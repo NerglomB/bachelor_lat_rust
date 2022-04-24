@@ -1,0 +1,16 @@
+// Offen
+Multiplikation von Pows mit selber Base: x**y * x**z in simplify implementieren
+Alle clone() und * nochmal prüfen. Etl. ast funktion get_val implementieren oder so
+expand und simplify implementieren
+
+// Gemacht
+add some functions like sin and cos and allow simplify sin(x)**2 + cos(x)**2 zbd nut multiplikation use val
+Nohcmal quelle zu copy oder clone und evtl. clone entfernen. Copy nicht möglich, da vec nicht auf dem stack
+Bruch kürzen in ast -> mithilfe der bibliothek gcd
+mul operation wie add mit prüfen ob int oder float oder rational schon vorhanden
+wurzel implementieren, sowohl sqrt als auch nthroot umschreiben in pow und dann pow separat
+x^((1/2)^(2)) funktioniert nicht im gegensatz zu x^((2)^(2)) -> erweitern, das ganze auch nochmal für - testen
+sqrt function und sqrt(4*x)*sqrt(x) umformen können in 2*x
+added subs method
+Hard validation adding. im moment werden in pow nur integer ausgerechnet, floats werden ignoriert. Das muss in hard validation geändert werden
+Add negative integers to rational 3/2 - 1
