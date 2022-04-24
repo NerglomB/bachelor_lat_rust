@@ -1,10 +1,10 @@
-pub mod base_funcs;
-pub mod eval_funcs_add;
-pub mod eval_funcs_core;
-pub mod eval_funcs_mul;
-pub mod eval_funcs_pow;
+pub mod add_eval;
+pub mod common_eval;
+pub mod function_eval;
+pub mod mul_eval;
+pub mod pow_eval;
 
-use crate::evaluator::{eval_funcs_add::*, eval_funcs_core::*, eval_funcs_pow::*};
+use crate::evaluator::{add_eval::*, function_eval::*, pow_eval::*};
 use crate::types::{
     ast::Ast,
     constants::{ConstType, PiConst},

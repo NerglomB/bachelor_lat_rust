@@ -106,7 +106,6 @@ impl<'a> Parser<'a> {
             }
             Some(Token::Var(name)) => {
                 iter.next();
-                let name = name.clone();
                 let mut is_const = false;
                 for const_struct in self.evaler.consts.iter() {
                     if const_struct.is_const(&name) {

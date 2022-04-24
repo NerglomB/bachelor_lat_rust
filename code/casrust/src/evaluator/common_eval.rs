@@ -1,4 +1,4 @@
-use crate::evaluator::{eval_funcs_add::*, eval_funcs_mul::*, EvalFn};
+use crate::evaluator::{add_eval::*, mul_eval::*, EvalFn};
 use crate::types::{ast::Ast, NumberType};
 use std::collections::HashMap;
 
@@ -28,20 +28,6 @@ where
     }
 
     for (sym, val) in terms {
-        // let mut eval_val = val.eval(evaler, hard_eval);
-        // eval_val.shorten().sort();
-        // match &eval_val {
-        //     Ast::Num(v) => {
-        //         if *v == 1 {
-        //             result = result + sym;
-        //         } else if *v != 0 {
-        //             result = result + (eval_val * sym);
-        //         }
-        //     }
-        //     _ => {
-        //         result = result + (eval_val * sym);
-        //     }
-        // }
         match &val {
             Ast::Num(v) => {
                 if *v == 1 {
@@ -89,22 +75,6 @@ where
     }
 
     for (sym, val) in terms {
-        // let mut eval_val = val.eval(evaler, hard_eval);
-        // eval_val.shorten().sort();
-        // match &eval_val {
-        //     Ast::Num(v) => {
-        //         if *v == 0 {
-        //             result = Ast::Num(N::one());
-        //         } else if *v == 1 {
-        //             result = result * sym;
-        //         } else {
-        //             result = result * Ast::Pow(Box::new(sym), Box::new(eval_val));
-        //         }
-        //     }
-        //     _ => {
-        //         result = result * Ast::Pow(Box::new(sym), Box::new(eval_val));
-        //     }
-        // }
         match &val {
             Ast::Num(v) => {
                 if *v == 0 {

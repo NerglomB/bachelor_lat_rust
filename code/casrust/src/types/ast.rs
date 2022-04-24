@@ -1,4 +1,4 @@
-use crate::evaluator::{base_evaluator, base_funcs::*, EvalFn};
+use crate::evaluator::{base_evaluator, common_eval::*, EvalFn};
 use crate::parser::{lexer::Lexer, parser::Parser};
 use crate::types::{prim_num::PrimNum, NumberType};
 use std::cmp::Ordering;

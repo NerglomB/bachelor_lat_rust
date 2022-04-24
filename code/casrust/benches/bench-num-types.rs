@@ -78,5 +78,3 @@ fn loop_decimal(b: &mut Bencher) {
         assert_eq!(x, BigDecimal::from_str("4999.25").unwrap());
     })
 }
-
-// rustup run nightly cargo bench
