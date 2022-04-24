@@ -488,13 +488,13 @@ Leider ist es mit Rust-Benchmarks noch nicht möglich den Speicherverbrauch zu m
 
 \paragraph{Primitive Typen Stack} Der Datentyp \codeword{i64} und \codeword{f64} verbrauchen 8 Bytes. Es werden also nie mehr als 8*4=32 Bytes für die eigentlichen Daten benötigt. Die Variable x, die das Ergebnis enthält beansprucht davon 8 Bytes. Der Schleifenparameter i wird ebenfalls als \codeword{i64} (bzw. \codeword{i32} im falle von Float) behandelt durch die Addition mit x (bzw. dem TypeCasting) und verbraucht ebenfalls 8 Bytes. Bei der Addition x+i wird nun wie bereits erwähnt bei einem Funktionsaufruf eine Kopie der Werte erstellt, die den Copy-Trait implementiert haben. Der Typ \codeword{i64} und \codeword{f64} haben diesen implementiert (link src i64 impl copy) und somit wird sowohl von x als auch von i zur Addition eine Kopie erzeugt.
 
-\paragraph{Primitivee Typen Heap} Der Speicherverbrauch der eigentlich Werte ist wie bei den primitiven Typen auf dem Stack. Davon entfallen aber 8 Bytes auf dem Heap statt auf dem Stack. Zusätzlich befindet sich ein Zeiger auf dem Stack durch \codeword{Box}. Die Größe hiervon hängt von der verwendeten Architektur ab.
+\paragraph{Primitive Typen Heap} Der Speicherverbrauch der eigentlich Werte ist wie bei den primitiven Typen auf dem Stack. Davon entfallen aber 8 Bytes auf dem Heap statt auf dem Stack. Zusätzlich befindet sich ein Zeiger auf dem Stack durch \codeword{Box}. Die Größe hiervon hängt von der verwendeten Architektur ab.
 
 \paragraph{num und bigdecimal} Bei dem Datentyp BigInt wird einerseits ein Vorzeichen (enum) verwendet, welches 1 Byte verbraucht (https://fasterthanli.me/articles/peeking-inside-a-rust-enum) als auch der Datentyp BigUint der wiederum einen Vektor mit BigDigit erhält. Schaut man sich diese Definition an, kann dieser Type zwischen 4 Bytes (u32) und 16 Bytes(i128) verbrauchen. Während des Debuggens auf verschiedenen Systemen wird in diesem Beispiel der Typ u64 angenommen und somit ein Speicherplatz von 8 Bytes benötigt. Mit größer werdenden Zahlen steigt allerdings dieser Verbrauch, da sich der Vektor vergrößert. Auch liegen nicht mehr alle Daten auf dem Stack, sondern alle BigDigits auf dem Heap, was die Zugriffsgeschwindigkeit wie bereits gezeigt erhöht.
 
 Der Typ bigdecimal verwendet laut Beschreibung den Typ BigInt und zusätzlich einen 64-Bit-Integer um die Position der Dezimalstelle zu bestimmen. Hier erhöht sich der Speicherverbrauch also nur unwesentlich.
 
-\paragraph{Entscheidung der verwendeten Typen} Im Rahmen dieser Arbeit ist zumindest eine eigene Implementierung der Typen für unbegrenzete Präzision nicht das Ziel. Genausogut können auch die bereits bestehenden Crates verwendet werden. Da dadurch aber die Performance leidet, wenn auch wahrscheinlich nicht relevant für spätere Beispiele und Tests, ist wiederrum die Implemeniterung mit primitiven Typen von Vorteil.
+\paragraph{Entscheidung der verwendeten Typen} Im Rahmen dieser Arbeit ist zumindest eine eigene Implementierung der Typen für unbegrenzete Präzision nicht das Ziel. Genausogut können auch die bereits bestehenden Crates verwendet werden. Da dadurch aber die Performance leidet, wenn auch wahrscheinlich nicht relevant für spätere Beispiele und Tests, ist wiederrum die Implementierung mit primitiven Typen von Vorteil.
 
 Da Rust Generics untersützt wurde die Entscheidung getroffen, das CAS in Teilen mit Generics umzusetzen, sodass beide Kombinationen verwendet werden können. Dabei sollen alle Funktionen des Systems mit den primitiven Typen funktionieren und einige Beispielimplementierungen mit den Crate-Typen gemacht werden. Dies erlaubt einerseits eine spätere Erweiterung der Crate-Typen als auch die Entwicklung der eigenen Typen. Darüberhinaus werden auch weiterführende Konzepte von Rust veranschaulicht. Auf Besonderheiten in der Implementierung wird an entsprechender Stelle näher eingegangen.
 
@@ -513,7 +513,7 @@ Um insgesamt weniger Bedingungen für mathematische Operationen zu haben, ist ge
 \begin{itemize}
     \item Jede Substraktion ist im Grunde eine Addition. Für Zahlen bedeudet dies $5-3 = 5+(-3)$ und für Symbole bzw. Terme anderer Art $a-b = a+(-1 * b)$. Eine Besonderheit sollen Terme der Art $1-(a+b+1)$ darstellen, diese sollen zu $1+(-1*a)+(-1*b)+(-1)$ umgeformt werden und nicht zu $1+(-1*(a+b+1))$
     \item Bei Divisionen werden Zahlen zu rationalen Zahlen, also $2/3 = \frac{2}{3}$ und $-(2/3) = \frac{-2}{3}$. Symbole und Terme werden zu einer Multiplikation vereinfacht, also $a/b = b^{(-1)} * a$ und $(a*b*c)/(d+1) = (d+1)^{-1} * (a*b*c)$
-    \item Das Kommutativgesetz soll beachtet werden: $x+y = y+x$ also auch $2*(x+y) + 2*(y+x) = 4*(x+y)$
+    \item Das Kommutativgesetz soll beachtet werden: $x+y = y+x$ also auch $2*(x+y) + (y+x)*2 = 4*(x+y)$
     \item Das Assoziativgesetz soll beachtet werden: $a+(b+c) = (a+b)+c = a+b+c$
     \item Das Distributivgesetz soll beacht werden: $a*(x+y) = a*x + a*y$
 \end{itemize}
@@ -531,7 +531,7 @@ Insgesamt sollen folgende Implementationen im System vorhanden sein:
 \end{itemize}
 
 \subsection{Grundtypen des CAS}
-In diesem Kapitel soll definiert werden, welche \codeword{structs}, \codeword{traits} oder \codeword{enums} benötigt werden, um das CAS zu erstellen. Darüberhinaus soll grob umrissen werden, welche Implemeniterungen im weiteren Verlauf sinnvoll sein können und welchen Zweck diese erfüllen.
+In diesem Kapitel soll definiert werden, welche \codeword{structs}, \codeword{traits} oder \codeword{enums} benötigt werden, um das CAS zu erstellen. Darüberhinaus soll grob umrissen werden, welche Implementierungen im weiteren Verlauf sinnvoll sein können und welchen Zweck diese erfüllen.
 Es ist noch zu erwähnen, dass hier nicht definiert werden sollen, mit welchen \codeword{Derive macros} diese Typen erweitert werden sollen. In Rust ist es üblich \codeword{structs} und \codeword{enums} mit diesen Makros zu erweitern, um z.B. anzugeben, dass der Typ kopiert oder sortiert werden kann. Die Implementierung dieser Funktionalität wird dann zur Compilezeit vom Makro übernommen.
 
 \paragraph{enum PrimNum und enum PrecisionNum} Diese beiden \codeword{enums} sollen als Implementierung für unsere Generic-Parameter im CAS dienen. Ebenso bieten diese den Vorteil, dass später ein allgemeiner Nummern-Typ existiert mit dem gerechnet werden kann, und nicht ständig manuell Type Castings durchgeführt werden müssen. So ist in Rust nicht möglich eine Addition oder Multiplikation von i32 und f64 durchzuführen. Hierzu muss einer der beiden Werte erst in den anderen manuell überführt werden.
@@ -568,7 +568,7 @@ In Rust sähe die Implementierung folgendermaßen aus. Die Ausprägung Add benö
     }
 
     let tree = BTree::Add(
-        Box::new(BTree::Add(    // <- Baum 1
+        Box::new(BTree::Add(
             Box::new(BTree::Symbol("x".to_owned())),
             Box::new(BTree::Number(1)),
         )),
@@ -617,7 +617,7 @@ Problem in-place Änderung wie werden die einzelnen Blätter zusammengefasst? Ma
     println!("{:?}", tree);
 \end{lstlisting}
 
-Eine Alternative wäre nur lesende Referenzen zu erzeugen, über diese zu iterieren und dann einen neuen Baum zu erstellen. Wenn man aber sowieso alle Werte auf einer Ebene benötigt um diese zusammenfassen zu können, ist es eine bessere Idee, Werte, die Assoziativ sind, gleich in einem Vektor zu speichern um alle Werte einfach abrufen zu können. Für Addition und Multiplikation würde dann der Baum für den Term $myfunc(a, b*c)+1+2+x*y*2^z$ beispielsweise so aussehen:
+Eine Alternative wäre nur lesende Referenzen zu erzeugen, über diese zu iterieren und dann einen neuen Baum zu erstellen. Wenn man aber sowieso alle Werte auf einer Ebene benötigt um diese zusammenfassen zu können, ist es eine bessere Idee, Werte, die Kommutativ sind, gleich in einem Vektor zu speichern um alle Werte einfach abrufen zu können. Für Addition und Multiplikation würde dann der Baum für den Term $myfunc(a, b*c)+1+2+x*y*2^z$ beispielsweise so aussehen:
 
 \Tree[.+-Vektor
         [.func
@@ -675,7 +675,7 @@ Mit dem Wissen über Generics und und den theoretischen Überlegungen zur Datens
 
 \paragraph{Add und Mul} Diese beiden Ausprägungen besitzen als Wert einen Vektor, der weitere Elemente enthält. So sind diese einfach abrufbar und der Vektor kann gezielt geändert, z.B. zum sortieren der Werte oder das Entfernen von unnötigen Elementen (neutrale Elemente Addition/Multiplikation).
 
-\paragraph{Symbol} Ein einfacher String, der einen Variablennamen enthält. Diese sollen später einfach substituiert werden.
+\paragraph{Symbol} Ein einfacher String, der einen Variablennamen enthält. Diese sollen später einfach substituiert werden können.
 
 \paragraph{Const} Ein einfacher String, der einen Konstantennamen enthält, auch in UTF-8 möglich, z.B. $\pi$. Eigens hinzugefügte Funktionen können somit prüfen, um welche Konstante es sich handelt und entsprechend eine Vereinfachung implementieren. Es besteht darüberhinaus die Möglichkeit Konstanten als Wert zurückzugeben.
 
@@ -748,7 +748,7 @@ Die Abhängigkeit ``rug'' soll die beliebige Genauigkeit ermöglichen. Dabei han
 
 \paragraph{meval Rust} Diese Bibliothek erscheint recht unkompliziert und einfach zu nutzen. Die geparsten Tokens werden als UPN (umgekehrte polnische Notation) ausgewertet. Dies könnte man prinzipiell dazu nutzen unseren modifizierten Ast zu erzeugen. Ein kleiner Nachteil ist, dass nur Fließkommazahlen ausgewertet werden. Sollte man den Lexer irgendwann erweitern wollen, sodass eine beliebige Genauigkeit erreicht werden soll, müsste man diesen Part neu schreiben. Zudem habe ich diese Bibliothek leider nicht bei meiner initialen Recherche in Betracht gezogen und nicht weiter überprüft. Erst während der Entwicklung habe ich Interessehalber weiter reingesehen und die Enums \codeword{Operation} und \codeword{Token} größtenteils übernommen. Hätte ich den Lexer nicht bereits zu einem großen Teil implementiert, hätte ich die Möglichkeit genutzt, die Tokens aus dieser Bibliothek zu erzeugen.
 
-\paragraph{evalexpr Rust} Diese Bibliothek erscheint sehr Featurereich. Allerdings lässt sich eigentlich nur die \codeword{eval}-Funktion nutzen, da fast alle anderen Strukturen nicht publich sind. Es war mir daher nicht möglich, den Tokenizer bzw. den Tree direkt zu nutzen, in dem sich ein bereits geparster String befindet. Daher schied diese Bibliothek ebenfalls aus.
+\paragraph{evalexpr Rust} Diese Bibliothek erscheint sehr Featurereich. Allerdings lässt sich eigentlich nur die \codeword{eval}-Funktion nutzen, da fast alle anderen Strukturen nicht public sind. Es war mir daher nicht möglich, den Tokenizer bzw. den Tree direkt zu nutzen, in dem sich ein bereits geparster String befindet. Daher schied diese Bibliothek ebenfalls aus.
 
 \paragraph{tinyexpr C} Da es in Rust auch möglich ist, bereits bestehenden C-Code zu nutzen, wurde ebenfalls geprüft eine einfache C-Bibliothek zu nutzen, sodass auch das die notwendige Schnittstelle des Parsers nicht allzu kompliziert wird. Hier habe ich mich für tinyexpr entschieden. Leider mussten Variablen bereits vor der lexikalischen Analyse zumindest bekannt sein (siehe Readme https://github.com/codeplea/tinyexpr te compile). Da ich mich generell gegen diesen Schritt entschieden habe, wurde auch diese Bibliothek nicht verwendet.
 
@@ -812,7 +812,7 @@ Mögliche Verbesserungen dann im Fazit (z.B. erlauben von 3x statt 3*x und Parse
 
 Die Grammatik dazu sieht folgendermaßen aus: (siehe kurs 1810 ke2 Seite 6)
 
-Hier dann noch ordentlich die Grammatik in Latex übertragen! Da probiere ich verschiedenes aus mit dem Mathemodus, da ich latex nicht oft benutze.
+Hier dann noch ordentlich die Grammatik von papier in Latex übertragen! Da probiere ich verschiedenes aus mit dem Mathemodus, da ich latex nicht oft benutze.
 
 \newpage
 
@@ -980,6 +980,9 @@ Um die Erweiterbarkeit des Systems zu gewährleisten wird das Struct \codeword{E
 \newpage
 
 \section{Fazit}
+\subsection{Erweiterungs- und Verbesserungsideen des Systems}
+\subsection{Vor- und Nachteile Rust}
+
 
 \newpage
 \bibliographystyle{babplain-fl}
