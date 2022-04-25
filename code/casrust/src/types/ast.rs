@@ -314,7 +314,7 @@ impl FromStr for Ast<PrimNum> {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let eval = base_evaluator();
         let tokens = Lexer::new(s).into_tokens();
-        let ast = Parser { evaler: &eval }.parse(&tokens);
+        let ast = Parser { evaler: &eval }.parse(&tokens)?;
 
         Ok(ast.simple_eval(&eval))
     }

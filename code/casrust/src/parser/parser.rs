@@ -1,5 +1,5 @@
 use crate::evaluator::EvalFn;
-use crate::types::{ast::Ast, prim_num::PrimNum, Operator, Token};
+use crate::types::{ast::Ast, ast::AstError, prim_num::PrimNum, Operator, Token};
 use std::iter::Peekable;
 use std::slice::Iter;
 
@@ -8,25 +8,25 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
-    pub fn parse(&self, tokens: &Vec<Token>) -> Ast<PrimNum> {
+    pub fn parse(&self, tokens: &Vec<Token>) -> Result<Ast<PrimNum>, AstError> {
         let mut iter = tokens.iter().peekable();
         self.parse_add(&mut iter)
     }
 
-    fn parse_add(&self, iter: &mut Peekable<Iter<Token>>) -> Ast<PrimNum> {
+    fn parse_add(&self, iter: &mut Peekable<Iter<Token>>) -> Result<Ast<PrimNum>, AstError> {
         let mut t = Ast::Add(vec![]);
-        t = t + self.parse_mul(iter);
+        t = t + self.parse_mul(iter)?;
         while self.cmp_iter_peek(iter.peek(), Token::Op(Operator::Add))
             || self.cmp_iter_peek(iter.peek(), Token::Op(Operator::Sub))
         {
             match iter.peek() {
                 Some(Token::Op(Operator::Add)) => {
                     iter.next();
-                    t = t + self.parse_mul(iter);
+                    t = t + self.parse_mul(iter)?;
                 }
                 Some(Token::Op(Operator::Sub)) => {
                     iter.next();
-                    let next_term = self.parse_mul(iter);
+                    let next_term = self.parse_mul(iter)?;
                     match next_term {
                         Ast::Num(number) => {
                             t = t + Ast::Num(number * -1);
@@ -46,12 +46,12 @@ impl<'a> Parser<'a> {
         }
 
         t.shorten().sort();
-        t
+        Ok(t)
     }
 
-    fn parse_mul(&self, iter: &mut Peekable<Iter<Token>>) -> Ast<PrimNum> {
+    fn parse_mul(&self, iter: &mut Peekable<Iter<Token>>) -> Result<Ast<PrimNum>, AstError> {
         let mut t = Ast::Mul(vec![]);
-        t = t * self.parse_pow(iter);
+        t = t * self.parse_pow(iter)?;
         while self.cmp_iter_peek(iter.peek(), Token::Op(Operator::Mul))
             || self.cmp_iter_peek(iter.peek(), Token::Op(Operator::Div))
             || self.cmp_iter_peek(iter.peek(), Token::Op(Operator::Pow))
@@ -59,12 +59,12 @@ impl<'a> Parser<'a> {
             match iter.peek() {
                 Some(Token::Op(Operator::Mul)) => {
                     iter.next();
-                    t = t * self.parse_pow(iter);
+                    t = t * self.parse_pow(iter)?;
                 }
                 Some(Token::Op(Operator::Div)) => {
                     iter.next();
                     t = t * Ast::Pow(
-                        Box::new(self.parse_pow(iter)),
+                        Box::new(self.parse_pow(iter)?),
                         Box::new(Ast::Num(PrimNum::Int(-1))),
                     );
                 }
@@ -73,37 +73,35 @@ impl<'a> Parser<'a> {
         }
 
         t.shorten().sort();
-        t
+        Ok(t)
     }
 
-    fn parse_pow(&self, iter: &mut Peekable<Iter<Token>>) -> Ast<PrimNum> {
-        let mut ast = self.parse_unary(iter);
+    fn parse_pow(&self, iter: &mut Peekable<Iter<Token>>) -> Result<Ast<PrimNum>, AstError> {
+        let mut ast = self.parse_unary(iter)?;
         while self.cmp_iter_peek(iter.peek(), Token::Op(Operator::Pow)) {
             match iter.peek() {
                 Some(Token::Op(Operator::Pow)) => {
                     iter.next();
-                    ast = Ast::Pow(Box::new(ast), Box::new(self.parse_unary(iter)));
+                    ast = Ast::Pow(Box::new(ast), Box::new(self.parse_unary(iter)?));
                 }
                 _ => {}
             }
         }
 
-        ast
+        Ok(ast)
     }
 
-    fn parse_unary(&self, iter: &mut Peekable<Iter<Token>>) -> Ast<PrimNum> {
+    fn parse_unary(&self, iter: &mut Peekable<Iter<Token>>) -> Result<Ast<PrimNum>, AstError> {
         match iter.peek() {
-            Some(Token::Op(Operator::Sub)) => Ast::Num(PrimNum::Int(0)),
-            Some(Token::Op(Operator::Add)) => Ast::Num(PrimNum::Int(0)),
+            Some(Token::Op(Operator::Sub)) => Ok(Ast::Num(PrimNum::Int(0))),
+            Some(Token::Op(Operator::Add)) => Ok(Ast::Num(PrimNum::Int(0))),
             _ => self.parse_primary(iter),
         }
     }
 
-    fn parse_primary(&self, iter: &mut Peekable<Iter<Token>>) -> Ast<PrimNum> {
+    fn parse_primary(&self, iter: &mut Peekable<Iter<Token>>) -> Result<Ast<PrimNum>, AstError> {
         match iter.peek() {
-            None => {
-                panic!("Invalid expression.");
-            }
+            None => Err(AstError),
             Some(Token::Var(name)) => {
                 iter.next();
                 let mut is_const = false;
@@ -114,54 +112,58 @@ impl<'a> Parser<'a> {
                     }
                 }
                 if is_const {
-                    Ast::Const(name.clone())
+                    Ok(Ast::Const(name.clone()))
                 } else {
-                    Ast::Symbol(name.clone())
+                    Ok(Ast::Symbol(name.clone()))
                 }
             }
             Some(Token::Func(name)) => {
                 iter.next();
-                Ast::Func(name.clone(), self.parse_function(iter))
+                Ok(Ast::Func(name.clone(), self.parse_function(iter)?))
             }
             Some(Token::Num(number)) => {
                 iter.next();
-                Ast::Num(number.clone())
+                Ok(Ast::Num(number.clone()))
             }
             Some(Token::LParen) => {
                 iter.next();
                 let ast = self.parse_add(iter);
                 if !self.cmp_iter_token(iter.next(), Token::RParen) {
-                    panic!("Expected ).")
+                    return Err(AstError);
                 }
 
                 ast
             }
-            _ => {
-                panic!("Invalid expression.");
-            }
+            _ => Err(AstError),
         }
     }
 
-    fn parse_function(&self, iter: &mut Peekable<Iter<Token>>) -> Vec<Ast<PrimNum>> {
+    fn parse_function(
+        &self,
+        iter: &mut Peekable<Iter<Token>>,
+    ) -> Result<Vec<Ast<PrimNum>>, AstError> {
         if !self.cmp_iter_token(iter.next(), Token::LParen) {
-            panic!("Expected ( after function.");
+            return Err(AstError);
         }
         let args: Vec<Ast<PrimNum>> = if !self.cmp_iter_peek(iter.peek(), Token::RParen) {
-            self.parse_arguments(iter)
+            self.parse_arguments(iter)?
         } else {
             vec![]
         };
         if !self.cmp_iter_token(iter.next(), Token::RParen) {
-            panic!("Expected ) after function arguments.");
+            return Err(AstError);
         }
 
-        args
+        Ok(args)
     }
 
-    fn parse_arguments(&self, iter: &mut Peekable<Iter<Token>>) -> Vec<Ast<PrimNum>> {
+    fn parse_arguments(
+        &self,
+        iter: &mut Peekable<Iter<Token>>,
+    ) -> Result<Vec<Ast<PrimNum>>, AstError> {
         let mut args = vec![];
         loop {
-            let ast = self.parse_add(iter);
+            let ast = self.parse_add(iter)?;
             args.push(ast);
             if !self.cmp_iter_peek(iter.peek(), Token::Comma) {
                 break;
@@ -169,7 +171,7 @@ impl<'a> Parser<'a> {
             iter.next();
         }
 
-        args
+        Ok(args)
     }
 
     fn cmp_iter_token(&self, iter_token: Option<&Token>, token: Token) -> bool {
