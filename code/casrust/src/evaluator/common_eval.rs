@@ -69,6 +69,9 @@ where
 
     // Könnte von typ rational sein, also gemeinsamer nenner teilen
     result.shorten();
+    if result == Ast::Num(N::zero()) {
+        return Ast::Num(N::zero());
+    }
 
     for fun in evaler.adders.iter() {
         fun(&mut terms, hard_eval);
@@ -78,7 +81,7 @@ where
         match &val {
             Ast::Num(v) => {
                 if *v == 0 {
-                    result = Ast::Num(N::one());
+                    return Ast::Num(N::zero());
                 } else if *v == 1 {
                     result = result * sym;
                 } else {

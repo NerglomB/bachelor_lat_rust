@@ -83,31 +83,65 @@ where
         self.eval(evaler, &false)
     }
 
+    pub fn simple_eval_sub(
+        &self,
+        evaler: &EvalFn<N>,
+        sub: &Option<&str>,
+        with: &Option<Ast<N>>,
+    ) -> Ast<N> {
+        self.eval_sub(evaler, &false, sub, with)
+    }
+
     pub fn hard_eval(&self, evaler: &EvalFn<N>) -> Ast<N> {
         self.eval(evaler, &true)
     }
 
+    pub fn hard_eval_sub(
+        &self,
+        evaler: &EvalFn<N>,
+        sub: &Option<&str>,
+        with: &Option<Ast<N>>,
+    ) -> Ast<N> {
+        self.eval_sub(evaler, &true, sub, with)
+    }
+
     pub fn eval(&self, evaler: &EvalFn<N>, hard_eval: &bool) -> Ast<N> {
+        self.eval_sub(evaler, hard_eval, &None, &None)
+    }
+
+    pub fn eval_sub(
+        &self,
+        evaler: &EvalFn<N>,
+        hard_eval: &bool,
+        sub: &Option<&str>,
+        with: &Option<Ast<N>>,
+    ) -> Ast<N> {
         match self {
             Ast::Add(vec) => add(
-                vec.iter().map(|t| t.eval(evaler, hard_eval)).collect(),
+                vec.iter()
+                    .map(|t| t.eval_sub(evaler, hard_eval, sub, with))
+                    .collect(),
                 evaler,
                 hard_eval,
             ),
             Ast::Mul(vec) => mul(
-                vec.iter().map(|t| t.eval(evaler, hard_eval)).collect(),
+                vec.iter()
+                    .map(|t| t.eval_sub(evaler, hard_eval, sub, with))
+                    .collect(),
                 evaler,
                 hard_eval,
             ),
             Ast::Pow(base, exp) => pow(
-                base.eval(evaler, hard_eval),
-                exp.eval(evaler, hard_eval),
+                base.eval_sub(evaler, hard_eval, sub, with),
+                exp.eval_sub(evaler, hard_eval, sub, with),
                 evaler,
                 hard_eval,
             ),
             Ast::Func(name, args) => func(
                 name,
-                args.iter().map(|t| t.eval(evaler, hard_eval)).collect(),
+                args.iter()
+                    .map(|t| t.eval_sub(evaler, hard_eval, sub, with))
+                    .collect(),
                 evaler,
                 hard_eval,
             ),
@@ -122,6 +156,7 @@ where
 
                 ret.unwrap_or(self.clone())
             }
+            Ast::Symbol(name) if sub.is_some() && name == sub.unwrap() => with.clone().unwrap(),
             _ => self.clone(),
         }
     }
