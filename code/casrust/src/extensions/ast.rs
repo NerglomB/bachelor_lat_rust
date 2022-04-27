@@ -9,35 +9,12 @@ where
         match self {
             Ast::Mul(vec) => {
                 let mut result: Vec<Ast<N>> = vec![];
-                let mut last_adders: Vec<Ast<N>> = vec![];
-                // let mut none_adds = vec![];
-                // let mut adds = vec![];
-                // for node in vec.clone() {
-                //     match node {
-                //         Ast::Add(v_add) => {
-                //             adds.push(v_add);
-                //         }
-                //         _ => {
-                //             none_adds.push(node);
-                //         }
-                //     };
-                // }
 
-                // let none_adds = Ast::Mul(none_adds);
-
-                // for add in adds {
-                //     for el in add {
-                //         // clone weil schleife mehrmals durchlaufen wird und ownserhip abgegeben wird
-                //         result.push((el.clone() * none_adds.clone()).sort().clone());
-                //     }
-                // }
-
-                for node in vec.clone() {
+                for node in vec {
                     match node {
                         Ast::Add(v_add) => {
                             if result.is_empty() {
                                 result.append(&mut v_add.clone());
-                                last_adders.append(&mut v_add.clone());
                             } else {
                                 let mut t_res = vec![];
                                 for el in v_add {
@@ -54,7 +31,7 @@ where
                         }
                         _ => {
                             if result.is_empty() {
-                                result.push(node);
+                                result.push(node.clone());
                             } else {
                                 result = result.into_iter().map(|e| e * node.clone()).collect();
                             }
@@ -65,8 +42,19 @@ where
                 if result.len() == 1 {
                     result.pop().unwrap().sort().clone()
                 } else {
-                    Ast::Add(result).sort().clone()
+                    Ast::Add(
+                        result
+                            .into_iter()
+                            .map(|mut e| e.shorten().sort().clone())
+                            .collect(),
+                    )
+                    .sort()
+                    .clone()
                 }
+            }
+            Ast::Add(vec) => Ast::Add(vec.iter().map(|e| e.expand()).collect()),
+            Ast::Func(name, args) => {
+                Ast::Func(name.to_string(), args.iter().map(|e| e.expand()).collect())
             }
             _ => self.clone(),
         }

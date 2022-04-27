@@ -1,6 +1,6 @@
 use crate::evaluator::{base_evaluator, common_eval::*, EvalFn};
 use crate::parser::{lexer::Lexer, parser::Parser};
-use crate::types::{prim_num::PrimNum, NumberType};
+use crate::types::{prim_num::PrimNum, NumberType, Operator};
 use std::cmp::Ordering;
 use std::collections::hash_map::DefaultHasher;
 use std::error::Error;
@@ -24,6 +24,26 @@ impl<N> Ast<N>
 where
     N: NumberType,
 {
+    pub fn flatten(&self, op: &Operator) -> Vec<Ast<N>> {
+        match self {
+            Ast::Add(vec) => {
+                if Operator::Add == *op {
+                    vec.clone().into_iter().collect()
+                } else {
+                    vec![self.clone()]
+                }
+            }
+            Ast::Mul(vec) => {
+                if Operator::Mul == *op {
+                    vec.clone().into_iter().collect()
+                } else {
+                    vec![self.clone()]
+                }
+            }
+            _ => vec![self.clone()],
+        }
+    }
+
     pub fn shorten(&mut self) -> &mut Self {
         match self {
             Ast::Add(v) => {

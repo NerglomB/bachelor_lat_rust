@@ -1,5 +1,5 @@
 use crate::evaluator::{add_eval::*, mul_eval::*, EvalFn};
-use crate::types::{ast::Ast, NumberType};
+use crate::types::{ast::Ast, NumberType, Operator};
 use std::collections::HashMap;
 
 pub fn add<N>(vec: Vec<Ast<N>>, evaler: &EvalFn<N>, hard_eval: &bool) -> Ast<N>
@@ -8,7 +8,11 @@ where
 {
     let mut result = Ast::Num(N::zero());
     let mut terms: HashMap<Ast<N>, Ast<N>> = HashMap::new();
+    let mut extend_seq: Vec<Ast<N>> = vec![];
     for node in vec {
+        extend_seq.append(&mut node.flatten(&Operator::Add));
+    }
+    for node in extend_seq {
         match &node {
             Ast::Num(_) | Ast::Add(_) => {
                 // Soll wirklich immer hinzugefügt werden? Evtl. anpassung, sodass Rational und Float coexisiteren?
@@ -52,7 +56,11 @@ where
 {
     let mut result = Ast::Num(N::one());
     let mut terms: HashMap<Ast<N>, Ast<N>> = HashMap::new();
+    let mut extend_seq: Vec<Ast<N>> = vec![];
     for node in vec {
+        extend_seq.append(&mut node.flatten(&Operator::Mul));
+    }
+    for node in extend_seq {
         match &node {
             Ast::Num(_) | Ast::Mul(_) => {
                 // Soll wirklich immer hinzugefügt werden? Evtl. anpassung, sodass Rational und Float coexisiteren?
