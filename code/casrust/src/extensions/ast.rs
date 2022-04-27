@@ -60,24 +60,34 @@ where
                 let base = base.expand();
                 let exp = exp.expand();
 
-                match exp {
-                    Ast::Num(exp) if exp.is_integer() && exp > 0 => {
+                match base {
+                    Ast::Mul(vec) => {
                         let mut mul = vec![];
-                        for _ in 0..exp.into() {
-                            mul.push(base.clone());
+                        for node in vec {
+                            mul.push(Ast::Pow(Box::new(node), Box::new(exp.clone())).expand());
                         }
 
                         Ast::Mul(mul).expand()
                     }
-                    Ast::Add(exp) => {
-                        let mut mul = vec![];
-                        for node in exp {
-                            mul.push(Ast::Pow(Box::new(base.clone()), Box::new(node)));
-                        }
+                    _ => match exp {
+                        Ast::Num(exp) if exp.is_integer() && exp > 0 => {
+                            let mut mul = vec![];
+                            for _ in 0..exp.into() {
+                                mul.push(base.clone());
+                            }
 
-                        Ast::Mul(mul).expand()
-                    }
-                    _ => Ast::Pow(Box::new(base), Box::new(exp)),
+                            Ast::Mul(mul).expand()
+                        }
+                        Ast::Add(exp) => {
+                            let mut mul = vec![];
+                            for node in exp {
+                                mul.push(Ast::Pow(Box::new(base.clone()), Box::new(node)));
+                            }
+
+                            Ast::Mul(mul).expand()
+                        }
+                        _ => Ast::Pow(Box::new(base), Box::new(exp)),
+                    },
                 }
             }
             _ => self.clone(),
