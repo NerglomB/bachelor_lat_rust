@@ -69,6 +69,14 @@ where
 
                         Ast::Mul(mul).expand()
                     }
+                    Ast::Add(exp) => {
+                        let mut mul = vec![];
+                        for node in exp {
+                            mul.push(Ast::Pow(Box::new(base.clone()), Box::new(node)));
+                        }
+
+                        Ast::Mul(mul).expand()
+                    }
                     _ => Ast::Pow(Box::new(base), Box::new(exp)),
                 }
             }
