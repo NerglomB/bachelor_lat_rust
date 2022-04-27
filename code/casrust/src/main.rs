@@ -4,7 +4,7 @@ use casrust::types::prim_num::PrimNum;
 use std::str::FromStr;
 
 fn main() {
-    match Ast::from_str("(a+b)*(c+d)") {
+    match Ast::from_str("(a+b)*(c+d)*2") {
         Ok(ast) => {
             println!("{:?}", ast);
             // let eval = base_evaluator();

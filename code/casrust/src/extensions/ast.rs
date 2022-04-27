@@ -39,12 +39,17 @@ where
                                 result.append(&mut v_add.clone());
                                 last_adders.append(&mut v_add.clone());
                             } else {
-                                println!("res: {:?}", result);
+                                let mut t_res = vec![];
                                 for el in v_add {
-                                    println!("el to mut: {:?}", el);
-                                    result = result.into_iter().map(|e| e * el.clone()).collect();
-                                    println!("after: {:?}", result);
+                                    t_res.append(
+                                        &mut result
+                                            .clone()
+                                            .into_iter()
+                                            .map(|e| e * el.clone())
+                                            .collect(),
+                                    );
                                 }
+                                result = t_res;
                             }
                         }
                         _ => {
