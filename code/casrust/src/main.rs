@@ -4,7 +4,7 @@ use casrust::types::prim_num::PrimNum;
 use std::str::FromStr;
 
 fn main() {
-    match Ast::from_str("(x+1)*(x+2)") {
+    match Ast::from_str("(x + y + z)^2") {
         Ok(ast) => {
             println!("{:?}", ast);
             let eval = base_evaluator();

@@ -56,6 +56,22 @@ where
             Ast::Func(name, args) => {
                 Ast::Func(name.to_string(), args.iter().map(|e| e.expand()).collect())
             }
+            Ast::Pow(base, exp) => {
+                let base = base.expand();
+                let exp = exp.expand();
+
+                match exp {
+                    Ast::Num(exp) if exp.is_integer() && exp > 0 => {
+                        let mut mul = vec![];
+                        for _ in 0..exp.into() {
+                            mul.push(base.clone());
+                        }
+
+                        Ast::Mul(mul).expand()
+                    }
+                    _ => Ast::Pow(Box::new(base), Box::new(exp)),
+                }
+            }
             _ => self.clone(),
         }
     }
