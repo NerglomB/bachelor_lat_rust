@@ -527,7 +527,7 @@ Insgesamt sollen folgende Implementationen im System vorhanden sein:
     \item Auswertung von Potenzen von Zahlen, Symbolen und Terme inkl. Potenzregeln in Hinblick auf Genauigkeit des Ergebnis, z.B. $x^a*x^b=x^{(a+b)}$ oder $x^a*y^a = (x*y)^a$
     \item Auswertung von Funktionen, die dynamisch hinzugefügt werden können sollen. Funktionen die dem CAS nicht bekannt sind, tauchen weiterhin in Termen auf, werden aber nicht ausgewertet, z.B. $sin(x)$ oder $sqrt(x)$
     \item Auswertung von Konstanten falls bekannt und gewollt
-    \item Die Ausführungsreihenfolge in den Termen soll Konstanten -> Funktion -> Potenz -> Multiplikation -> Addition entsprechen
+    \item Die Ausführungsreihenfolge in den Termen soll Konstanten und Variablen -> Funktion -> Potenz -> Multiplikation -> Addition entsprechen
 \end{itemize}
 
 \subsection{Grundtypen des CAS}
@@ -684,6 +684,63 @@ Mit dem Wissen über Generics und und den theoretischen Überlegungen zur Datens
 \paragraph{Func} Besitzt ebenfalls zwei Parameter, Name der Funktion und Parameter als Vektor. Der Name kann somit einfach ausgewertet, die Parameter einfach übergeben werden. Beide Werte werden an die dynamisch hinzugefügten Auswertungsfunktionen übergeben.
 
 \paragraph{Num} Enthält als Wert unseren eigenen Nummerntyp.
+
+\paragraph{Auswertung des Terms} Eine Hauptfunktionalität, die dieses Enum erhält, ist die Möglichkeit einen Term zusammenzufassen und falls möglich soweit wie möglich in ein numerisches Ergebnis zu überführen. Dabei muss natürlich einerseits die Ausführungsreihenfolge beachtet werden, andererseits soll diese Methode leicht erweiterbar sein.
+
+In unserem System wird die Methode rekursiv verwendet, was zwar wahrscheinlich zur Lasten der Performance geht, aber einen deutlichen Vorteil bei der Leserlichkeit und Verständlichkeit hat. (Quelle? Beispiel wie rekurs to iterativ in Rust -> sehr codelastig). Bei der entsprechenden Auswertung eines \codeword{Ast} werden dabei erst alle ``Kindelemente'' ausgewertet (rekursiv). Für die Addition bedeutet dies konkret, dass erst alle Elemente im Vektor ausgewertet werden und danach erst versucht wird zu addieren.
+
+Eine erste Implementierung hierfür sieht folgendermaßen aus. Die beiden Parameter \codeword{evaler} und \codeword{hard_eval} werden noch näher in den Kapiteln zu ``Erweitbarkeit in Rust'' und ``Ungenauigkeiten erlauben'' näher erläuert.
+
+\begin{lstlisting}[language=rust, caption={eval-Methode 1. Implementierung}]
+pub fn eval(
+        &self,
+        evaler: &EvalFn<N>,
+        hard_eval: &bool,
+    ) -> Ast<N> {
+        match self {
+            Ast::Add(vec) => add(
+                vec.iter()
+                    .map(|t| t.eval(evaler, hard_eval))
+                    .collect(),
+                evaler,
+                hard_eval,
+            ),
+            Ast::Mul(vec) => mul(
+                vec.iter()
+                    .map(|t| t.eval(evaler, hard_eval))
+                    .collect(),
+                evaler,
+                hard_eval,
+            ),
+            Ast::Pow(base, exp) => pow(
+                base.eval(evaler, hard_eval),
+                exp.eval(evaler, hard_eval),
+                evaler,
+                hard_eval,
+            ),
+            Ast::Func(name, args) => func(
+                name,
+                args.iter()
+                    .map(|t| t.eval(evaler, hard_eval))
+                    .collect(),
+                evaler,
+                hard_eval,
+            ),
+            Ast::Const(name) if *hard_eval => {
+                let mut ret = None;
+                for const_struct in evaler.consts.iter() {
+                    if let Some(v) = const_struct.eval(&name) {
+                        ret = Some(v);
+                        break;
+                    }
+                }
+
+                ret.unwrap_or(self.clone())
+            }
+            _ => self.clone(),
+        }
+    }
+\end{lstlisting}
 
 \paragraph{Allgemeine Anmerkungen} Der Generic-Typparameter \codeword{N} soll den gewählten Nummerntyp darstellen. Dieser wird aber noch nicht eingeschränkt, da sonst diese Einschränkungen später für alle implementieren Blöcke gelten muss. Dies kann z.B. nicht gewünscht sein, wenn eine Grundlegend andere Art implementiert werden soll um Terme zu verarbeiten, bei der der Trait \codeword{NumberType} keine Verwendung finden soll. Die Ausführungsreihenfolge kann so ebenfalls gewährleistet werden. Bevor also \codeword{Ast::Add} ausgewertet wird, werden zuerst alle Elemente des Vektors ausgewertet. Evtl. vereinfachungen sind dann bereits vorgenommen. Die Auswertung kann dabei rekursiv oder iterativ implementiert werden.
 
@@ -954,20 +1011,95 @@ Um die Erweiterbarkeit des Systems zu gewährleisten wird das Struct \codeword{E
 
 \paragraph{muls} Funktionen, die den Typ \codeword{Ast::Mul} weiter vereinfachen können. Die Parameter sind identisch wie schon bei \codeword{adders}. Dieses Feld ist der Vollständigkeithalber implementiert, da ich kein Beispielterm finden konnte, bei dem das relevant ist.
 
-\paragraph{pows} Funktionen, die die Basis und den Exponenten erhalten und Auswerten können. So kann z.B. der Term $(x*4)^(1/2)$ zu $x^(1/2)*2$ vereinfacht werden. Auch hier gibt es wieder die Möglichkeit eine Explizite Berechnung zu erwzwingen. Diese Funktion besitzt darüberhinaus einen Rückgabewert. Da der entsprechende \codeword{Ast} nicht direkt bearbeitet wird, da sich dieser auch in der Ausprägung verändern kann.
+\paragraph{pows} Funktionen, die die Basis und den Exponenten erhalten und Auswerten können. So kann z.B. der Term $(x*4)^{(1/2)}$ zu $x^{(1/2)}*2$ vereinfacht werden. Auch hier gibt es wieder die Möglichkeit eine Explizite Berechnung zu erwzwingen. Diese Funktion besitzt darüberhinaus einen Rückgabewert. Da der entsprechende \codeword{Ast} nicht direkt bearbeitet wird, da sich dieser auch in der Ausprägung verändern kann.
 
 \paragraph{funcs} Funktionen, die angegebene Funktionen im Term umschreiben bzw. auswerten sollen. So kann z.B. der Term $sin(0) + 2$ direkt vereinfacht werden in $0 + 2 = 2$. Der Term $sqrt(4)$ kann zu $2$ vereinfacht werden. Dabei bleiben Funktionen, die \codeword{EvalFn} nicht bekannt sind natürlich im Term unverändert erhalten. Falls eine Auswertung nicht möglich ist, ist dies ebenfalls der Fall. Ansonsten steht der Funktion natürlich immer offen den Term entsprechend in ein anderes \codeword{Ast}-Objekt umzuwandeln.
 
 \paragraph{consts} Structs, die den Trait \codeword{ConstType} implementieren. Diese werden ausgewertet, sobald bei der Berechnung Ungenauigkeiten erlaubt werden.
 
-\subsection{Implementierung von Substitution}
+\subsection{Implementierung von Substitution} Um nun endlich einen Term mit Variablen auszuwerten, müssen wir diese im \codeword{Ast}-Enum substituieren können. Diese Funktionalität kann recht einfach implementiert werden. Hierzu wird die bestehende \codeword{eval}-Methode erweitert, sodass nun auch Variablen überprüft werden. Als zusätliche Parameter erhält die Methode einen Variablennamen und den zu substituierenden Term. Sind beide gesetzt und es handelt sich bei der Auswertung um die Variable wird der Term anstelle der Variable zurückgegeben. Hierzu wird die bereits vorgestellte \codeword{eval}-Methode erweitert. Da Rust keine Methodenüberladung unterstützt, werden ebenfalls Methoden implementiert, die den Funktionsaufruf auch mit weniger Argumenten unterstützen und entsprechend Standardwerte übergeben, die keinen Einfluss auf die Berechnung haben.
+
+Die Erweiterung der Methode besitzt zwei weitere Parameter, den optionalen Variablennamen, der ersetzt werden soll, und das entsprechend \codeword{Ast}, mit dem substituiert werden soll.
+\begin{lstlisting}[language=rust, caption={Erweiterung pub fn eval}]
+    pub fn eval_sub(
+        &self,
+        evaler: &EvalFn<N>,
+        hard_eval: &bool,
+        sub: &Option<&str>,
+        with: &Option<&Ast<N>>,
+    ) -> Ast<N> {
+        match self {
+            Ast::Add(vec) => add(
+                vec.iter()
+                    .map(|t| t.eval_sub(evaler, hard_eval, sub, with))
+                    .collect(),
+                evaler,
+                hard_eval,
+            ),
+            Ast::Mul(vec) => mul(
+                vec.iter()
+                    .map(|t| t.eval_sub(evaler, hard_eval, sub, with))
+                    .collect(),
+                evaler,
+                hard_eval,
+            ),
+            Ast::Pow(base, exp) => pow(
+                base.eval_sub(evaler, hard_eval, sub, with),
+                exp.eval_sub(evaler, hard_eval, sub, with),
+                evaler,
+                hard_eval,
+            ),
+            Ast::Func(name, args) => func(
+                name,
+                args.iter()
+                    .map(|t| t.eval_sub(evaler, hard_eval, sub, with))
+                    .collect(),
+                evaler,
+                hard_eval,
+            ),
+            Ast::Const(name) if *hard_eval => {
+                let mut ret = None;
+                for const_struct in evaler.consts.iter() {
+                    if let Some(v) = const_struct.eval(&name) {
+                        ret = Some(v);
+                        break;
+                    }
+                }
+
+                ret.unwrap_or(self.clone())
+            }
+            Ast::Symbol(name) if sub.is_some() && name == sub.unwrap() => 
+                with.unwrap().clone(),
+            _ => self.clone(),
+        }
+    }
+\end{lstlisting}
+
+Der bisherige Aufbau der \codeword{eval}-Methode stellt sicher, dass die bereits vorgestellte Ausführungsfolge von Kapitel x beibehalten wird. Zu überlegen ist noch, ob der übergebene Term vor der Substituierung ebenfalls evaluiert wird, oder ob darauf vertraut wird, dass immer ein bereits evaluierter Term übergeben wird.
+
+\paragraph{Verbesserungs- und Erweiterungsideen} Übergabe eines Vektors von Werten, um wieder einen Vektor mit allen Ersetzungen zurückzuerhalten. Mehrere Variablen auf einmal ersetzen. Substitution von ganzen Termen erlauben, nicht nur einzelnen Variablen.
+
 \subsection{Implementierung von expand}
 \subsection{Implementierung von simplify}
 
 \newpage
 
 \section{Erweiterte Funktionalitäten (Beispiele)}
-\subsection{Terme mit floats berechnen (Ungenauigkeit in Kauf nehmen)}
+Die bisherige Implementierung des CAS ist noch rudimentär. Es wurden lediglich die wichtigsten Eigenschaften implementiert um Terme möglichst weit und genau zusammenzufassen.
+Die weiteren Implementierungen sollen nun einen Ausblick darauf geben, wie erweiterte Funktionalitäten implementitert werden können aufgrund der geschaffenen Basis. 
+
+\subsection{Terme mit floats berechnen (Ungenauigkeit in Kauf nehmen)} Um ein einzelnes numerisches Ergebnis zu erhalten, sofern alle Variablen im Term besetzt sind, erhält das \codeword{Ast}-Enum zusätzlich die Methode \codeword{hard_eval}. Diese ruft die bereits vorgestellte Methode \codeword{eval_sub} auf und übergibt als Parameter, dass eine explizite Berechnung stattfinden soll. Dies kann mit einer gewissen Ungenaugkeit verbunden sein.
+
+Den Parameter \codeword{hard_eval} sollen dabei alle berechnenden Funktionen - insbesondere auch später hinzugefügte Funktionen - weitergegeben werden. Dies kann durch die Typdefinition von EvalFn sichergestellt werden.
+
+Als konkretes Beispiel wird die bestehende Funktion \codeword{perfect_nth_root} erweitert. Als Rückgabewert ist hist das Enum \codeword{Option} angegeben werden. Bisher gibt diese Funktion \codeword{None} zurück, wenn es sich um kein exaktes Ergebnis handelt. Ansonsten wird ein entsprechendes \codeword{Ast}-Element zurückgegeben.
+
+Wenn nun \codeword{hard_eval} auf true gesetzt ist soll die Potenz ohne weitere Prüfung durchgeführt werden, falls es sich um Zahlen handelt. Dazu muss das trait \codeword{NumberType} noch die Methodendefinition \codeword{pow} forden, die in den eigenen Nummerntypen implementiert werden muss. In unserem Fall für \codeword{PrimNum} werden danach die entsprechenden Rust-Funktionen der primitiven Typen aufgerufen um eine Potenz zu berechnen.
+
+Als erstes Beispiel dient der Term $sqrt(2)$. Der Parser erkennt hierbei nur die Funktion. Bei einem Aufruf von \codeword{simple_eval} wird diese Funktion dann durch die bestehende Implementierung nach \codeword{Pow(Num(Int(2)), Num(Rational(1, 2)))} umgewandelt (vgl. Kapitel Wurzel und co.). Der Aufruf von von \codeword{hard_eval} dagegen gibt den Float-Wert \codeword{1.4142135623730951} aus, wodurch bereits eine Ungenauigkeit entstanden ist.
+
+Als zweites Beispiel dient der Term $sqrt(2)*sqrt(2)$. Durch die gewährleistete Ausführungsreihenfolge der Terme ist das Ergebnis mit \codeword{simple_eval} $2$. Dies kommt durch die Termzusammenfassung zustande, wie sie für die Addition in Kapitel x erläuertert ist. Bei der Ausführung mit \codeword{hard_eval} wird dagegen entsprechend das Ergebnis $2.0000000000000004$ zurückgegeben. Dies hat den Grund, da ja erst die Potenzen ausgeführt werden, und danach erst die Multiplikation durchgeführt wird. Andere Nummerntypen, die hier eine höhere Genauigkeit erlauben bzw. solche Sonderfälle abfangen, können hierbei natürlich auch immer noch ein genaueres Ergebnis liefern.
+
 \subsection{Implementierung der limit-Funktion}
 \subsection{Implementierung einer to string-Methode}
 

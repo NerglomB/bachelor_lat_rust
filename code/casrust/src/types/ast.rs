@@ -103,26 +103,16 @@ where
         self.eval(evaler, &false)
     }
 
-    pub fn simple_eval_sub(
-        &self,
-        evaler: &EvalFn<N>,
-        sub: &Option<&str>,
-        with: &Option<Ast<N>>,
-    ) -> Ast<N> {
-        self.eval_sub(evaler, &false, sub, with)
+    pub fn simple_eval_sub(&self, evaler: &EvalFn<N>, sub: &str, with: &Ast<N>) -> Ast<N> {
+        self.eval_sub(evaler, &false, &Some(sub), &Some(with))
     }
 
     pub fn hard_eval(&self, evaler: &EvalFn<N>) -> Ast<N> {
         self.eval(evaler, &true)
     }
 
-    pub fn hard_eval_sub(
-        &self,
-        evaler: &EvalFn<N>,
-        sub: &Option<&str>,
-        with: &Option<Ast<N>>,
-    ) -> Ast<N> {
-        self.eval_sub(evaler, &true, sub, with)
+    pub fn hard_eval_sub(&self, evaler: &EvalFn<N>, sub: &str, with: &Ast<N>) -> Ast<N> {
+        self.eval_sub(evaler, &true, &Some(sub), &Some(with))
     }
 
     pub fn eval(&self, evaler: &EvalFn<N>, hard_eval: &bool) -> Ast<N> {
@@ -134,7 +124,7 @@ where
         evaler: &EvalFn<N>,
         hard_eval: &bool,
         sub: &Option<&str>,
-        with: &Option<Ast<N>>,
+        with: &Option<&Ast<N>>,
     ) -> Ast<N> {
         match self {
             Ast::Add(vec) => add(
@@ -176,7 +166,7 @@ where
 
                 ret.unwrap_or(self.clone())
             }
-            Ast::Symbol(name) if sub.is_some() && name == sub.unwrap() => with.clone().unwrap(),
+            Ast::Symbol(name) if sub.is_some() && name == sub.unwrap() => with.unwrap().clone(),
             _ => self.clone(),
         }
     }
@@ -337,5 +327,23 @@ impl FromStr for Ast<PrimNum> {
         let ast = Parser { evaler: &eval }.parse(&tokens)?;
 
         Ok(ast.simple_eval(&eval))
+    }
+}
+
+impl Ast<PrimNum> {
+    pub fn from_str_hard(s: &str) -> Result<Self, AstError> {
+        let eval = base_evaluator();
+        let tokens = Lexer::new(s).into_tokens();
+        let ast = Parser { evaler: &eval }.parse(&tokens)?;
+
+        Ok(ast.hard_eval(&eval))
+    }
+
+    pub fn from_str_none(s: &str) -> Result<Self, AstError> {
+        let eval = base_evaluator();
+        let tokens = Lexer::new(s).into_tokens();
+        let ast = Parser { evaler: &eval }.parse(&tokens)?;
+
+        Ok(ast)
     }
 }

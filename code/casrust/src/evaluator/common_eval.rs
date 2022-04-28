@@ -81,7 +81,7 @@ where
         return Ast::Num(N::zero());
     }
 
-    for fun in evaler.adders.iter() {
+    for fun in evaler.muls.iter() {
         fun(&mut terms, hard_eval);
     }
 
