@@ -4,33 +4,29 @@ pub fn func_sin<N>(name: &str, args: &Vec<Ast<N>>, hard_eval: &bool) -> Option<A
 where
     N: NumberType + SinCos,
 {
-    if name == "sin" {
-        if args.len() == 1 {
-            match &args[0] {
-                Ast::Num(v) if v.is_integer() || v.is_float() => {
-                    if *hard_eval {
-                        Some(Ast::Num(v.sin()))
-                    } else {
-                        if *v == 0 {
-                            Some(Ast::Num(N::zero()))
-                        } else if v.clone() % 90 == 0 {
-                            Some(Ast::Num(N::one()))
-                        } else {
-                            None
-                        }
-                    }
-                }
-                Ast::Num(v) if v.is_rational() => {
-                    if *hard_eval {
-                        Some(Ast::Num(v.sin()))
+    if name == "sin" && args.len() == 1 {
+        match &args[0] {
+            Ast::Num(v) if v.is_integer() || v.is_float() => {
+                if *hard_eval {
+                    Some(Ast::Num(v.sin()))
+                } else {
+                    if *v == 0 {
+                        Some(Ast::Num(N::zero()))
+                    } else if v.clone() % 90 == 0 {
+                        Some(Ast::Num(N::one()))
                     } else {
                         None
                     }
                 }
-                _ => None,
             }
-        } else {
-            None
+            Ast::Num(v) if v.is_rational() => {
+                if *hard_eval {
+                    Some(Ast::Num(v.sin()))
+                } else {
+                    None
+                }
+            }
+            _ => None,
         }
     } else {
         None
@@ -41,33 +37,29 @@ pub fn func_cos<N>(name: &str, args: &Vec<Ast<N>>, hard_eval: &bool) -> Option<A
 where
     N: NumberType + SinCos,
 {
-    if name == "cos" {
-        if args.len() == 1 {
-            match &args[0] {
-                Ast::Num(v) if v.is_integer() || v.is_float() => {
-                    if *hard_eval {
-                        Some(Ast::Num(v.cos()))
-                    } else {
-                        if *v == 0 {
-                            Some(Ast::Num(N::one()))
-                        } else if v.clone() % 90 == 0 {
-                            Some(Ast::Num(N::zero()))
-                        } else {
-                            None
-                        }
-                    }
-                }
-                Ast::Num(v) if v.is_rational() => {
-                    if *hard_eval {
-                        Some(Ast::Num(v.cos()))
+    if name == "cos" && args.len() == 1 {
+        match &args[0] {
+            Ast::Num(v) if v.is_integer() || v.is_float() => {
+                if *hard_eval {
+                    Some(Ast::Num(v.cos()))
+                } else {
+                    if *v == 0 {
+                        Some(Ast::Num(N::one()))
+                    } else if v.clone() % 90 == 0 {
+                        Some(Ast::Num(N::zero()))
                     } else {
                         None
                     }
                 }
-                _ => None,
             }
-        } else {
-            None
+            Ast::Num(v) if v.is_rational() => {
+                if *hard_eval {
+                    Some(Ast::Num(v.cos()))
+                } else {
+                    None
+                }
+            }
+            _ => None,
         }
     } else {
         None

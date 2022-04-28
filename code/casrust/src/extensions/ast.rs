@@ -1,3 +1,4 @@
+use crate::evaluator::EvalFn;
 use crate::types::ast::Ast;
 use crate::types::NumberType;
 
@@ -5,7 +6,7 @@ impl<N> Ast<N>
 where
     N: NumberType,
 {
-    pub fn expand(&self) -> Ast<N> {
+    pub fn expand(&self, evaler: &EvalFn<N>) -> Ast<N> {
         match self {
             Ast::Mul(vec) => {
                 let mut result: Vec<Ast<N>> = vec![];
@@ -52,22 +53,33 @@ where
                     .clone()
                 }
             }
-            Ast::Add(vec) => Ast::Add(vec.iter().map(|e| e.expand()).collect()),
+            Ast::Add(vec) => Ast::Add(vec.iter().map(|e| e.expand(evaler)).collect()),
             Ast::Func(name, args) => {
-                Ast::Func(name.to_string(), args.iter().map(|e| e.expand()).collect())
+                let args = args.iter().map(|e| e.expand(evaler)).collect();
+                let mut ret = None;
+                for fun in evaler.expand_funcs.iter() {
+                    if let Some(ast) = fun(name, &args) {
+                        ret = Some(ast);
+                        break;
+                    }
+                }
+
+                ret.unwrap_or(Ast::Func(name.to_string(), args))
             }
             Ast::Pow(base, exp) => {
-                let base = base.expand();
-                let exp = exp.expand();
+                let base = base.expand(evaler);
+                let exp = exp.expand(evaler);
 
                 match base {
                     Ast::Mul(vec) => {
                         let mut mul = vec![];
                         for node in vec {
-                            mul.push(Ast::Pow(Box::new(node), Box::new(exp.clone())).expand());
+                            mul.push(
+                                Ast::Pow(Box::new(node), Box::new(exp.clone())).expand(evaler),
+                            );
                         }
 
-                        Ast::Mul(mul).expand()
+                        Ast::Mul(mul).expand(evaler)
                     }
                     _ => match exp {
                         Ast::Num(exp) if exp.is_integer() && exp > 0 => {
@@ -76,7 +88,7 @@ where
                                 mul.push(base.clone());
                             }
 
-                            Ast::Mul(mul).expand()
+                            Ast::Mul(mul).expand(evaler)
                         }
                         Ast::Add(exp) => {
                             let mut mul = vec![];
@@ -84,7 +96,7 @@ where
                                 mul.push(Ast::Pow(Box::new(base.clone()), Box::new(node)));
                             }
 
-                            Ast::Mul(mul).expand()
+                            Ast::Mul(mul).expand(evaler)
                         }
                         _ => Ast::Pow(Box::new(base), Box::new(exp)),
                     },
