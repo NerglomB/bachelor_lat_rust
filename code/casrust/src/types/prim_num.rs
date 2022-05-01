@@ -315,3 +315,19 @@ impl Hash for PrimNum {
         }
     }
 }
+
+impl std::fmt::Display for PrimNum {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            PrimNum::Int(v) => {
+                write!(f, "{}", v)
+            }
+            PrimNum::Float(v) => {
+                write!(f, "{}", v)
+            }
+            PrimNum::Rational(num, den) => {
+                write!(f, "({}/{})", num, den)
+            }
+        }
+    }
+}

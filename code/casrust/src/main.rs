@@ -5,11 +5,11 @@ use casrust::types::prim_num::PrimNum;
 use std::str::FromStr;
 
 fn main() {
-    match Ast::from_str("log(x^2*y)") {
+    match Ast::from_str("x+2/3") {
         Ok(ast) => {
-            let eval = base_evaluator();
+            // let eval = base_evaluator();
+            println!("{}", ast);
             println!("{:?}", ast);
-            println!("{:?}", ast.expand(&eval));
             // println!(
             //     "{:?}",
             //     ast.simple_eval_sub(&eval, &Some("x"), &Some(Ast::Num(PrimNum::Int(0))))

@@ -348,3 +348,44 @@ impl Ast<PrimNum> {
         Ok(ast)
     }
 }
+
+impl<N> std::fmt::Display for Ast<N>
+where
+    N: NumberType,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Ast::Add(vec) => {
+                let mut s = "".to_owned();
+                let len = vec.len();
+                let mut current = 0;
+                while current < len {
+                    if current == 0 {
+                        s.push_str(&format!("{}", vec[current]));
+                    } else {
+                        let el_s = format!("{}", vec[current]);
+                        if el_s.chars().nth(0).unwrap() == '-' {
+                            s = s[0..s.len() - 1].to_string();
+                        }
+                        s.push_str(&el_s);
+                    }
+                    if current < len - 1 {
+                        s.push_str("+");
+                    }
+                    current += 1;
+                }
+
+                write!(f, "{}", s)
+            }
+            Ast::Symbol(name) => {
+                write!(f, "{}", name)
+            }
+            Ast::Num(num) => {
+                write!(f, "{}", num)
+            }
+            _ => {
+                write!(f, "ein ast")
+            }
+        }
+    }
+}

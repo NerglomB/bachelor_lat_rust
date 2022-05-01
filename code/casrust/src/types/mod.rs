@@ -41,6 +41,7 @@ pub trait NumberType:
     + Into<i128>
     + From<i128>
     + From<f64>
+    + std::fmt::Display
 {
     fn zero() -> Self;
     fn one() -> Self;
