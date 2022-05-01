@@ -1080,6 +1080,26 @@ Der bisherige Aufbau der \codeword{eval}-Methode stellt sicher, dass die bereits
 \paragraph{Verbesserungs- und Erweiterungsideen} Übergabe eines Vektors von Werten, um wieder einen Vektor mit allen Ersetzungen zurückzuerhalten. Mehrere Variablen auf einmal ersetzen. Substitution von ganzen Termen erlauben, nicht nur einzelnen Variablen.
 
 \subsection{Implementierung von expand}
+Eventuell ist es interessant einen Term vereinfacht vorliegen zu haben. Auch wenn der Name ``expand'' nicht danach klingt, einen Term zu vereinfachen, so kann dies durchaus der Fall sein, wie der folgende Term zeigt $(x + 1)*(x - 2) - (x - 1)*x$ (Quelle sympy expand). Wird der Term ausmultipliziert kann dieser anschließend auf $-2$ vereinfacht werden.
+
+Im folgenden sollen die gängigsten Terme auf dieser Art vereinfacht werden können.
+
+\paragraph{Multiplikation über Addition bzw. einzelne Elemente} Hierbei soll der Term $x*(a+b)$ zu $x*a+x*b$ umgeformt werden, der Term $(a+b)*(c+d)*e$ entsprechend zu $a*c*e + a*d*e + b*c*e + b*d*e$ umgeformt werden.
+
+Die Implementierung hiervon ist recht einfach. Bei der Ausprägung \codeword{Ast::Mul} wird über jedes Element im Vektor iteriert. Davor wird noch ein leerer Ergebnisvektor erstellt. Handelt es sich nicht um die Ausprägung \codeword{Ast::Add} wird das Element dem Ergebnis hinzugefügt falls leer, ansonsten wird jedes Element im Ergebnisvektor mit dem derzeitigen Element Multipliziert, dies kann einfach in-place erfolgen mit der Funktion \codeword{map}.
+
+Handelt es sich jedoch um die Ausprägung \codeword{Ast::Add} wird prinzipiell mit demselben Verfahren gearbeitet. Diesmal muss nur zusätlich über alle Elemente im Vektor von \codeword{Ast} iteriert werden um das derzeitige Element zu bestimmen. Diesmal kann die Veränderung nicht einfach in-place erfolgen, da wir ansonsten den Ergebnisvektor verändert, bevor alle Elemente mit diesem Multipliziert werden.
+
+\paragraph{Potenzen mit ganzzahligen positiven Exponenten} (x+y+z)**n
+
+\paragraph{Multiplikation im Exponent} 2**(x+y)
+
+\paragraph{Potenzen mit Multiplikation in der Basis} (x*y)**2
+
+\paragraph{Beispiel der Erweiterung an der log Funktion} log(x**2*y)
+
+\paragraph{Besonderheiten mit Rust} Siehe rückgabetyp shorten, hier besonders viel clone wegen ownership und clone in mul add nicht derefenzierbar wegen fnmut
+
 \subsection{Implementierung von simplify}
 
 \newpage

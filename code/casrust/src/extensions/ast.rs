@@ -8,6 +8,7 @@ where
 {
     pub fn expand(&self, evaler: &EvalFn<N>) -> Ast<N> {
         match self {
+            Ast::Add(vec) => Ast::Add(vec.iter().map(|e| e.expand(evaler)).collect()),
             Ast::Mul(vec) => {
                 let mut result: Vec<Ast<N>> = vec![];
 
@@ -18,6 +19,7 @@ where
                                 result.append(&mut v_add.clone());
                             } else {
                                 let mut t_res = vec![];
+                                // Durch fnmut kann nicht derefenziert werden, deshalb clone
                                 for el in v_add {
                                     t_res.append(
                                         &mut result
@@ -41,19 +43,14 @@ where
                 }
 
                 if result.len() == 1 {
-                    result.pop().unwrap().sort().clone()
+                    result.pop().unwrap()
                 } else {
-                    Ast::Add(
-                        result
-                            .into_iter()
-                            .map(|mut e| e.shorten().sort().clone())
-                            .collect(),
-                    )
-                    .sort()
-                    .clone()
+                    let mut result = Ast::Add(result);
+                    result.shorten().sort();
+
+                    result
                 }
             }
-            Ast::Add(vec) => Ast::Add(vec.iter().map(|e| e.expand(evaler)).collect()),
             Ast::Func(name, args) => {
                 let args = args.iter().map(|e| e.expand(evaler)).collect();
                 let mut ret = None;
@@ -79,7 +76,7 @@ where
                             );
                         }
 
-                        Ast::Mul(mul).expand(evaler)
+                        Ast::Mul(mul)
                     }
                     _ => match exp {
                         Ast::Num(exp) if exp.is_integer() && exp > 0 => {
@@ -88,7 +85,7 @@ where
                                 mul.push(base.clone());
                             }
 
-                            Ast::Mul(mul).expand(evaler)
+                            Ast::Mul(mul).expand(evaler).simple_eval(evaler)
                         }
                         Ast::Add(exp) => {
                             let mut mul = vec![];
@@ -96,7 +93,7 @@ where
                                 mul.push(Ast::Pow(Box::new(base.clone()), Box::new(node)));
                             }
 
-                            Ast::Mul(mul).expand(evaler)
+                            Ast::Mul(mul)
                         }
                         _ => Ast::Pow(Box::new(base), Box::new(exp)),
                     },

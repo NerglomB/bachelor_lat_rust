@@ -44,6 +44,7 @@ where
         }
     }
 
+    // Hier das problem mit rückgabetyp, versuche diesen in extension/ast bei rückgabe in mul anzuwenden -> fehler, clone nötig
     pub fn shorten(&mut self) -> &mut Self {
         match self {
             Ast::Add(v) => {
