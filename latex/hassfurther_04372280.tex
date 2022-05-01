@@ -1090,15 +1090,45 @@ Die Implementierung hiervon ist recht einfach. Bei der Ausprägung \codeword{Ast
 
 Handelt es sich jedoch um die Ausprägung \codeword{Ast::Add} wird prinzipiell mit demselben Verfahren gearbeitet. Diesmal muss nur zusätlich über alle Elemente im Vektor von \codeword{Ast} iteriert werden um das derzeitige Element zu bestimmen. Diesmal kann die Veränderung nicht einfach in-place erfolgen, da wir ansonsten den Ergebnisvektor verändert, bevor alle Elemente mit diesem Multipliziert werden.
 
-\paragraph{Potenzen mit ganzzahligen positiven Exponenten} (x+y+z)**n
+\paragraph{Potenzen mit ganzzahligen positiven Exponenten} Bei Potenzen der Form $(x+y+z)^n, n \in \mathbb{N}$ kann die entsprechende Basis n-mal in den Vektor für \codeword{Ast::Mul} eingefügt werden. Hiernach kann die expand-Funktion für \codeword{Ast::Mul} aufgerufen werden um den Term auszumultiplizieren. 
 
-\paragraph{Multiplikation im Exponent} 2**(x+y)
+\paragraph{Addition im Exponent} Potenzen der Form $n^{x+y}$ sollen in die Form $n^x*n^y$ überführt werden. Die Prüfung kann dabei durch eine einfache \codeword{match}-Anweisung erfolgen. Eine weitere Vereinfachung des Terms ist nach fertigstellung nicht notwendig.
 
-\paragraph{Potenzen mit Multiplikation in der Basis} (x*y)**2
+\paragraph{Potenzen mit Multiplikation in der Basis} Potenzen der Form $(x*y)^a$ sollen in die Form $x^a*y^a$ überführt werden. Die Prüfung kann dabei durch eine einfache \codeword{match}-Anweisung erfolgen. Eine weitere Vereinfachung des Terms ist nach fertigstellung wie bereits davor nicht notwendig.
 
-\paragraph{Beispiel der Erweiterung an der log Funktion} log(x**2*y)
+\paragraph{Beispiel der Erweiterung an der log Funktion} Darüberhinaus soll es wieder einfach möglich sein, für eigene Funktionen die \codeword{expand}-Methode aufrufen zu können. Hierzu wird das struct \codeword{EvalFn} erweitert.
 
-\paragraph{Besonderheiten mit Rust} Siehe rückgabetyp shorten, hier besonders viel clone wegen ownership und clone in mul add nicht derefenzierbar wegen fnmut
+\begin{lstlisting}[language=rust, caption={EvalFn nach expand}]
+pub struct EvalFn<N> {
+    pub adders: Vec<fn(&mut HashMap<Ast<N>, Ast<N>>, &bool)>,
+    pub muls: Vec<fn(&mut HashMap<Ast<N>, Ast<N>>, &bool)>,
+    pub pows: Vec<fn(&Ast<N>, &Ast<N>, &bool) -> Option<Ast<N>>>,
+    pub funcs: Vec<fn(&str, &Vec<Ast<N>>, &bool) -> Option<Ast<N>>>,
+    pub consts: Vec<Box<dyn ConstType<N>>>,
+    pub expand_funcs: Vec<fn(&str, &Vec<Ast<N>>) -> Option<Ast<N>>>,
+}
+\end{lstlisting}
+
+Beispielhaft wird dies für die Funktion $log$ implementiert. So gilt: $log(x^z*y) = z*log(x) + log(y)$.
+
+\paragraph{Besonderheiten mit Rust} Bei der Implementierung dieser Methode sind deutlich das strenge Typensystem von Rust als auch das Borrowing und Ownership in Erscheinung getreten. Explementarisch soll dies an zwei Beispielen erläutert werden, da sich dieses Verhalten ähnlich in anderen Fällen wiederholt.
+
+Für das Enum \codeword{Ast} wurden die Methoden \codeword{shorten} und \codeword{sort} implementiert um generell die Handhabung des Typen zu verbessern. Beide Methoden erhalten eine mutable Referenz auf das eigene Objekt und geben auch solch eine wieder zurück. Die Implementierung von \codeword{expand} gibt allerdings eine eigenständige Instanz von \codeword{Ast} zurück, und gibt somit das Ownership in diesem Fall ab. Da \codeword{Ast} nicht den Copy-Trait implementieren kann (oben noch aufführen warum) wie bereits besprochen, kann der entsprechende Rückgabewert von \codeword{shorten} und \codeword{sort} nicht einfach derefenziert werden.
+
+Um das Problem zu umgehen bieten sich zwei Lösungen an. Einerseits kann man das zurückgegebene Objekt mit \codeword{.clone()} klonen und als eigenständiges Objekt zurückgeben, oder es werden die Funktionen auf dem Objekt aufgerufen um danach das Objekt als solches zurückgegeben. Dies funktioniert da, beide Methoden in-place arbeiten.
+
+\begin{lstlisting}[language=rust, caption={Mögliche Lösungen für Rückgabewerte}]
+    // 1. Möglichkeit
+    Ast::Add(result).shorten().sort().clone()
+
+    // 2. Möglichkeit
+    let mut result = Ast::Add(result);
+    result.shorten().sort();
+
+    result
+\end{lstlisting}
+
+Das zweite Beispiel bezieht sich auf explizite klonen des Exponenten bei Potenzen, wenn die Basis eine Multiplikation ist. In der entsprechenden for-Schleife wird für jedes Element des Vektors der Basis dem Ergebnis ein neues hinzugefügt nach den oben genannten Regeln. Der Exponent bleibt aber in jedem Durchlauf dersselbe. Da \codeword{Ast} einerseits immer noch nicht den Copy-Trait implementiert und andererseits die Initialisierung von Box das Ownership des Wertes bekommt muss hier \codeword{.clone()} ausgeführt werden. Alle anderen \codeword{.clone()}-Aufrufe dieser Methode beheben prinzipiell dasselbe Problem.
 
 \subsection{Implementierung von simplify}
 

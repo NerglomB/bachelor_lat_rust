@@ -19,7 +19,6 @@ where
                                 result.append(&mut v_add.clone());
                             } else {
                                 let mut t_res = vec![];
-                                // Durch fnmut kann nicht derefenziert werden, deshalb clone
                                 for el in v_add {
                                     t_res.append(
                                         &mut result

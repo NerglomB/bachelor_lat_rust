@@ -5,7 +5,7 @@ use casrust::types::prim_num::PrimNum;
 use std::str::FromStr;
 
 fn main() {
-    match Ast::from_str("(x*y)^z") {
+    match Ast::from_str("log(x^2*y)") {
         Ok(ast) => {
             let eval = base_evaluator();
             println!("{:?}", ast);
