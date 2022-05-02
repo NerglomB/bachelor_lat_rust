@@ -13,9 +13,9 @@ use std::str::FromStr;
 pub enum Ast<N> {
     Add(Vec<Ast<N>>),
     Mul(Vec<Ast<N>>),
+    Pow(Box<Ast<N>>, Box<Ast<N>>),
     Symbol(String),
     Const(String),
-    Pow(Box<Ast<N>>, Box<Ast<N>>),
     Func(String, Vec<Ast<N>>),
     Num(N),
 }
@@ -325,9 +325,8 @@ impl FromStr for Ast<PrimNum> {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let eval = base_evaluator();
         let tokens = Lexer::new(s).into_tokens();
-        let ast = Parser { evaler: &eval }.parse(&tokens)?;
 
-        Ok(ast.simple_eval(&eval))
+        Ok(Parser { evaler: &eval }.parse(&tokens)?.simple_eval(&eval))
     }
 }
 
@@ -335,17 +334,15 @@ impl Ast<PrimNum> {
     pub fn from_str_hard(s: &str) -> Result<Self, AstError> {
         let eval = base_evaluator();
         let tokens = Lexer::new(s).into_tokens();
-        let ast = Parser { evaler: &eval }.parse(&tokens)?;
 
-        Ok(ast.hard_eval(&eval))
+        Ok(Parser { evaler: &eval }.parse(&tokens)?.hard_eval(&eval))
     }
 
     pub fn from_str_none(s: &str) -> Result<Self, AstError> {
         let eval = base_evaluator();
         let tokens = Lexer::new(s).into_tokens();
-        let ast = Parser { evaler: &eval }.parse(&tokens)?;
 
-        Ok(ast)
+        Ok(Parser { evaler: &eval }.parse(&tokens)?)
     }
 }
 
@@ -356,6 +353,8 @@ where
     fn fmt(&self, f: &mut fmt::Formatter) -> std::fmt::Result {
         match self {
             Ast::Add(vec) => {
+                let mut vec = vec.clone();
+                vec.sort_by(display_sort);
                 let mut s = "".to_owned();
                 let len = vec.len();
                 let mut current = 0;
@@ -377,15 +376,114 @@ where
 
                 write!(f, "{}", s)
             }
-            Ast::Symbol(name) => {
+            Ast::Mul(vec) => {
+                let mut s = "".to_owned();
+                let len = vec.len();
+                let mut current = 0;
+
+                let mut vec = if let Ast::Num(_) = vec[len - 1] {
+                    let mut new_v = vec![];
+                    new_v.push(vec[len - 1].clone());
+                    new_v.extend_from_slice(&vec[0..len - 1]);
+
+                    new_v
+                } else {
+                    vec.clone()
+                };
+                vec.sort_by(display_sort);
+
+                if vec.len() == 2 {
+                    if let Ast::Num(v) = &vec[0] {
+                        if *v == 1 {
+                            s.push_str(&format!("{}", vec[1]));
+                            current = 2;
+                        } else if *v == -1 {
+                            s.push_str(&format!("-{}", vec[1]));
+                            current = 2;
+                        }
+                    } else if let Ast::Num(v) = &vec[1] {
+                        if *v == 1 {
+                            s.push_str(&format!("{}", vec[0]));
+                            current = 2;
+                        } else if *v == -1 {
+                            s.push_str(&format!("-{}", vec[0]));
+                            current = 2;
+                        }
+                    }
+                }
+                while current < len {
+                    if current == 0 {
+                        if let Ast::Add(_) = &vec[current] {
+                            s.push_str(&format!("({})", vec[current]));
+                        } else {
+                            s.push_str(&format!("{}", vec[current]));
+                        }
+                    } else {
+                        let el_s = if let Ast::Add(_) = &vec[current] {
+                            format!("({})", vec[current])
+                        } else {
+                            format!("{}", vec[current])
+                        };
+                        s.push_str(&el_s);
+                    }
+                    if current < len - 1 {
+                        s.push_str("*");
+                    }
+                    current += 1;
+                }
+
+                write!(f, "{}", s)
+            }
+            Ast::Symbol(name) | Ast::Const(name) => {
                 write!(f, "{}", name)
             }
             Ast::Num(num) => {
                 write!(f, "{}", num)
             }
-            _ => {
-                write!(f, "ein ast")
+            Ast::Pow(base, exp) => {
+                let mut s = "".to_owned();
+                if let Ast::Add(_) | Ast::Mul(_) = **base {
+                    s.push_str(&format!("({})^", base));
+                } else {
+                    s.push_str(&format!("{}^", base));
+                }
+                if let Ast::Add(_) | Ast::Mul(_) = **exp {
+                    s.push_str(&format!("({})", exp));
+                } else {
+                    s.push_str(&format!("{}", exp));
+                }
+                write!(f, "{}", s)
+            }
+            Ast::Func(name, args) => {
+                let mut s = "".to_owned();
+                for node in args {
+                    s.push_str(&format!("{}, ", node));
+                }
+                s = s[0..s.len() - 2].to_string();
+
+                write!(f, "{}({})", name, s)
             }
         }
+    }
+}
+
+fn display_sort<N>(a: &Ast<N>, b: &Ast<N>) -> Ordering
+where
+    N: NumberType,
+{
+    match (a, b) {
+        (Ast::Pow(_, a), Ast::Pow(_, b)) => match (*a.clone(), *b.clone()) {
+            (Ast::Num(a), Ast::Num(b)) => {
+                if a > b {
+                    Ordering::Less
+                } else {
+                    Ordering::Greater
+                }
+            }
+            (Ast::Num(_), _) => Ordering::Less,
+            (_, Ast::Num(_)) => Ordering::Greater,
+            _ => Ordering::Equal,
+        },
+        _ => Ordering::Equal,
     }
 }
