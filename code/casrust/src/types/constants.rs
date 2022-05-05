@@ -4,9 +4,7 @@ pub trait ConstType<N>
 where
     N: From<i128> + From<f64>,
 {
-    fn is_const(&self, c: &str) -> bool;
-
-    fn eval(&self, c: &str) -> Option<Ast<N>>;
+    fn eval(&self, c: &str) -> Ast<N>;
 }
 
 #[derive(Debug)]
@@ -15,15 +13,7 @@ impl<N> ConstType<N> for PiConst
 where
     N: From<i128> + From<f64>,
 {
-    fn is_const(&self, c: &str) -> bool {
-        c == "π"
-    }
-
-    fn eval(&self, c: &str) -> Option<Ast<N>> {
-        if c == "π" {
-            Some(Ast::Num(N::from(std::f64::consts::PI)))
-        } else {
-            None
-        }
+    fn eval(&self, c: &str) -> Ast<N> {
+        Ast::Num(N::from(std::f64::consts::PI))
     }
 }

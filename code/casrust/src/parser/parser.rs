@@ -104,14 +104,7 @@ impl<'a> Parser<'a> {
             None => Err(AstError),
             Some(Token::Var(name)) => {
                 iter.next();
-                let mut is_const = false;
-                for const_struct in self.evaler.consts.iter() {
-                    if const_struct.is_const(&name) {
-                        is_const = true;
-                        break;
-                    }
-                }
-                if is_const {
+                if self.evaler.consts.contains_key(name) {
                     Ok(Ast::Const(name.clone()))
                 } else {
                     Ok(Ast::Symbol(name.clone()))

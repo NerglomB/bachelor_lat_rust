@@ -5,11 +5,11 @@ use casrust::types::prim_num::PrimNum;
 use std::str::FromStr;
 
 fn main() {
-    match Ast::from_str("x^2*y^3") {
+    match Ast::from_str("sqrt(4)") {
         Ok(ast) => {
-            // let eval = base_evaluator();
+            let eval = base_evaluator();
             println!("{}", ast);
-            println!("{:?}", ast);
+            println!("{}", ast.hard_eval(&eval));
             // println!(
             //     "{:?}",
             //     ast.simple_eval_sub(&eval, &Some("x"), &Some(Ast::Num(PrimNum::Int(0))))

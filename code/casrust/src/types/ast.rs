@@ -157,15 +157,11 @@ where
                 hard_eval,
             ),
             Ast::Const(name) if *hard_eval => {
-                let mut ret = None;
-                for const_struct in evaler.consts.iter() {
-                    if let Some(v) = const_struct.eval(&name) {
-                        ret = Some(v);
-                        break;
-                    }
+                if evaler.consts.contains_key(name) {
+                    evaler.consts[name].eval(&name)
+                } else {
+                    self.clone()
                 }
-
-                ret.unwrap_or(self.clone())
             }
             Ast::Symbol(name) if sub.is_some() && name == sub.unwrap() => with.unwrap().clone(),
             _ => self.clone(),

@@ -110,14 +110,17 @@ pub fn func<N>(name: &str, args: Vec<Ast<N>>, evaler: &EvalFn<N>, hard_eval: &bo
 where
     N: NumberType,
 {
-    let mut ret_val = None;
-    for fun in evaler.funcs.iter() {
-        if let Some(ast) = fun(name, &args, hard_eval) {
-            ret_val = Some(ast.eval(evaler, hard_eval));
-            break;
-        }
+    let ret_val = if evaler.funcs.contains_key(name) {
+        evaler.funcs[name](&args, hard_eval)
+    } else {
+        None
+    };
+
+    if ret_val.is_some() {
+        ret_val.unwrap().eval(&evaler, hard_eval)
+    } else {
+        Ast::Func(String::from(name), args)
     }
-    ret_val.unwrap_or(Ast::Func(String::from(name), args))
 }
 
 pub fn pow<N>(base: Ast<N>, exp: Ast<N>, evaler: &EvalFn<N>, hard_eval: &bool) -> Ast<N>

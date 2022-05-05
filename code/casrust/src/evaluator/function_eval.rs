@@ -1,10 +1,10 @@
 use crate::types::{ast::Ast, prim_num::PrimNum, NumberType};
 
-pub fn func_sin<N>(name: &str, args: &Vec<Ast<N>>, hard_eval: &bool) -> Option<Ast<N>>
+pub fn func_sin<N>(args: &Vec<Ast<N>>, hard_eval: &bool) -> Option<Ast<N>>
 where
     N: NumberType + SinCos,
 {
-    if name == "sin" && args.len() == 1 {
+    if args.len() == 1 {
         match &args[0] {
             Ast::Num(v) if v.is_integer() || v.is_float() => {
                 if *hard_eval {
@@ -33,11 +33,11 @@ where
     }
 }
 
-pub fn func_cos<N>(name: &str, args: &Vec<Ast<N>>, hard_eval: &bool) -> Option<Ast<N>>
+pub fn func_cos<N>(args: &Vec<Ast<N>>, hard_eval: &bool) -> Option<Ast<N>>
 where
     N: NumberType + SinCos,
 {
-    if name == "cos" && args.len() == 1 {
+    if args.len() == 1 {
         match &args[0] {
             Ast::Num(v) if v.is_integer() || v.is_float() => {
                 if *hard_eval {
@@ -66,12 +66,12 @@ where
     }
 }
 
-pub fn func_sqrt<N>(name: &str, args: &Vec<Ast<N>>, _: &bool) -> Option<Ast<N>>
+pub fn func_sqrt<N>(args: &Vec<Ast<N>>, _: &bool) -> Option<Ast<N>>
 where
     N: NumberType,
 {
     let mut ret_val: Option<Ast<N>> = None;
-    if name == "sqrt" && args.len() == 1 {
+    if args.len() == 1 {
         ret_val = Some(Ast::Pow(
             Box::new(args[0].clone()),
             Box::new(Ast::Num(N::try_create_rational(N::one(), N::from(2)))),
@@ -81,12 +81,12 @@ where
     ret_val
 }
 
-pub fn func_nthroot<N>(name: &str, args: &Vec<Ast<N>>, _: &bool) -> Option<Ast<N>>
+pub fn func_nthroot<N>(args: &Vec<Ast<N>>, _: &bool) -> Option<Ast<N>>
 where
     N: NumberType,
 {
     let mut ret_val: Option<Ast<N>> = None;
-    if name == "nthroot" && args.len() == 2 {
+    if args.len() == 2 {
         if let Ast::Num(nthroot) = &args[1] {
             if nthroot >= &0 {
                 ret_val = Some(Ast::Pow(
