@@ -5,7 +5,7 @@ use casrust::types::prim_num::PrimNum;
 use std::str::FromStr;
 
 fn main() {
-    match Ast::from_str("sqrt(4)") {
+    match Ast::from_str("π+1") {
         Ok(ast) => {
             let eval = base_evaluator();
             println!("{}", ast);

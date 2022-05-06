@@ -6,11 +6,7 @@ pub mod pow_eval;
 
 use crate::evaluator::{add_eval::*, function_eval::*, pow_eval::*};
 use crate::extensions::function_expand::*;
-use crate::types::{
-    ast::Ast,
-    constants::{ConstType, PiConst},
-    NumberType,
-};
+use crate::types::{ast::Ast, constants::*, NumberType};
 use std::collections::HashMap;
 
 pub struct EvalFn<N> {
@@ -18,7 +14,7 @@ pub struct EvalFn<N> {
     pub muls: Vec<fn(&mut HashMap<Ast<N>, Ast<N>>, &bool)>,
     pub pows: Vec<fn(&Ast<N>, &Ast<N>, &bool) -> Option<Ast<N>>>,
     pub funcs: HashMap<String, fn(&Vec<Ast<N>>, &bool) -> Option<Ast<N>>>,
-    pub consts: HashMap<String, Box<dyn ConstType<N>>>,
+    pub consts: HashMap<String, fn() -> Ast<N>>,
     pub expand_funcs: Vec<fn(&str, &Vec<Ast<N>>) -> Option<Ast<N>>>,
 }
 
@@ -32,8 +28,8 @@ where
     funcs.insert("sqrt".to_string(), func_sqrt);
     funcs.insert("nthroot".to_string(), func_nthroot);
 
-    let mut consts: HashMap<String, Box<dyn ConstType<N>>> = HashMap::new();
-    consts.insert("π".to_string(), Box::new(PiConst {}));
+    let mut consts: HashMap<String, fn() -> Ast<N>> = HashMap::new();
+    consts.insert("π".to_string(), pi_const);
 
     EvalFn {
         adders: vec![add_sin_cos],

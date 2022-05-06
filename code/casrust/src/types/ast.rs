@@ -158,7 +158,7 @@ where
             ),
             Ast::Const(name) if *hard_eval => {
                 if evaler.consts.contains_key(name) {
-                    evaler.consts[name].eval(&name)
+                    evaler.consts[name]()
                 } else {
                     self.clone()
                 }

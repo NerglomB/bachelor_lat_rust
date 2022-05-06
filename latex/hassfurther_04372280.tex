@@ -119,17 +119,19 @@
 \newpage
 
 \section{Einleitung}
-Computeralgebrasysteme - im folgender Arbeit abgekürzt CAS - nehmen in verschiedenen Bereichen der Wissenschaft eine wichtige Rolle ein. Sie ermöglichen es einerseits mathematische Ausdrücke mit Variablen darzustellen, diese Terme zu verändern und mit diesen zu arbeiten. Andererseits lassen sich wesentlich genauere Berechnung durchführen, indem z.B. nicht alle Ausdrücke in einem Term ausgewertet werden, wenn es hierdurch zu Ungenauigkeiten kommen kann. Diese Ungenauigkeiten kommen durch die begrenzte Kapazität im Speicher zustande, Stichwort IEEE float.
+Computeralgebrasysteme - im folgender Arbeit abgekürzt CAS - nehmen in verschiedenen Bereichen der Wissenschaft eine wichtige Rolle ein. Sie ermöglichen es einerseits mathematische Ausdrücke mit Variablen darzustellen, diese Terme zu verändern und mit diesen zu arbeiten. Andererseits lassen sich wesentlich genauere Berechnung durchführen, indem z.B. nicht alle Ausdrücke in einem Term ausgewertet werden, wenn es hierdurch zu Ungenauigkeiten kommen kann.
 
-In der vorliegenden Arbeit soll ein solches CAS in Ansätzen mit der Programmiersprache Rust entwickelt werden. Es soll untersucht werden, inwieweit das Ownership- und Borrowing-System von Rust bei einem solchen komplexen System bei der Entwicklung unterstützt und wie die Performance zur Laufzeit ausfällt. Das Projekt wird als Library erstellt, welche einfach durch dritte Erweiterbar sein soll umd weitere Funktionen zu implementieren oder gar auszutauschen.
+Beispiele von Verwendungen eines CAS
 
-Es gibt bereits eine Vielzahl an Software, die diese Art der Berechnung ermöglicht. Hierbei existieren sowohl Lösungen für Taschenrechner wie Giac, Programmbibliotheken wie SymPy oder auch eigenständige Programme wie Maple. In dieser Arbeit werden wir einen besonderen Blick auf SymPy werfen, da dieses System einerseits als Open-Source-Projekt verfügbar ist, als auch der Code in Python geschrieben ist und leicht verständlich ist. Der Code soll dabei natürlich nicht 1-zu-1 in Rust neu geschrieben werden, sondern mit den Möglichkeiten von Rust erweitert werden, auch wenn natürlich nur ein Teil des Umfangs von SymPy in dieser Arbeit möglich sein wird.
+In der vorliegenden Arbeit soll ein solches CAS in Ansätzen mit der Programmiersprache Rust entwickelt werden. Es soll untersucht werden, inwieweit das Ownership- und Borrowing-System von Rust bei einem solchen komplexen System bei der Entwicklung unterstützt und wie die Performance zur Laufzeit ausfällt. Da System soll dabei einfach erweiterbar sein. Dabei sollen sowohl neue mathematische Funktionen einfach integriert werden können, als auch die Terme mit neuen Regeln zusammenfassbar sein.
+
+Einen besonderen Stellenwert nimmt SymPy ein, da dieses System einerseits als Open-Source-Projekt verfügbar ist, als auch der Code in Python geschrieben ist und leicht verständlich ist. Der Code soll dabei natürlich nicht 1-zu-1 in Rust neu geschrieben werden, sondern mit den Möglichkeiten von Rust erweitert werden, auch wenn natürlich nur ein Teil des Umfangs von SymPy in dieser Arbeit möglich sein wird.
 
 \newpage
 
 \section{Vorstellung der Programmiersprache Rust}
 \subsection{Einführendes Beispiel Ownership und Borrowing}
-Bevor Rust vorgestellt wird und die genauen Regeln des Ownership und Borrowing erläutert werden, soll das Prinzip anhand eines Beispiels verdeutlicht werden. Hierzu nehmen wir an, dass es ein \codeword{struct} - vergleichbar mit Klassen - existiert, welches z.B. eine große Matrix beinhaltet, die verarbeitet werden soll.
+Bevor Rust vorgestellt wird und die genauen Regeln des Ownership und Borrowing erläutert werden, soll das Prinzip anhand eines Beispiels verdeutlicht werden. Hierzu wird ein \codeword{struct} - vergleichbar mit Klassen - angelegt, welches z.B. eine große Matrix beinhaltet, die verarbeitet werden soll.
 
 \begin{lstlisting}[language=rust, caption={Einführendes Beispiel struct}]
     struct LargeMatrix {
@@ -137,10 +139,10 @@ Bevor Rust vorgestellt wird und die genauen Regeln des Ownership und Borrowing e
     }
 \end{lstlisting}
 
- Im ersten Beispiel wird eine Funktion erstellt, die das Ownership der Matrix übernimmt und nach der Verarbeitung den Speicherplatz freigibt. Dies geschieht automatisch, da der Gültigkeitsbereich der Variable verlassen wird. Das Programm lässt sich so nicht kompilieren. Die zweite Ausgabe schlägt dabei fehl, da beim Aufruf der Funktion der Wert in die Funktion verschoben und freigegeben wird, der Zugriff auf den entsprechenden Speicherbereich im Hauptprogramm ist dabei also undefiniert.
+ Im ersten Beispiel wird eine Funktion erstellt, die das Ownership der Matrix übernimmt und nach der Verarbeitung den Speicherplatz freigibt. Dies geschieht automatisch, da der Gültigkeitsbereich der Variable \codeword{matrix_fn} verlassen wird. In diesem Kontext bedeutet Ownership, dass der Wert vom Hauptprogramm in die Funktion verschoben wird und die neue Variable \codeword{matrix_fn} das alleinige Recht besitzt diesen Wert zu nutzen. Das Programm lässt sich so nicht kompilieren. Die zweite Ausgabe schlägt dabei fehl, da beim Aufruf der Funktion der Wert in die Funktion verschoben und freigegeben wird, der Zugriff auf den entsprechenden Speicherbereich im Hauptprogramm wäre undefiniert.
 
  \begin{lstlisting}[language=rust, caption={Einführendes Beispiel Ownership abgeben}]
-    fn take_ownership(matrix: LargeMatrix) {
+    fn take_ownership(matrix_fn: LargeMatrix) {
         // ...
     }
 
@@ -150,13 +152,13 @@ Bevor Rust vorgestellt wird und die genauen Regeln des Ownership und Borrowing e
     println!("{:?}", matrix); // <- Fehler
 \end{lstlisting}
 
-Die zweite Funktion gibt das Ownership der Matrix wieder zurück, der Wert wird also wieder zurückgeschoben und kann nach dem Funktionsaufruf weiter verwendet werden. Dies geschieht aber nur, wenn der Variablen im Hauptprogramm der Rückgabewert zugewiesen wird. Ein Nachteil dieser Methode ist, dass nicht klar ist, ob es sich um die originale Matrix handelt, oder über eine neu initialisierte Matrix.
+Die zweite Funktion gibt das Ownership der Matrix wieder zurück, der Wert wird also wieder zurückgeschoben und kann nach dem Funktionsaufruf weiter verwendet werden. Dies geschieht aber nur, wenn der Variablen im Hauptprogramm der Rückgabewert zugewiesen wird. Hierzu muss die Variable \codeword{matrix} explizit als veränderbar mit dem Schlüsselwort \codeword{mut} definiert werden Ein Nachteil dieser Methode ist, dass nicht klar ist, ob es sich um die originale Matrix handelt, oder über eine neu initialisierte Matrix.
 
 \begin{lstlisting}[language=rust, caption={Einführendes Beispiel Ownership zurückgeben}]
-    fn give_back_ownership(matrix: LargeMatrix) -> LargeMatrix {
+    fn give_back_ownership(matrix_fn: LargeMatrix) -> LargeMatrix {
         // ...
         // Originale Matrix zurückgeben
-        matrix
+        matrix_fn
         // Oder neue Matrix zurückgeben
         // LargeMatrix { matrix: vec![] }
     }
@@ -167,13 +169,12 @@ Die zweite Funktion gibt das Ownership der Matrix wieder zurück, der Wert wird 
     println!("{:?}", matrix);
 \end{lstlisting}
 
-Im nächsten Beispiel erhält die Funktion nur eine Referenz auf die Matrix, gekennzeichnet durch das \codeword{&}-Zeichen. In Rust wird dieses Prinzip als ``Borrowing'' bezeichnet (quelle: https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html). Wie bereits im ersten Beispiel wird beim verlassen der Funktion der Speicherplatz der Variablen freigegeben, diesmal handelt es sich aber nur um den Zeiger und nicht um die eigentlichen Daten. Eine Verwendung nach dem Funktionsaufruf ist somit weiterhin möglich.
+Im nächsten Beispiel erhält die Funktion nur eine Referenz auf die Matrix, gekennzeichnet durch das \codeword{&}-Zeichen. In Rust wird dieses Prinzip als ``Borrowing'' bezeichnet (quelle: https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html). Wie bereits im ersten Beispiel wird beim verlassen der Funktion der Speicherplatz der Variablen freigegeben, diesmal handelt es sich aber nur um den Zeiger und nicht um die eigentlichen Daten. Eine Verwendung nach dem Funktionsaufruf ist daher weiterhin möglich.
 
 Da Variablen in Rust standardmäßig unveränderbar sind, ist ebenso sichergestellt, dass die Matrix in der Funktion nicht verändert worden ist. 
 
 \begin{lstlisting}[language=rust, caption={Einführendes Beispiel Unveränderliche Referenz}]
-    fn take_reference(matrix: &LargeMatrix) {
-        matrix.matrix[0] = 0; // <- Fehler
+    fn take_reference(matrix_ref: &LargeMatrix) {
         // ...
     }
 
@@ -183,11 +184,11 @@ Da Variablen in Rust standardmäßig unveränderbar sind, ist ebenso sichergeste
     println!("{:?}", matrix);
 \end{lstlisting}
 
-Im letzten Beispiel soll nun durch die Verwendung des \codeword{mut}-Schlüsselworts ermöglich werden, die Daten der Matrix zu verändern. Ansonsten gibt es keine Änderung zum vorherigen Beispiel, beim verlassen der Funktion wird auch wieder nur der Zeiger freigegeben.
+Im letzten Beispiel soll nun durch die Verwendung des \codeword{mut}-Schlüsselworts ermöglich werden, die Daten der originalen Matrix zu verändern. Ansonsten gibt es keine Änderung zum vorherigen Beispiel, beim verlassen der Funktion wird auch wieder nur der Zeiger freigegeben.
 
 \begin{lstlisting}[language=rust, caption={Einführendes Beispiel Veränderliche Referenz}]
-    fn take_mutable_reference(matrix: &mut LargeMatrix) {
-        matrix.matrix[0] = 0;
+    fn take_mutable_reference(matrix_ref: &mut LargeMatrix) {
+        matrix_ref.matrix[0] = 0;
         // ...
     }
 
@@ -197,14 +198,14 @@ Im letzten Beispiel soll nun durch die Verwendung des \codeword{mut}-Schlüsselw
     println!("{:?}", matrix);
 \end{lstlisting}
 
-Natürlich können die beiden letzten Funktionen auch einen Rückgabewert besitzen, der mit dem der eigentlich Matrix nichts zu tun hat. Eine besondere Stärke sind die Regeln, die für das Borrowing gelten. So ist z.B. zu jeder Zeit nur eine veränderbare Referenz auf eine Variable erlaubt, es ist daher leicht nachvollziehbar welcher Programmabschnitt die Daten tatsächlich verändern kann. Race-Conditions in Multihreaded-Anwendungen sind somit ausgeschlossen. Rust bietet für solche Einsatzzwecke spezielle Datenstrukturen wie (siehe Seminararbeit und Beispiel). Die Regeln werden später noch genauer vorgestellt.
+Natürlich können die beiden letzten Funktionen auch einen Rückgabewert besitzen, der mit dem der eigentlich Matrix nichts zu tun hat. Eine besondere Stärke sind die Regeln, die für das Borrowing gelten. So ist z.B. zu jeder Zeit nur eine veränderbare Referenz auf eine Variable erlaubt, es ist daher leicht nachvollziehbar welcher Programmabschnitt die Daten tatsächlich verändern kann. Race-Conditions in nebenläufigen Anwendungen sind somit ausgeschlossen. Rust bietet für solche Einsatzzwecke spezielle Datenstrukturen wie (siehe Seminararbeit und Beispiel). Die genauen Regeln zu Ownership und Borrowing werden noch vorgestellt.
 
 \subsection{Was ist Rust und warum verwenden?}
 Rust ist eine statisch typisierte Programmiersprache, welche vor allem mit den Eigenschaften Performance, Verlässlichkeit und Produktivität eine Alternative zu anderen Sprachen anbieten kann. Version 1.0 wurde 2015 veröffentlich, seitdem gibt es mit der ``Rust 2018 Edition'' und ``Rust 2021 Edition'' eine stetige Weiterentwicklung.
 
 Die Performance begründet sich durch zwei wesentliche Aspekte. So werden alle Regeln die das Ownership und das Borrowing betreffen bereits zur Compilezeit durchgeführt. Ein zusätlicher Overhead zur Laufzeit des Programms wird so vermieden. Der andere Aspkekt ist die Implementierung von Featurs in Rust. So wird beispielsweise Monomorphisierung zur Compilezeit von Generics eingesetzt. Für jeden implementierten Typen des Generics gibt es somit eine eigene Implementierung im Compilat. Hierdurch entfallen Typechecks wie sie z.B. in Java möglich sein können.
 
-Die Verlässlichkeit beruht ebenfalls auf dem Ownership- und Borrowing-System. Hierdurch ist zu jeder Zeit klar, welche Variablen welche Daten enthalten. Ein unbeabsichtigtes Verändern der Daten oder Dangling References werden ebenfalls bereits zur Compilezeit ausgeschlossen, dieses Prinzip funktioniert ebenfalls in Multithreading-Anwendungen. Zudem stellt Rust sicher, dass man nicht außerhalb eines Buffers lesen oder schreiben kann, dies kann aber zu Umständen zu einem Programmabbruch führen. Das spezielle \codeword{Option} \codeword{enum} bietet eine fehlerunanfällige Variante des \codeword{NULL}-Werts, das in Rust nicht existiert.
+Die Verlässlichkeit beruht ebenfalls auf dem Ownership- und Borrowing-System. Hierdurch ist zu jeder Zeit klar, welche Variablen welche Daten enthalten. Ein unbeabsichtigtes Verändern der Daten oder Dangling References werden ebenfalls bereits zur Compilezeit ausgeschlossen, dieses Prinzip funktioniert ebenfalls in nebenläufigen Anwendungen. Zudem stellt Rust sicher, dass man nicht außerhalb eines Puffers lesen oder schreiben kann, dies kann aber zu Umständen zu einem Programmabbruch führen. Das spezielle \codeword{Option} \codeword{enum} bietet eine fehlerunanfällige Variante des \codeword{NULL}-Werts, das in Rust nicht existiert.
 
 Um die Produktivität zu unterstützen bieten die beiden Tools \codeword{rustup} und \codeword{cargo} alles notwendige um den kompletten Entwicklungsprozess eines Rust-Programms zu erfüllen. Dies betrifft z.B. konkret eine Abhängigkeitsverwaltung, die Erstellung von Dokumentation und das ausführen von Tests und Benchmarks.
 
@@ -235,7 +236,7 @@ Das folgende Beispiel deklariert ein \codeword{struct} mit einem Feld. Anschlie�
             }
         }
 
-        fn doSmth(&self) {}
+        fn do_smth(&self) {}
     }
 \end{lstlisting}
 \paragraph{trait} In Rust gibt es weder Vererbung durch \codeword{struct}s, noch klassiche Interfaces. Mit \codeword{trait}s kann aber ein ähnliches Verhalten nachgebildet werden. Dabei findet bei der Definition des \codeword{trait} die Deklarierung von Methoden und Funktionen statt. Anschließend können \codeword{struct}s und \codeword{enum}s ein oder mehrere \codeword{trait}s implementieren. Der Traitname wird schlussendlich z.B. in der Parameterdeklaration von Funktionen verwendet.
@@ -244,11 +245,11 @@ Für das bereits bestehende \codeword{struct} soll ein \codeword{trait} erstellt
 
 \begin{lstlisting}[language=rust, caption={trait}]
     trait MyTrait {
-        fn traitMethod(&mut self) -> bool;
+        fn trait_method(&mut self) -> bool;
     }
 
     impl MyTrait for MyStruct {
-        fn traitMethod(&mut self) -> bool {
+        fn trait_method(&mut self) -> bool {
             true
         }
     }
@@ -275,7 +276,7 @@ Bei der Auswertung der Variablen ist es zudem erlaubt mehrere Werte gleichzeitig
 \subsection{Enums}
 Der Aufzählungstyp \codeword{enum} spielt in Rust eine wichtige Rolle. So wird z.B. mit dem \codeword{enum} \codeword{Result} das Error-Handling in Rust ermöglicht. Weiterhin gibt es mit dem \codeword{Option} \codeword{enum} wie bereits erwähnt eine Alternative um fehlende \codeword{NULL}-Werte in Rust zu darzustellen.
 
-Jede Ausprägung eines \codeword{enum} kann verschiedene Werte enthalten. Wie bereits \codeword{struct}s können Implementierungsblöcke definiert und Traits implementiert werden. Mit dem bereits vorgestellten \codeword{match} kann geprüft werden, welche Ausprägung das \codeword{enum} hat. Alternativ geht dies auch mit der \codeword{if let}-Anweisung, die es erlaubt nur auf eine Ausprägung zu überprüfen.
+Jede Ausprägung eines \codeword{enum} kann verschiedene Werte enthalten. Wie bereits \codeword{struct}s können Implementierungsblöcke definiert und Traits implementiert werden. Mit dem bereits vorgestellten \codeword{match} kann geprüft werden, welche Ausprägung das \codeword{enum} hat. Alternativ funktioniert dies auch mit der \codeword{if let}-Anweisung, die es erlaubt nur auf eine Ausprägung zu überprüfen.
 
 In diesem Beispiel wird ein \codeword{enum} mit verschiedenen Werten definiert, die dann über eine \codeword{match}-Anweisung konkret abgefragt werden können. Zudem gibt es wieder einen Implementierungsblock für Fuktionen und Methoden und es wird ein \codeword{trait} implementiert. Die Syntax ist dabei identisch wie bereits bei \codeword{structs}.
 
@@ -299,7 +300,7 @@ In diesem Beispiel wird ein \codeword{enum} mit verschiedenen Werten definiert, 
 \subsection{Generics}
 Rust bietet ebenfalls generische Typparameter an. Diese können bei \codeword{struct}, \codeword{enum}, \codeword{trait} und Funktionen verwendet werden. Um eine hohe Performance zu gewährleisten, wird Monomorphisierung zur Compilezeit eingesetzt (vgl. \cite[S. 196 ff.]{SK19}). Dies bedeutet, dass z.B. eine entsprechende Funktion speziell für die verwendeten Typen implementiert wird.
 
-Dies wird exemplarisch für das bestehende \codeword{Option} \codeword{enum} veranschaulicht, welches im fertigen Kompilat sozusagen zwei mal mit unterschiedlichen Typen existiert.
+Dies wird exemplarisch für das bestehende \codeword{Option} \codeword{enum} veranschaulicht, welches im fertigen Programm zwei mal mit unterschiedlichen Typen existiert.
 
 \begin{lstlisting}[language=rust, caption={Monomorphisierung Veranschaulichung \cite{MonoCodeEx}}]
     // enum im Quellcode
@@ -326,7 +327,9 @@ Dies wird exemplarisch für das bestehende \codeword{Option} \codeword{enum} ver
 
 Im Zusammenspiel mit Traits kann ein entsprechender Typparameter begrenzt werden. Ein Nachteil der Monomorphie ist, dass ein Typparameter immer nur von einem konkreten Typ ersetzt werden kann. Eine Lösung hierfür bieten \codeword{trait objects}.
 
-Im folgenden Beispiel dazu werden zuallerst ein \codeword{trait} und zwei \codeword{structs} definiert, die das \codeword{trait} implementieren. Das \codeword{ScreenTraitObject} kann im Vektor \codeword{components} beide Structs unabhängig voneinander vorhalten, da \codeword{trait objects} verwendet werden. \codeword{ScreenGeneric} benutzt allerdings nur einen einfachen Generic-Parameter für den Vektor, sodass tatsächlich nur eine konkrete Implementierung von \codeword{Draw} hinzugefügt werden. Durch den \codeword{Box}-Typ werden die Werte auf dem Heap abgelegt, da nicht von vornherein klar ist, wie viel Speicher auf dem Stack benötigt wird.
+Im folgenden Beispiel dazu werden zuallerst ein \codeword{trait} und zwei \codeword{structs} definiert, die das \codeword{trait} implementieren. Das \codeword{ScreenTraitObject} kann im Vektor \codeword{components} beide Structs unabhängig voneinander vorhalten, da \codeword{trait objects} verwendet werden. \codeword{ScreenGeneric} benutzt allerdings nur einen einfachen Generic-Parameter für den Vektor, sodass tatsächlich nur eine konkrete Implementierung von \codeword{Draw} hinzugefügt werden.
+
+Durch den \codeword{Box}-Typ werden die Werte auf dem Heap abgelegt, da nicht von vornherein klar ist, wie viel Speicher auf dem Stack benötigt wird.
 
 \begin{lstlisting}[language=rust, caption={Trait Boundaries \cite{TraitBoundariesEx}}]
     trait Draw {}
@@ -366,7 +369,7 @@ Im folgenden Beispiel dazu werden zuallerst ein \codeword{trait} und zwei \codew
     };
 \end{lstlisting}
 
-\subsection{Operatorenüberladung} In Rust können Operatoren überladen werden und somit für eigene als auch bestehende Typen implementiert und erweitert werden. Diese Funktionlität kann in unserem System dazu genutzt werden, um z.B. einen bestehenden Term ohne Funktionsaufruf zu verändern. Stattdessen können gewohnte Sprachmittel verwendet werden. Auch ist es möglich die Prüfung auf Gleichheit mit einem anderen Datentyp zu implementieren.
+\subsection{Operatorenüberladung} In Rust können Operatoren überladen werden und somit für eigene als auch bestehende Typen implementiert und erweitert werden. Diese Funktionlität kann im CAS dazu genutzt werden, um z.B. einen bestehenden Term ohne Funktionsaufruf zu verändern. Stattdessen können gewohnte Sprachmittel verwendet werden. Auch ist es möglich die Prüfung auf Gleichheit mit einem anderen Datentyp zu implementieren.
 
 Im Beispiel kann das erstellte \codeword{enum} mit sich selbst addiert und mit dem primitiven Datentyp \codeword{i32} verglichen werden. Dabei werden die bereits existierenden Operatoren ``+'' und ``=='' verwendet.
 
@@ -521,68 +524,9 @@ In den meisten Fällen kann der Compiler die lifetimes von Variablen und Referen
 
 \newpage
 
-\section{Theoretischer Aufbau des CAS}
-\subsection{Überlauf und Ungenauigkeit}
-Ein bereits zu Beginn prominentes Problem für ein CAS ist das Handling von Integer-Overflows und die Ungenaugikeiten von Rechnung mit floats (siehe IEEE754). So gibt das folgende Programm in Rust einen falschen Wert für die float-Operation aus und bricht anschließend ab.
-
-\begin{lstlisting}[language=rust, caption={Überlauf und Ungenauigkeit}]
-    let f1 = 0.1;
-    let f2 = 0.2;
-    println!("{}", f1 + f2);
-
-    let mut x = i32::MAX;
-    x += 1;
-    println!("{}", x);
-
-    // Ausgabe
-    0.30000000000000004
-    thread main panicked...
-\end{lstlisting}
-
-Sympy kann hierbei einerseits auf die Implementierung von Integers in Python zurückgreifen. Diese besitzen bereits eine unbegrenzte Präzision (\cite{PythonDocuIntPrecision}). Für Fliesskommazahlen ist eine die Klasse \codeword{Float} implementiert, die eine ungebrenzte Genauigkeit erlaubt. Dabei kann mit dem zweiten Parameter die eigentliche Präzision bestimmt werden. Es wird darüberhinaus angeraten den eigentlichen Wert als String zu übergeben, da der native float-Typ in Python bereits eine Ungenauigkeit hervorrufen kann. (siehe src code class Float(Number):)
-
-\begin{lstlisting}[language=Python, caption={SymPy Precision}]
-    x = fakultaet(100) // 158 Stellen
-    print(type(x))
-    // <class int>
-
-    print(sympy.Float('0.1', 100) + sympy.Float('0.2', 100))
-    // 0.300000000000000000000000000000000000000000000...
-
-    print(float(0.1) + float(0.2))
-    // 0.30000000000000004
-\end{lstlisting}
-
-In Buch und Buch (Quelle) ist eine allgemeine Implementierung für solche Werte angegeben. Hiervon könnten wir in dieser Arbeit natürlich gebrauch machen und diese Typen selbst implementieren, da Rust diese Typen leider nicht selbst anbietet. Allerdings existieren bereits die beiden Crates (Abhängigkeiten) num (link) und bigdecimal (link, baut auf num auf), die Typen mit ungebrenzter Präszision anbieten.
-
-Folgend wird die Performance zwischen den primitiven Typen auf dem Stack, den primitiven Typen auf dem Heap und den Crates verglichen. Wie zu erwarten ist die Speicherung auf dem Stack am effizientesten, der Zugriff auf dem Heap kostet Zeit. Der zusätliche Zeitverlust bei den Crates lässt sich zum einen dadurch erklären, dass immer ein Überlauf geprüft werden muss um den Wert richtig zu speichern, andererseits arbeit der Typ \codeword{BigInt} mit einem Vektor. Wie schon erwähnt wird hier bei einem Zugriff zusätlich geprüft, ob der Index gültig ist, was ebenfalls Zeit kostet.
-
-\begin{verbatim}
-    running 6 tests
-    test loop_decimal    ... bench:   7,447,000 ns/iter (+/- 474,681)
-    test loop_float      ... bench:      36,975 ns/iter (+/- 809)
-    test loop_float_heap ... bench:      74,324 ns/iter (+/- 920)
-    test loop_int        ... bench:      18,505 ns/iter (+/- 396)
-    test loop_int_heap   ... bench:      50,293 ns/iter (+/- 1,683)
-    test loop_num        ... bench:     548,640 ns/iter (+/- 42,989)
-\end{verbatim}
-
-Leider ist es mit Rust-Benchmarks noch nicht möglich den Speicherverbrauch zu messen. Allerdings können wir diesen für unsere Beispiele auch selbst gut bestimmen. Hierbei geht es nur um die eigentlichen Werte, mit denen Berechnungen durchgeführt werden.
-
-\paragraph{Primitive Typen Stack} Der Datentyp \codeword{i64} und \codeword{f64} verbrauchen 8 Bytes. Es werden also nie mehr als 8*4=32 Bytes für die eigentlichen Daten benötigt. Die Variable x, die das Ergebnis enthält beansprucht davon 8 Bytes. Der Schleifenparameter i wird ebenfalls als \codeword{i64} (bzw. \codeword{i32} im falle von Float) behandelt durch die Addition mit x (bzw. dem TypeCasting) und verbraucht ebenfalls 8 Bytes. Bei der Addition x+i wird nun wie bereits erwähnt bei einem Funktionsaufruf eine Kopie der Werte erstellt, die den Copy-Trait implementiert haben. Der Typ \codeword{i64} und \codeword{f64} haben diesen implementiert (link src i64 impl copy) und somit wird sowohl von x als auch von i zur Addition eine Kopie erzeugt.
-
-\paragraph{Primitive Typen Heap} Der Speicherverbrauch der eigentlich Werte ist wie bei den primitiven Typen auf dem Stack. Davon entfallen aber 8 Bytes auf dem Heap statt auf dem Stack. Zusätzlich befindet sich ein Zeiger auf dem Stack durch \codeword{Box}. Die Größe hiervon hängt von der verwendeten Architektur ab.
-
-\paragraph{num und bigdecimal} Bei dem Datentyp BigInt wird einerseits ein Vorzeichen (enum) verwendet, welches 1 Byte verbraucht (https://fasterthanli.me/articles/peeking-inside-a-rust-enum) als auch der Datentyp BigUint der wiederum einen Vektor mit BigDigit erhält. Schaut man sich diese Definition an, kann dieser Type zwischen 4 Bytes (u32) und 16 Bytes(i128) verbrauchen. Während des Debuggens auf verschiedenen Systemen wird in diesem Beispiel der Typ u64 angenommen und somit ein Speicherplatz von 8 Bytes benötigt. Mit größer werdenden Zahlen steigt allerdings dieser Verbrauch, da sich der Vektor vergrößert. Auch liegen nicht mehr alle Daten auf dem Stack, sondern alle BigDigits auf dem Heap, was die Zugriffsgeschwindigkeit wie bereits gezeigt erhöht.
-
-Der Typ bigdecimal verwendet laut Beschreibung den Typ BigInt und zusätzlich einen 64-Bit-Integer um die Position der Dezimalstelle zu bestimmen. Hier erhöht sich der Speicherverbrauch also nur unwesentlich.
-
-\paragraph{Entscheidung der verwendeten Typen} Im Rahmen dieser Arbeit ist zumindest eine eigene Implementierung der Typen für unbegrenzete Präzision nicht das Ziel. Genausogut können auch die bereits bestehenden Crates verwendet werden. Da dadurch aber die Performance leidet, wenn auch wahrscheinlich nicht relevant für spätere Beispiele und Tests, ist wiederrum die Implementierung mit primitiven Typen von Vorteil.
-
-Da Rust Generics untersützt wurde die Entscheidung getroffen, das CAS in Teilen mit Generics umzusetzen, sodass beide Kombinationen verwendet werden können. Dabei sollen alle Funktionen des Systems mit den primitiven Typen funktionieren und einige Beispielimplementierungen mit den Crate-Typen gemacht werden. Dies erlaubt einerseits eine spätere Erweiterung der Crate-Typen als auch die Entwicklung der eigenen Typen. Darüberhinaus werden auch weiterführende Konzepte von Rust veranschaulicht. Auf Besonderheiten in der Implementierung wird an entsprechender Stelle näher eingegangen.
-
+\section{Implementierung des CAS}
 \subsection{Grundregeln und Annahmen}
-Bevor überlegt wird, wie die Daten des CAS im Speicher abgelegt werden, müssen noch ein paar Vorüberlegungen gemacht werden, welche Grundregeln und Annahmen im System gelten sollen. Wir betrachten die Zahlenräume:
+Bevor überlegt wird, wie der Aufbau des CAS aussieht und welche Typen benötigt werden, müssen noch ein paar Vorüberlegungen gemacht werden, welche Grundregeln und Annahmen im System gelten sollen. Es sollen folgende Zahlenräume betrachtet werden:
 \begin{itemize}
     \item $\mathbb{N}$ die Menge der natürlichen Zahlen mit 0, $\{0, 1, 2, 3...\}$
     \item $\mathbb{Z}$ die Menge der ganzen Zahlen, $\{...-3, -2, -1, 0, 1, 2, 3...\}$
@@ -601,7 +545,8 @@ Um insgesamt weniger Bedingungen für mathematische Operationen zu haben, ist ge
     \item Das Distributivgesetz soll beacht werden: $a*(x+y) = a*x + a*y$
 \end{itemize}
 
-Insgesamt sollen folgende Implementationen im System vorhanden sein:
+\subsection{Funktionsumfang}
+Da wie bereits in der Einleitung gezeigt ein CAS sowohl einen sehr breiten Umfang als auch sehr spezialisiert sein kann, soll noch definiert werden, welche Operationen erlaubt sein sollen und welche Art von Termen verarbeitet werden sollen können:
 \begin{itemize}
     \item Addition von Zahlen (Ganzzahlen, Fließkommazahlen, rationalen Zahlen), z.B. $1+2.1 = 3.1$
     \item Addition von Symbolen und Termen, z.B. $x+y = x+y$ oder $x+(2*y)+2+(2*y)+x = 2*x+4*y+2$
@@ -610,28 +555,71 @@ Insgesamt sollen folgende Implementationen im System vorhanden sein:
     \item Auswertung von Potenzen von Zahlen, Symbolen und Terme inkl. Potenzregeln in Hinblick auf Genauigkeit des Ergebnis, z.B. $x^a*x^b=x^{(a+b)}$ oder $x^a*y^a = (x*y)^a$
     \item Auswertung von Funktionen, die dynamisch hinzugefügt werden können sollen. Funktionen die dem CAS nicht bekannt sind, tauchen weiterhin in Termen auf, werden aber nicht ausgewertet, z.B. $sin(x)$ oder $sqrt(x)$
     \item Auswertung von Konstanten falls bekannt und gewollt
-    \item Die Ausführungsreihenfolge in den Termen soll Konstanten und Variablen -> Funktion -> Potenz -> Multiplikation -> Addition entsprechen
+    \item Die Ausführungsreihenfolge in Termen lautet: Konstanten und Variablen $\rightarrow$ Funktion $\rightarrow$ Potenz $\rightarrow$ Multiplikation $\rightarrow$ Addition
 \end{itemize}
 
-\subsection{Grundtypen des CAS}
-In diesem Kapitel soll definiert werden, welche \codeword{structs}, \codeword{traits} oder \codeword{enums} benötigt werden, um das CAS zu erstellen. Darüberhinaus soll grob umrissen werden, welche Implementierungen im weiteren Verlauf sinnvoll sein können und welchen Zweck diese erfüllen.
-Es ist noch zu erwähnen, dass hier nicht definiert werden sollen, mit welchen \codeword{Derive macros} diese Typen erweitert werden sollen. In Rust ist es üblich \codeword{structs} und \codeword{enums} mit diesen Makros zu erweitern, um z.B. anzugeben, dass der Typ kopiert oder sortiert werden kann. Die Implementierung dieser Funktionalität wird dann zur Compilezeit vom Makro übernommen.
+Darüberhinaus sollen Terme soweit wie möglich mit bereits bestehenden Sprachmitteln erweitert und verglichen werden können, hierzu werden einige Operatorüberladungen implementiert. Bei der Auswertung der Terme soll die Möglichkeit bestehen auch ungenaue numerische Ergebnisse zu berechnen. Funkionen und Konstanten sollen einfach hinzugefügt werden können.
 
-\paragraph{enum PrimNum und enum PrecisionNum} Diese beiden \codeword{enums} sollen als Implementierung für unsere Generic-Parameter im CAS dienen. Ebenso bieten diese den Vorteil, dass später ein allgemeiner Nummern-Typ existiert mit dem gerechnet werden kann, und nicht ständig manuell Type Castings durchgeführt werden müssen. So ist in Rust nicht möglich eine Addition oder Multiplikation von i32 und f64 durchzuführen. Hierzu muss einer der beiden Werte erst in den anderen manuell überführt werden.
+\subsection{Überlauf und Ungenauigkeit}
+Ein bereits zu Beginn prominentes Problem für ein CAS ist das Handling von Ganzzahl-Überläufen und die Ungenaugikeiten von Rechnung mit Fließkommazahlen (siehe IEEE754). So gibt das folgende Programm in Rust einen falschen Wert für die Addition aus und bricht anschließend ab.
 
-Ein weiterer Vorteil ist, dass wir hier direkt eine rationale Ausprägung des \codeword{enum} implementieren können. Auch hier kann der Typ direkt die Rechnung übernehmen. Hierzu werden die Operatoren \codeword{std::ops::Add} und \codeword{std::ops::Mul} für den Enum selbst überladen. Im Hinblick auf die Bedingung, dass eine Subtraktion eine Addition ist, wird ebenso \codeword{std::ops::Mul} für einen Integerwert mit den Enums überladen. Ebenso kann es von Interesse sein, ob es sich um das neutrale Element der Addition oder Multiplikation handelt um einen Term zu vereinfachen. Für diesen Fall wird der Trait \codeword{PartialEq} für Integers überladen, um hier nach Bedarf auch andere Werte zu überprüfen. Eine Alternative wären Methoden, die einen \codeword{bool}-Wert zurückgeben, ob es sich um einen solchen Wert handelt.
+\begin{lstlisting}[language=rust, caption={Überlauf und Ungenauigkeit}]
+    let f1 = 0.1;
+    let f2 = 0.2;
+    println!("{}", f1 + f2);
 
-In unserer Implementierung wird \codeword{PrimNum} solange wie möglich mit Integer und Rationalen Werten arbeiten. Sobald ein Float-Wert addiert wird, werden die beiden anderen Werte zu einem Float umgewandelt. Dies geht zulasten der Genauigkeit und könnte bei Bedarf so angepasst werden, dass ein Rationaler Typ erzeugt wird. Eine weitere Möglichkeit wäre sicherlich, Floats und andere numerische Typen nicht standardmäßig zusammenzufassen.
+    let mut x = i32::MAX;
+    x += 1;
+    println!("{}", x);
 
-\paragraph{trait NumberType} Dieser Trait soll hauptsächlich als Typparameter oder als Einschränkung für Generics zum Einsatz kommen. Wie bereits erwähnt soll ein Teil des CAS mit verschiedenen Typen durchführbar sein und alle Typen, die diesen Trait implementieren können dann für das CAS genutzt werden. In unserem Fall werden dies die beiden \codeword{enums} sein, die gerade erwähnt worden sind. Zudem werden wir hier Funktionen als Bedingungen definieren um die neutralen Elemente der Addition und Multiplikation zurückzugeben als auch eine Möglichkeit um einen Bruch zu kürzen. Diese müssen dann von den \codeword{enums} implementiert werden.
+    // Ausgabe
+    0.30000000000000004
+    thread main panicked...
+\end{lstlisting}
 
-Außerdem kann dieser Trait bereits weitere Bedingungen aufnehmen wie z.B. dass der implementierende Enum gewisse Operatorenüberladungen haben muss oder auch, dass die Werte vergleichbar und sortierbar sind.
+Ein Blick zu SymPy zeigt, dass bereits hier Lösungen direkt aus Python verwendet werden können, die in Rust nicht existieren. So besitzen Ganzzahltypen bereits eine unbegrenzte Präzision (\cite{PythonDocuIntPrecision}). Für Fliesskommazahlen ist die Klasse \codeword{Float} implementiert, die eine ungebrenzte Genauigkeit erlaubt. Dabei kann mit dem zweiten Parameter die eigentliche Präzision bestimmt werden. Es wird darüberhinaus angeraten den eigentlichen Wert als String zu übergeben, da der native float-Typ in Python bereits eine Ungenauigkeit hervorrufen kann. (siehe src code class Float(Number):)
 
-\paragraph{trait ConstType} Soll vom Parser genutzt werden, um zu bestimmen ob es sich bei einem Symbolnamen um eine Variable oder eine Konstante handelt, sodass diese zuverlässig unterschieden werden können. Außerdem soll eine Methode implementiert werden, die es ermöglicht die Konstante numerisch auszugeben.
+\begin{lstlisting}[language=Python, caption={SymPy Precision}]
+    x = fakultaet(100) // 158 Stellen
+    print(type(x))
+    // <class int>
 
-\paragraph{struct Parser} Auch wenn angedacht ist, eine bestehende Bibliothek zur lexikalischen Analyse von Strings einzusetzen, benötigen wir einen Parser, der die generierten Tokens oder die entstehende Datenstruktur in die Struktur des Systems überführt.
+    print(sympy.Float('0.1', 100) + sympy.Float('0.2', 100))
+    // 0.300000000000000000000000000000000000000000000...
 
-\subsection{Grundlegende Datenstruktur im Speicher}
+    print(float(0.1) + float(0.2))
+    // 0.30000000000000004
+\end{lstlisting}
+
+In Buch und Buch (Quelle) ist eine allgemeine Implementierung für solche Werte angegeben. Hiervon könnten wir in dieser Arbeit natürlich gebrauch machen und diese Typen selbst implementieren, da Rust diese Typen leider nicht selbst anbietet. Allerdings existieren bereits die beiden Crates (Abhängigkeiten) num (link) und bigdecimal (link, baut auf num auf), die Typen mit ungebrenzter Präszision anbieten.
+
+Folgend wird die Performance zwischen den primitiven Typen auf dem Stack, den primitiven Typen auf dem Heap und den Crates verglichen. Wie zu erwarten ist die Speicherung auf dem Stack am effizientesten, der Zugriff auf dem Heap kostet Zeit. Der zusätliche Zeitverlust bei den Crates lässt sich zum einen dadurch erklären, dass immer ein Überlauf geprüft werden muss um den Wert richtig zu verarbeiten, andererseits arbeit der Typ \codeword{BigInt} mit einem Vektor. Wie schon erwähnt wird hier bei einem Zugriff zusätlich geprüft, ob der Index gültig ist, was ebenfalls Zeit kostet.
+
+\begin{verbatim}
+    running 6 tests
+    test loop_decimal    ... bench:   7,447,000 ns/iter (+/- 474,681)
+    test loop_float      ... bench:      36,975 ns/iter (+/- 809)
+    test loop_float_heap ... bench:      74,324 ns/iter (+/- 920)
+    test loop_int        ... bench:      18,505 ns/iter (+/- 396)
+    test loop_int_heap   ... bench:      50,293 ns/iter (+/- 1,683)
+    test loop_num        ... bench:     548,640 ns/iter (+/- 42,989)
+\end{verbatim}
+
+Leider ist es mit Rust-Benchmarks noch nicht möglich den Speicherverbrauch zu messen. Allerdings können wir diesen für unsere Beispiele auch selbst gut bestimmen. Hierbei geht es nur um die eigentlichen Werte, mit denen Berechnungen durchgeführt werden.
+
+\paragraph{Primitive Typen Stack} Der Datentyp \codeword{i64} und \codeword{f64} verbrauchen 8 Bytes. Es werden also nie mehr als 8*4=32 Bytes für die eigentlichen Daten benötigt. Die Variable x, die das Ergebnis enthält beansprucht davon 8 Bytes. Der Schleifenparameter i wird ebenfalls als \codeword{i64} (bzw. \codeword{i32} im Falle der Benchmarks mit \codeword{f64}) behandelt durch die Addition mit x (bzw. dem TypeCasting) und verbraucht ebenfalls 8 Bytes. Bei der Addition x+i wird nun wie bereits erwähnt bei einem Funktionsaufruf eine Kopie der Werte erstellt, die den Copy-Trait implementiert haben. Der Typ \codeword{i64} und \codeword{f64} haben diesen implementiert (link src i64 impl copy) und somit wird sowohl von x als auch von i zur Addition eine Kopie erzeugt.
+
+\paragraph{Primitive Typen Heap} Der Speicherverbrauch der eigentlich Werte ist wie bei den primitiven Typen auf dem Stack. Davon entfallen aber 8 Bytes auf dem Heap statt auf dem Stack. Zusätzlich befindet sich ein Zeiger auf dem Stack durch \codeword{Box}. Die Größe hiervon hängt von der verwendeten Architektur ab.
+
+\paragraph{num und bigdecimal} Bei dem Datentyp BigInt wird einerseits ein Vorzeichen (enum) verwendet, welches 1 Byte verbraucht (https://fasterthanli.me/articles/peeking-inside-a-rust-enum) als auch der Datentyp BigUint der wiederum einen Vektor mit BigDigit erhält. Schaut man sich diese Definition an, kann dieser Typ zwischen 4 Bytes (u32) und 16 Bytes(i128) verbrauchen. Während des Debuggens auf verschiedenen Systemen wird in diesem Beispiel der Typ u64 angenommen und somit ein Speicherplatz von 8 Bytes benötigt. Mit größer werdenden Zahlen steigt allerdings dieser Verbrauch, da sich der Vektor vergrößert. Auch liegen nicht mehr alle Daten auf dem Stack, sondern alle BigDigits auf dem Heap, was die Zugriffsgeschwindigkeit wie bereits gezeigt erhöht.
+
+Der Typ bigdecimal verwendet laut Beschreibung den Typ BigInt und zusätzlich einen 64-Bit-Integer um die Position der Dezimalstelle zu bestimmen. Hier erhöht sich der Speicherverbrauch also nur unwesentlich.
+
+\paragraph{Entscheidung der verwendeten Typen} Im Rahmen dieser Arbeit ist zumindest eine eigene Implementierung der Typen für unbegrenzete Präzision nicht das Ziel. Genausogut können auch die bereits bestehenden Crates verwendet werden. Da dadurch aber die Performance leidet, wenn auch wahrscheinlich nicht relevant für spätere Beispiele und Tests, ist wiederrum die Implementierung mit primitiven Typen von Vorteil.
+
+Da Rust Generics untersützt wurde die Entscheidung getroffen, das CAS in Teilen mit Generics umzusetzen, sodass beide Kombinationen verwendet werden können. Dabei sollen alle Funktionen des Systems mit den primitiven Typen funktionieren und einige Beispielimplementierungen mit den Crate-Typen gemacht werden. Dies erlaubt einerseits eine spätere Erweiterung der Crate-Typen als auch die Entwicklung der eigenen Typen. Darüberhinaus werden auch weiterführende Konzepte von Rust veranschaulicht.
+
+\subsection{Grundlegende Datenstruktur}
 Eine erste Idee, wie die Datenstruktur aussehen könnte, war ein einfacher binärer Baum, dessen Knoten die Operanden und die Blätter Einzelne Werte sind. Dies entspricht dem abstrakten Syntaxbaum nach dem Parsen. Dies könnte beispielsweise für den Term $x+1+2$ folgendermaßen aussehen.
 
 \Tree[.+
@@ -642,7 +630,8 @@ Eine erste Idee, wie die Datenstruktur aussehen könnte, war ein einfacher binä
         [.2 ]
     ]
 
-In Rust sähe die Implementierung folgendermaßen aus. Die Ausprägung Add benötigt für die Werte immer den Wrapper \codeword{Box} der die Daten auf den Heap speichert, da sich zur Compilezeit nicht die Größe auf dem Stack bestimmen lässt. Der Compiler kann nicht bestimmen wie viele Ebenen Add beinhaltet, z.B. kann dies ja durch User-Input verändert werden.
+In Rust sähe die Implementierung folgendermaßen aus. Die Ausprägung Add benötigt für die Werte immer den Wrapper \codeword{Box} der die Daten auf den Heap speichert, da sich zur Compilezeit nicht die Größe auf dem Stack bestimmen lässt. Konkret kann der Compiler nicht bestimmen wie viele Ebenen Add beinhaltet.
+
 \begin{lstlisting}[language=rust, caption={BTree Ast}]
     enum BTree {
         Number(i64),
@@ -659,48 +648,19 @@ In Rust sähe die Implementierung folgendermaßen aus. Die Ausprägung Add benö
     );
 \end{lstlisting}
 
-Problem in-place Änderung wie werden die einzelnen Blätter zusammengefasst? Man bräuchte auf jeden Knoten eine Referenz und müsste dann von unten nach oben immer prüfen, was sich zusammenfügen lässt und die Referenzen updaten. Ist in Rust wegen Ownership/Borrowing nur mit Aufwand möglich (Stichwort Rc und RefCell). Möchte man z.B. die Referenzen in einem Vektor speichern, so ist das nicht möglich, da wenn eine mutable Referenz auf Baum 1 existiert, nicht zusätzlich eine Referenz auf das Symbol x oder die Nummer 1 erzeugen kann (Regeln zum Borrowing und Ownership). Lösung z.B. Nutzung von raw-Pointern bzw. unsafe? (Reicht das so als Begründung, wenn man die noch etwas unterfüttert oder mehr Punkte, warum dagegen entschieden, zb resultierende Baumhöhe?)
+Bei der direkten Änderung bzw. Zusammenfassung des Baums ergibt sich nun durch das Ownership ein Problem. Man bräuchte auf jeden Knoten eine veränderbare Referenz und müsste dann von unten nach oben immer prüfen, welche Blätter sich zusammenfügen lassen. Diese müssten dann entfernt werden und vorherige Elternknoten müssten zu Blättern umgewandelt werden.
+
+Würde versucht werden die Referenzen in einem Vektor zu speichern ist das zumindest bereits für Add nicht möglich. Da \codeword{Box} das Ownership des Wertes nimmt kann dazu parallel keine veränderbare Referenz existieren. Dasselbe Problem tritt auf, wenn die Blätter bereits der entsprechende \codeword{Box}-Wert sind, dann würde das Ownership immer noch an \codeword{parent_1} übergeben werden. Hier könnte nun versucht das Problem mit Referenzzählern (Rc und RefCell) zu lösen, die speziell dafür gedacht sind. Auch wäre wahrscheinlich die Nutzung von Rohzeigern in Verbindung mit \codeword{unsafe} möglich, was Code in Rust kennzeichnet, der evtl. auf undefinierten Speicherbereich zeigen kann.
 \begin{lstlisting}[language=rust, caption={get refs}]
-    let tree_ref = &mut tree;
+    let mut leave_1 = BTree::Number(1);
+    let mut leave_2 = BTree::Number(2);
+    let mut parent_1 = BTree::Add(Box::new(leave_1), Box::new(leave_2));
 
-    let mut tree_ref1: &mut BTree = &mut BTree::Number(0);
-    let mut tree_ref2: &mut BTree = &mut BTree::Number(0);
-    let mut tree_ref3: &mut BTree = &mut BTree::Number(0);
-    let mut tree_ref4: &mut BTree = &mut BTree::Number(0);
-
-    let mut refs: Vec<&mut BTree> = vec![];
-
-    match tree_ref {
-        BTree::Add(left, right) => {
-            // tree_ref1 = left.as_mut();
-            // tree_ref2 = right.as_mut();
-            refs.push(left.as_mut());
-            refs.push(right.as_mut());
-        }
-        _ => {}
-    };
-
-    match refs.index_mut(0) {
-        BTree::Add(left, right) => {
-            // tree_ref3 = left.as_mut();
-            // tree_ref4 = right.as_mut();
-            refs.push(left.as_mut());
-            refs.push(right.as_mut());
-        }
-        _ => {}
-    };
-
-    // Logik um zu prüfen, ob tree_ref3 oder tree_ref4 mit tree_ref2 vereinbar sind. tree_ref1 ist das Add an sich
-    if let (BTree::Number(n1), BTree::Number(n2)) = (tree_ref2, tree_ref4) {
-        *n1 = *n1 + *n2;
-    }
-    if let BTree::Symbol(s) = tree_ref3 {
-        *tree_ref1 = BTree::Symbol(s.to_owned());
-    }
-    println!("{:?}", tree);
+    let mut refs = vec![&mut parent_1, &mut leave_1, &mut leave_2];
+    println!("{:?}", refs);
 \end{lstlisting}
 
-Eine Alternative wäre nur lesende Referenzen zu erzeugen, über diese zu iterieren und dann einen neuen Baum zu erstellen. Wenn man aber sowieso alle Werte auf einer Ebene benötigt um diese zusammenfassen zu können, ist es eine bessere Idee, Werte, die Kommutativ sind, gleich in einem Vektor zu speichern um alle Werte einfach abrufen zu können. Für Addition und Multiplikation würde dann der Baum für den Term $myfunc(a, b*c)+1+2+x*y*2^z$ beispielsweise so aussehen:
+Eine Alternative wäre nur lesende Referenzen zu erzeugen, über diese zu iterieren und dann einen neuen Baum zu erstellen. Wenn aber sowieso alle Werte benötigt werden um diese zusammenfassen zu können, ist es eine bessere Idee, Werte, die Kommutativ sind, in einem Vektor in einer Ausprägung des Enums um auf diese Zugreifen zu können. Für Addition und Multiplikation würde dann der Baum für den Term $myfunc(a, b*c)+1+2+x*y*2^z$ beispielsweise so aussehen:
 
 \Tree[.+-Vektor
         [.func
@@ -740,7 +700,23 @@ Werden die Bedingungen und Vereinfachungen noch angewendet, so ergibt sich für 
         ]
     ]
 
-Diese Struktur findet sich ebenfalls in Quelle Rotes Buch. SymPy verwendet eine ähnliche Struktur (link zu Quelle). Somit ist die Datenstruktur in Rust festgelegt, auf der alle weiteren Operationen aufbauen, wie z.B. das Zusammenfassen des Terms oder Substitution.
+Diese Struktur findet sich ebenfalls in Quelle Rotes Buch. SymPy verwendet eine ähnliche Struktur (link zu Quelle). Da sich diese Struktur anscheinend für ein CAS eignet, soll diese auch in diesem System verwendet werden. Hierrauf bauen alle weiteren Operationen auf, wie z.B. das Zusammenfassen des Terms oder Substitution.
+
+\subsection{Grundtypen des CAS}
+In diesem Kapitel soll definiert werden, welche \codeword{structs}, \codeword{traits} oder \codeword{enums} benötigt werden, um das CAS zu erstellen. Darüberhinaus soll grob umrissen werden, welche Implementierungen im weiteren Verlauf sinnvoll sein können und welchen Zweck diese erfüllen.
+Es ist noch zu erwähnen, dass hier nicht definiert werden sollen, mit welchen \codeword{Derive macros} diese Typen erweitert werden sollen. In Rust ist es üblich \codeword{structs} und \codeword{enums} mit diesen Makros zu erweitern, um z.B. anzugeben, dass der Typ kopiert oder sortiert werden kann. Die Implementierung dieser Funktionalität wird dann teilweise zur Compilezeit vom Makro übernommen.
+
+\paragraph{enum PrimNum und enum PrecisionNum} Diese beiden \codeword{enums} sollen als Implementierung für den Generic-Parameter im CAS dienen. Ebenso bieten diese den Vorteil, dass später ein allgemeiner Nummern-Typ existiert mit dem gerechnet werden kann, und nicht ständig manuell Type Castings durchgeführt werden müssen. So ist in Rust nicht möglich eine Addition oder Multiplikation von i32 und f64 durchzuführen. Hierzu muss einer der beiden Werte erst in den anderen manuell überführt werden.
+
+Ein weiterer Vorteil ist, dass direkt eine rationale Ausprägung des \codeword{enum} implementieren werden kann. Auch hier kann der Typ direkt die Rechnung übernehmen. Hierzu werden die Operatoren \codeword{std::ops::Add} und \codeword{std::ops::Mul} für den Enum selbst überladen. Im Hinblick auf die Bedingung, dass eine Subtraktion eine Addition ist, wird ebenso \codeword{std::ops::Mul} für einen Ganzzahlwert mit den Enums überladen. Ebenso kann es von Interesse sein, ob es sich um das neutrale Element der Addition oder Multiplikation handelt um einen Term zu vereinfachen. Für diesen Fall wird der Trait \codeword{PartialEq} für Ganzzahlen überladen, um hier nach Bedarf auch andere Werte zu überprüfen. Eine Alternative wären Methoden, die einen \codeword{bool}-Wert zurückgeben, ob es sich um einen solchen Wert handelt.
+
+In unserer Implementierung wird \codeword{PrimNum} solange wie möglich mit Ganzzahlen und Rationalen Werten arbeiten. Sobald ein Fliesskommawert addiert wird, werden die beiden anderen Werte zu einer Fliesskommazahl umgewandelt. Dies geht zulasten der Genauigkeit und könnte bei Bedarf so angepasst werden, dass ein Rationaler Typ erzeugt wird. Es wäre auch denkbar, Fliesskommazahlen und andere numerische Typen nicht standardmäßig zusammenzufassen.
+
+\paragraph{trait NumberType} Dieser Trait soll hauptsächlich als Typparameter oder als Einschränkung für Generics zum Einsatz kommen. Wie bereits erwähnt soll ein Teil des CAS mit verschiedenen Typen durchführbar sein und alle Typen, die diesen Trait implementieren können dann für das CAS genutzt werden. Im konkreten Fall werden dies die beiden \codeword{enums} sein, die gerade erwähnt worden sind. Zudem werden Funktionen als Bedingung definiert um die neutralen Elemente der Addition und der Multiplikation zurückzugeben als auch eine Möglichkeit einen Bruch zu kürzen. Diese müssen dann von den \codeword{enums} implementiert werden.
+
+Außerdem kann dieser Trait bereits weitere Bedingungen aufnehmen wie z.B. dass der implementierende Enum gewisse Operatorenüberladungen haben muss oder auch, dass die Werte vergleichbar und sortierbar sind.
+
+\paragraph{struct Parser} Auch wenn angedacht ist, eine bestehende Bibliothek zur lexikalischen Analyse von Strings einzusetzen, benötigen wir einen Parser, der die generierten Tokens oder die entstehende Datenstruktur in die Struktur des Systems überführt.
 
 \subsection{Datenstruktur in Rust}
 Mit dem Wissen über Generics und und den theoretischen Überlegungen zur Datenstruktur, kann diese in Rust folgendermaßen umgesetzt werden:
@@ -748,31 +724,35 @@ Mit dem Wissen über Generics und und den theoretischen Überlegungen zur Datens
     pub enum Ast<N> {
         Add(Vec<Ast<N>>),
         Mul(Vec<Ast<N>>),
+        Pow(Box<Ast<N>>, Box<Ast<N>>),
         Symbol(String),
         Const(String),
-        Pow(Box<Ast<N>>, Box<Ast<N>>),
         Func(String, Vec<Ast<N>>),
         Num(N),
     }
 \end{lstlisting}
 
-\paragraph{Add und Mul} Diese beiden Ausprägungen besitzen als Wert einen Vektor, der weitere Elemente enthält. So sind diese einfach abrufbar und der Vektor kann gezielt geändert, z.B. zum sortieren der Werte oder das Entfernen von unnötigen Elementen (neutrale Elemente Addition/Multiplikation).
+\paragraph{Add und Mul} Diese beiden Ausprägungen besitzen als Wert einen Vektor, der weitere Elemente enthält. So sind diese einfach abrufbar und der Vektor kann gezielt geändert werden, z.B. zum sortieren der Werte oder das Entfernen von unnötigen Elementen (neutrale Elemente der Addition oder Multiplikation).
+
+\paragraph{Pow} Diese Ausprägung besitzt zwei Parameter, Basis und Exponent, die jeweils wieder beliebige Ausdrücke sein können.
 
 \paragraph{Symbol} Ein einfacher String, der einen Variablennamen enthält. Diese sollen später einfach substituiert werden können.
 
 \paragraph{Const} Ein einfacher String, der einen Konstantennamen enthält, auch in UTF-8 möglich, z.B. $\pi$. Eigens hinzugefügte Funktionen können somit prüfen, um welche Konstante es sich handelt und entsprechend eine Vereinfachung implementieren. Es besteht darüberhinaus die Möglichkeit Konstanten als Wert zurückzugeben.
 
-\paragraph{Pow} Besitzt zwei Parameter, Basis und Exponent, die jeweils wieder beliebige Ausdrücke sein können.
+\paragraph{Func} Diese Ausprägung besitzt ebenfalls zwei Parameter, den Namen der Funktion und die übergebenen Parameter als Vektor. Der Name kann somit einfach ausgewertet, die Parameter einfach übergeben werden. Beide Werte werden an die dynamisch hinzugefügten Auswertungsfunktionen übergeben.
 
-\paragraph{Func} Besitzt ebenfalls zwei Parameter, Name der Funktion und Parameter als Vektor. Der Name kann somit einfach ausgewertet, die Parameter einfach übergeben werden. Beide Werte werden an die dynamisch hinzugefügten Auswertungsfunktionen übergeben.
-
-\paragraph{Num} Enthält als Wert unseren eigenen Nummerntyp.
+\paragraph{Num} Diese Ausprägung enthält als Wert eine Variante, die das \codeword{trait} \codeword{NumberType} implementiert.
 
 \paragraph{Auswertung des Terms} Eine Hauptfunktionalität, die dieses Enum erhält, ist die Möglichkeit einen Term zusammenzufassen und falls möglich soweit wie möglich in ein numerisches Ergebnis zu überführen. Dabei muss natürlich einerseits die Ausführungsreihenfolge beachtet werden, andererseits soll diese Methode leicht erweiterbar sein.
 
-In unserem System wird die Methode rekursiv verwendet, was zwar wahrscheinlich zur Lasten der Performance geht, aber einen deutlichen Vorteil bei der Leserlichkeit und Verständlichkeit hat. (Quelle? Beispiel wie rekurs to iterativ in Rust -> sehr codelastig). Bei der entsprechenden Auswertung eines \codeword{Ast} werden dabei erst alle ``Kindelemente'' ausgewertet (rekursiv). Für die Addition bedeutet dies konkret, dass erst alle Elemente im Vektor ausgewertet werden und danach erst versucht wird zu addieren.
+In unserem System wird die Methode rekursiv implementiert. Eine iterative Lösung wäre ebenfalls möglich, aufgrund des Ownership und Borrowing in Rust aber tatsächlich recht komplex und weniger leserlich und verständlich. (Quelle? Beispiel wie rekurs to iterativ in Rust -> sehr codelastig). Da Rust keine weiteren Besonderheiten für Rekursion bietet, wird diese Implementierung ebenfalls verbesserungswürdig sein im Hinblick auf die Geschwindigkeit.
 
-Eine erste Implementierung hierfür sieht folgendermaßen aus. Die beiden Parameter \codeword{evaler} und \codeword{hard_eval} werden noch näher in den Kapiteln zu ``Erweitbarkeit in Rust'' und ``Ungenauigkeiten erlauben'' näher erläuert.
+Bei der entsprechenden Auswertung einer Auspragung des \codeword{Ast} werden dabei erst alle ``Kindelemente'' ausgewertet. Für die Addition bedeutet dies konkret, dass erst alle Elemente im Vektor ausgewertet werden und danach erst versucht wird zu addieren. Für Potenzen werden entsprechend erst Basis und Exponent ausgewertet.
+
+Eine erste Implementierung hierfür sieht folgendermaßen aus. Die beiden zusätlichen Parameter werden noch näher in den Kapiteln zu ``Erweitbarkeit in Rust'' und ``Ungenauigkeiten erlauben'' näher erläuert.
+
+Bei der Entscheidung, ob das Element direkt bearbeitet wird oder ein neuer \codeword{Ast} zurückgegeben wird, wurde der Definition von SymPy gefolgt, dass der originale Term nicht verändert wird und ein neuer erstellt wird. Auch ist hier ersichtlich, dass teilweise die \codeword{clone}-Methode aufgerufen werden muss, da ansonsten ja nur die Referenz \codeword{self} zurückgegeben werden würde. Der \codeword{Copy}-Trait kann für \codeword{Ast} nicht implementiert werden, da bereits Vektoren diesen Trait nicht implementieren.
 
 \begin{lstlisting}[language=rust, caption={eval-Methode 1. Implementierung}]
 pub fn eval(
@@ -810,26 +790,22 @@ pub fn eval(
                 hard_eval,
             ),
             Ast::Const(name) if *hard_eval => {
-                let mut ret = None;
-                for const_struct in evaler.consts.iter() {
-                    if let Some(v) = const_struct.eval(&name) {
-                        ret = Some(v);
-                        break;
-                    }
+                if evaler.consts.contains_key(name) {
+                    evaler.consts[name]()
+                } else {
+                    self.clone()
                 }
-
-                ret.unwrap_or(self.clone())
             }
             _ => self.clone(),
         }
     }
 \end{lstlisting}
 
-\paragraph{Allgemeine Anmerkungen} Der Generic-Typparameter \codeword{N} soll den gewählten Nummerntyp darstellen. Dieser wird aber noch nicht eingeschränkt, da sonst diese Einschränkungen später für alle implementieren Blöcke gelten muss. Dies kann z.B. nicht gewünscht sein, wenn eine Grundlegend andere Art implementiert werden soll um Terme zu verarbeiten, bei der der Trait \codeword{NumberType} keine Verwendung finden soll. Die Ausführungsreihenfolge kann so ebenfalls gewährleistet werden. Bevor also \codeword{Ast::Add} ausgewertet wird, werden zuerst alle Elemente des Vektors ausgewertet. Evtl. vereinfachungen sind dann bereits vorgenommen. Die Auswertung kann dabei rekursiv oder iterativ implementiert werden.
+\paragraph{Allgemeine Anmerkungen} Der Generic-Typparameter \codeword{N} soll den gewählten Nummerntyp darstellen. Dieser wird aber noch nicht eingeschränkt, da sonst diese Einschränkungen später für alle implementieren Blöcke gelten muss. Dies kann z.B. nicht gewünscht sein, wenn eine Grundlegend andere Art implementiert werden soll um Terme zu verarbeiten, bei der der Trait \codeword{NumberType} keine Verwendung finden soll. Mit diesem Ansatz können wir auch die definierte Ausführungsreihenfolge der Ausprägungen bestimmen. Bevor also \codeword{Ast::Add} ausgewertet wird, werden zuerst alle Elemente des Vektors ausgewertet. Eventuelle vereinfachungen sind dann bereits vorgenommen.
 
-\paragraph{Datenstruktur auf dem Speicher} Mit dieser Implementierung wird ein Großteil der Daten auf dem Heap abgelegt. Einzig die Variante \codeword{Ast::Num<PrimNum>} kann komplett auf dem Stack abgelegt werden, da diese eine definierte Größe hat. String und Vec speichern die Daten auf dem Heap und halten nur einen Zeiger auf dem Stack falls es das oberste Element ist. Box legt die Daten wie bereits besprochen aus Grunden der ungewissen Speicheranforderung auch auf dem Heap an, lediglich der Zeiger kann sich auf dem Stack befinden.
+\paragraph{Datenstruktur auf dem Speicher} Mit dieser Implementierung wird ein Großteil der Daten auf dem Heap abgelegt. Einzig die Variante \codeword{Ast::Num<PrimNum>} kann komplett auf dem Stack abgelegt werden, da diese eine definierte Größe hat. String und Vec speichern die Daten auf dem Heap und halten nur einen Zeiger auf dem Stack falls es das oberste Element ist. Box legt die Daten wie bereits besprochen aus Gründen der ungewissen Speicheranforderung auch auf dem Heap an, lediglich der Zeiger kann sich auf dem Stack befinden.
 
-Hierzu zwei Beispiele. Der String bei \codeword{Symbol(x)} wird intern als Vektor mit dem Typ \codeword{u8} repräsentiert. (link quelle)
+Zwei konkrete Beispiele sollen dies veranschaulichen. Der String bei \codeword{Symbol(x)} wird intern als Vektor mit dem Typ \codeword{u8} repräsentiert. (link quelle)
 \begin{lstlisting}[language=rust, caption={Term 1 Stack und Heap}]
     let term = Ast::Num(PrimNum::Int(42));
     Stack:
@@ -888,7 +864,7 @@ Die Abhängigkeit ``rug'' soll die beliebige Genauigkeit ermöglichen. Dabei han
 
 \paragraph{meval Rust} Diese Bibliothek erscheint recht unkompliziert und einfach zu nutzen. Die geparsten Tokens werden als UPN (umgekehrte polnische Notation) ausgewertet. Dies könnte man prinzipiell dazu nutzen unseren modifizierten Ast zu erzeugen. Ein kleiner Nachteil ist, dass nur Fließkommazahlen ausgewertet werden. Sollte man den Lexer irgendwann erweitern wollen, sodass eine beliebige Genauigkeit erreicht werden soll, müsste man diesen Part neu schreiben. Zudem habe ich diese Bibliothek leider nicht bei meiner initialen Recherche in Betracht gezogen und nicht weiter überprüft. Erst während der Entwicklung habe ich Interessehalber weiter reingesehen und die Enums \codeword{Operation} und \codeword{Token} größtenteils übernommen. Hätte ich den Lexer nicht bereits zu einem großen Teil implementiert, hätte ich die Möglichkeit genutzt, die Tokens aus dieser Bibliothek zu erzeugen.
 
-\paragraph{evalexpr Rust} Diese Bibliothek erscheint sehr Featurereich. Allerdings lässt sich eigentlich nur die \codeword{eval}-Funktion nutzen, da fast alle anderen Strukturen nicht public sind. Es war mir daher nicht möglich, den Tokenizer bzw. den Tree direkt zu nutzen, in dem sich ein bereits geparster String befindet. Daher schied diese Bibliothek ebenfalls aus.
+\paragraph{evalexpr Rust} Diese Bibliothek erscheint sehr Umfangreich. Allerdings lässt sich eigentlich nur die \codeword{eval}-Funktion nutzen, da fast alle anderen Strukturen nicht mit dem Schlüsselwort \codeword{pub} versehen sind. Es war mir daher nicht möglich, den Tokenizer bzw. den Tree direkt zu nutzen, in dem sich ein bereits geparster String befindet. Daher schied diese Bibliothek ebenfalls aus.
 
 \paragraph{tinyexpr C} Da es in Rust auch möglich ist, bereits bestehenden C-Code zu nutzen, wurde ebenfalls geprüft eine einfache C-Bibliothek zu nutzen, sodass auch das die notwendige Schnittstelle des Parsers nicht allzu kompliziert wird. Hier habe ich mich für tinyexpr entschieden. Leider mussten Variablen bereits vor der lexikalischen Analyse zumindest bekannt sein (siehe Readme https://github.com/codeplea/tinyexpr te compile). Da ich mich generell gegen diesen Schritt entschieden habe, wurde auch diese Bibliothek nicht verwendet.
 
@@ -896,7 +872,7 @@ Die Abhängigkeit ``rug'' soll die beliebige Genauigkeit ermöglichen. Dabei han
 
 \subsection{Implementierung der lexikalischen Analyse bzw. Tokenizer} In diesem Schritt soll nur aus einer übergebenen Zeichenkette ein Vektor mit Tokens erstellt werden. Hierbei wird Zeichenweise gearbeitet und nicht über reguläre Ausdrücke. Eine besonderheit in Rust, dass ein Char in einem String nicht über einen Index angesprochen werden kann. Da Strings als UTF-8 gespeichert werden, ist mit dem Index nicht eindeutig, ob man das entsprechende Byte haben möchte oder das entsprechende Zeichen. Daher muss der String hier erst in einen Vektor des Typ \codeword{Char} umgewandelt werden.
 
-Die Tokens werden dabei wieder als Enum implementiert. In diesem Abschnitt verzichten wir auf Generics und implementieren den den struct nur für den Typ \codeword{PrimNum}.
+Die Tokens werden dabei wieder als Enum implementiert. In diesem Abschnitt verzichten wir auf Generics und implementieren den \codeword{struct} nur für den Typ \codeword{PrimNum}.
 
 Im Enum benötigen wir folgende Werte:
 \begin{lstlisting}[language=rust, caption={Enum Token}]
@@ -915,7 +891,7 @@ pub enum Token {
 
 \paragraph{Comma} Dient als Seperator von Funktionswerten. Fließkommazahlen werden nur im englischen Format mit Punkt akzeptiert.
 
-\paragraph{Var und Func} Eine alphanumerische Zeichenkette, die zwingend mit einem Buchstaben beginnt. Klein- und Großschreibung sind gleichermaßen erlaubt, die Namen sind case-sensitive. Eine Funktion wird daran erkannt, dass nach der Zeichenkette eine ``('' anschließt, die zwingend wieder geschlossen werden muss.
+\paragraph{Var und Func} Eine alphanumerische Zeichenkette, die zwingend mit einem Buchstaben beginnt. Klein- und Großschreibung sind gleichermaßen erlaubt, die Namen beachten die Groß- und Kleinschreibung. Eine Funktion wird daran erkannt, dass nach der Zeichenkette eine öffnende Klammer ``('' anschließt, die zwingend wieder geschlossen werden muss.
 
 \paragraph{Op} Mögliche Operatoren, es wird Beschränkt auf ``+, -, *, /, \^{}''. Der Typ Operator ist dabei wieder ein Enum, der diese Einträge enthält. Im Lexer werden noch keine Anpassungen des Terms vorgenommen.
 
@@ -1060,9 +1036,9 @@ Zum Schluss können die Ergebnisse wieder in die Ausprägung \codeword{Ast::Add}
     \item Alles andere: Es wird dem Vektor ``Ast::Mul(vec![Wert, Key])'' hinzugefügt
 \end{itemize}
 
-Um dieses Verfahren zu implementieren, muss für das \codeword{Ast}-Enum noch die Tratis \codeword{Eq}, \codeword{PartialEq} und \codeword{Hash} implementiert werden. Erst dann kann der Typ \codeword{Ast} als Key in der Map verwendet werden. Im einfachsten Fall, kann dies per Makro geschehen. In unserem geht dies aber nur für \codeword{PartialEq}. Da z.B. Vektoren die Traits \codeword{Eq} und \codeword{Hash} nicht implementieren, müssen wir dies selbst erledigen. Der \codeword{Eq} ist dabei aber nur deklarativ, es muss keine Funktion ausgefüllt werden, dies übernimmt der Compiler (https://doc.rust-lang.org/std/cmp/trait.Eq.html). Der \codeword{Hash}-Trait kann ebenfalls recht einfach implementiert werden, hier können wir alle vorhandenen Werte als Hash zusammenfassen.
+Um dieses Verfahren zu implementieren, muss für das \codeword{Ast}-Enum noch die Traits \codeword{Eq}, \codeword{PartialEq} und \codeword{Hash} implementiert werden. Erst dann kann der Typ \codeword{Ast} als Key in der Map verwendet werden. Im einfachsten Fall, kann dies per Makro geschehen. In unserem geht dies aber nur für \codeword{PartialEq}. Da z.B. Vektoren die Traits \codeword{Eq} und \codeword{Hash} nicht implementieren, müssen wir dies selbst erledigen. Der \codeword{Eq} ist dabei aber nur deklarativ, es muss keine Funktion ausgefüllt werden, dies übernimmt der Compiler (https://doc.rust-lang.org/std/cmp/trait.Eq.html). Der \codeword{Hash}-Trait kann ebenfalls recht einfach implementiert werden, hier können wir alle vorhandenen Werte als Hash zusammenfassen.
 
-\paragraph{Ideen zur Verbesserung} Es ist zu überlegen, den Nummerntyp nicht zusammenzufassen, sodass Rationale Zahlen und Floats nebeneinander existieren. In der momentanen Implementierung wird diese Addition zu einem Float vereinfacht. Vorteil: Immer nur sicher ein Zahlenwert vorhanden, Nachteil: kann evtl. ungenauer werden.
+\paragraph{Ideen zur Verbesserung} Es ist zu überlegen, den Nummerntyp nicht zusammenzufassen, sodass Rationale Zahlen und Fliesskommazahlen nebeneinander existieren. In der momentanen Implementierung wird diese Addition zu einem Fliesskommazahlen vereinfacht. Der Vorteil dabei ist, dass sicher nur ein Zahlenwert vorhanden. Allerdings wird der Nachteil der Ungenauigkeit in Kauf genommen.
 
 Bei der Zusammenfassung in der HashMap kann es natürlich zu Konflikten kommen. Eine andere Idee wäre hier als Key den Term als String zu verwenden. Hierzu müsste aber der Term auf jeden Fall vorher sortiert sein. Permutationen eines Terms ($x*y$ und $y*x$) können sonst nicht abgefangen werden. Hier hat das Hashing den Vorteil, das die Reihenfolge egal ist, da beide Symbole zusammen denselben Hashwert errechnen.
 
