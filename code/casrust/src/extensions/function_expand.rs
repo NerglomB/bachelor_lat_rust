@@ -1,10 +1,10 @@
 use crate::types::{ast::Ast, NumberType};
 
-pub fn expand_log<N>(name: &str, args: &Vec<Ast<N>>) -> Option<Ast<N>>
+pub fn expand_log<N>(args: &Vec<Ast<N>>) -> Option<Ast<N>>
 where
     N: NumberType,
 {
-    if name == "log" && args.len() == 1 {
+    if args.len() == 1 {
         match &args[0] {
             Ast::Mul(vec) => {
                 let mut result = vec![];

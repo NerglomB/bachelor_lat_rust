@@ -35,7 +35,9 @@ where
                             if result.is_empty() {
                                 result.push(node.clone());
                             } else {
-                                result = result.into_iter().map(|e| e * node.clone()).collect();
+                                for e in &mut result {
+                                    *e = e.clone() * node.clone()
+                                }
                             }
                         }
                     };
@@ -52,15 +54,12 @@ where
             }
             Ast::Func(name, args) => {
                 let args = args.iter().map(|e| e.expand(evaler)).collect();
-                let mut ret = None;
-                for fun in evaler.expand_funcs.iter() {
-                    if let Some(ast) = fun(name, &args) {
-                        ret = Some(ast);
-                        break;
-                    }
-                }
 
-                ret.unwrap_or(Ast::Func(name.to_string(), args))
+                if evaler.expand_funcs.contains_key(name) {
+                    evaler.expand_funcs[name](&args).unwrap_or(Ast::Func(name.to_string(), args))
+                } else {
+                    Ast::Func(name.to_string(), args)
+                }
             }
             Ast::Pow(base, exp) => {
                 let base = base.expand(evaler);
@@ -75,7 +74,7 @@ where
                             );
                         }
 
-                        Ast::Mul(mul)
+                        Ast::Mul(mul).expand(evaler).simple_eval(evaler)
                     }
                     _ => match exp {
                         Ast::Num(exp) if exp.is_integer() && exp > 0 => {
