@@ -204,18 +204,18 @@ Im letzten Beispiel soll nun durch die Verwendung des \codeword{mut}-Schlüsselw
 Natürlich können die beiden letzten Funktionen auch einen Rückgabewert besitzen, der unabhängig von der übergebenen Matrix ist. Eine besondere Stärke sind die Regeln, die für das Borrowing gelten. So ist z.B. zu jeder Zeit nur eine veränderbare Referenz auf eine Variable erlaubt, es ist daher leicht nachvollziehbar welcher Programmabschnitt die Daten tatsächlich verändern kann. Race-Conditions in nebenläufigen Anwendungen sind somit ausgeschlossen. Rust bietet für solche Einsatzzwecke Messge Passing \cite{K1727} und threadsichere Referenzzähler \cite{ArcSrc} an. Die Regeln zu Ownership und Borrowing werden noch genauer vorgestellt.
 
 \subsection{Was ist Rust und warum verwenden?}
-Rust ist eine statisch typisierte Programmiersprache, welche vor allem mit den Eigenschaften Performance, Verlässlichkeit und Produktivität eine Alternative zu anderen Sprachen anbieten kann. Version 1.0 wurde 2015 veröffentlich, seitdem gibt es mit der ``Rust 2018 Edition'' und ``Rust 2021 Edition'' eine stetige Weiterentwicklung.
+Rust ist eine statisch typisierte Programmiersprache, welche vor allem mit den Eigenschaften Performance, Verlässlichkeit und Produktivität eine Alternative zu anderen Sprachen anbieten soll \cite{RustPromises}. Version 1.0 wurde 2015 veröffentlich, seitdem gibt es mit der ``Rust 2018 Edition'' und ``Rust 2021 Edition'' eine stetige Weiterentwicklung \cite{RustEditions}.
 
-Die Performance begründet sich durch zwei wesentliche Aspekte. So werden alle Regeln die das Ownership und das Borrowing betreffen bereits zur Compilezeit durchgeführt. Ein zusätlicher Overhead zur Laufzeit des Programms wird so vermieden. Der andere Aspkekt ist die Implementierung von Featurs in Rust. So wird beispielsweise Monomorphisierung zur Compilezeit von Generics eingesetzt. Für jeden implementierten Typen des Generics gibt es somit eine eigene Implementierung im Compilat. Hierdurch entfallen Typechecks wie sie z.B. in Java möglich sein können.
+Die Performance begründet sich durch zwei wesentliche Aspekte. So werden alle Regeln die das Ownership und das Borrowing betreffen bereits zur Compilezeit durchgeführt. Ein zusätlicher Overhead zur Laufzeit des Programms wird so vermieden. Der andere Aspkekt ist die Implementierung von Featurs in Rust. So wird beispielsweise Monomorphisierung zur Compilezeit von Generics eingesetzt (vgl. \cite[S. 196 ff.]{SK19}). Für jeden implementierten Typen des Generics gibt es somit eine eigene Implementierung im Compilat. Hierdurch entfallen Typechecks wie sie z.B. in Java möglich sein können \cite{JavaGenerics}.
 
 Die Verlässlichkeit beruht ebenfalls auf dem Ownership- und Borrowing-System. Hierdurch ist zu jeder Zeit klar, welche Variablen welche Daten enthalten. Ein unbeabsichtigtes Verändern der Daten oder Dangling References werden ebenfalls bereits zur Compilezeit ausgeschlossen, dieses Prinzip funktioniert ebenfalls in nebenläufigen Anwendungen. Zudem stellt Rust sicher, dass man nicht außerhalb eines Puffers lesen oder schreiben kann, dies kann aber zu Umständen zu einem Programmabbruch führen. Das spezielle \codeword{Option} \codeword{enum} bietet eine fehlerunanfällige Variante des \codeword{NULL}-Werts, das in Rust nicht existiert.
 
 Um die Produktivität zu unterstützen bieten die beiden Tools \codeword{rustup} und \codeword{cargo} alles notwendige um den kompletten Entwicklungsprozess eines Rust-Programms zu erfüllen. Dies betrifft z.B. konkret eine Abhängigkeitsverwaltung, die Erstellung von Dokumentation und das ausführen von Tests und Benchmarks.
 
-Wo nötig setzt Rust auf etablierte Lösungen, so wird LLVM genutzt um ausführbare Programme zu erzeugen. Rust wird mittlerweile in Verschiedenen Projekten genutzt (z.B. Android OS, Linux Kernel, Windows-API). Alles zusammen rechtfertigt zumindest die Überlegung ein komplexes System - wie eben ein CAS - in Rust zu implementieren.
+Wo nötig setzt Rust auf etablierte Lösungen, so wird LLVM genutzt um ausführbare Programme zu erzeugen. Rust wird mittlerweile in Verschiedenen Projekten genutzt (z.B. Android OS \cite{GoogleExample}, Linux Kernel \cite{LinuxExample}, Windows-API \cite{WindowsRust}). Alles zusammen rechtfertigt zumindest die Überlegung ein komplexes System - wie eben ein CAS - in Rust zu implementieren.
 
 \subsection{Grundlegendes}
-\paragraph{Expression und Statements} Rust unterscheided bei Code-Anweisungen zwischen Statements und Expressions. Statements führen lediglich einen Codeblock aus, während Expressions stets einen Rückgabewert besitzen. Nahezu alle Sprachelemente in Rust sind als Expression implementiert.
+\paragraph{Expression und Statements} Rust unterscheided bei Code-Anweisungen zwischen Statements und Expressions. Statements führen lediglich einen Codeblock aus, während Expressions stets einen Rückgabewert besitzen. Nahezu alle Sprachelemente in Rust sind als Expression implementiert (vgl. \cite[S. 122 ff.]{BO18}).
 
 \begin{lstlisting}[language=rust, caption={Expression Einführendes Beispiel}]
     let test_var = if bedingung_1 { false } else { true };
@@ -410,7 +410,7 @@ Im Beispiel kann das erstellte \codeword{enum} mit sich selbst addiert und mit d
 \end{lstlisting}
 
 \subsection{Ownership, Borrowing und Lifetimes}
-Im folgenden sollen die Konzepte Ownership, Borrowing und Lifetimes kurz vorgestellt werden, diese tragen wesentlich zur erwähnten Speichersicherheit bei. Der Compiler beachtet dabei die folgenden Regeln.
+Im folgenden sollen die Konzepte Ownership, Borrowing und Lifetimes vorgestellt werden, diese tragen wesentlich zur erwähnten Speichersicherheit bei. Der Compiler beachtet dabei die folgenden Regeln \cite{Rules1} \cite{Rules2}.
 
 \begin{itemize}
     \item Jeder Wert ist einer Variablen zugewiesen, dem \codeword{Owner}
@@ -420,7 +420,7 @@ Im folgenden sollen die Konzepte Ownership, Borrowing und Lifetimes kurz vorgest
     \item Referenzen müssen immer gültig (d.h. deklariert sein und der Owner muss mindestens denselben Gültigkeitsbereich wie die Referenz haben) sein
 \end{itemize}
 
-Das Ownership-Prinzip deckt dabei bereits die ersten drei Regeln ab. Zu jedem Zeitpunkt kann jeder Wert nur durch eine Variable angesprochen werden. Liegt der Wert auf dem Stack oder wird das \codeword{Copy}-Trait implementiert wird bei einer Zuweisung der Wert kopiert. Liegt der Wert hingegen auf dem Heap, wie z.B. bei einem \codeword{Vector} oder einem \codeword{String} wird das Ownership an die neue Variable übergeben.
+Das Ownership-Prinzip deckt dabei bereits die ersten drei Regeln ab. Zu jedem Zeitpunkt kann jeder Wert nur durch eine Variable angesprochen werden. Liegt der Wert auf dem Stack oder wird das \codeword{Copy}-Trait implementiert wird bei einer Zuweisung der Wert kopiert \cite{CopyTraitOwner}. Liegt der Wert hingegen auf dem Heap, wie z.B. bei einem \codeword{Vector} oder einem \codeword{String} wird das Ownership an die neue Variable übergeben.
 
 \begin{lstlisting}[language=rust, caption={ownership}]
     let mut a = 2;
@@ -549,13 +549,13 @@ Um insgesamt weniger Bedingungen für mathematische Operationen zu haben, ist ge
 \end{itemize}
 
 \subsection{Funktionsumfang}
-Da wie bereits in der Einleitung gezeigt ein CAS sowohl einen sehr breiten Umfang als auch sehr spezialisiert sein kann, soll noch definiert werden, welche Operationen erlaubt sein sollen und welche Art von Termen verarbeitet werden sollen können:
+Da wie bereits in der Einleitung gezeigt ein CAS sowohl einen sehr breiten Umfang als auch spezialisiert sein kann, muss noch definiert werden, welche Möglichkeiten das in dieser Arbeit entwickelte System besitzt. Konkret soll veranschaulicht werden, welche Operationen erlaubt sein sollen und welche Art von Termen verarbeitet werden können:
 \begin{itemize}
-    \item Addition von Zahlen (Ganzzahlen, Fließkommazahlen, rationalen Zahlen), z.B. $1+2.1 = 3.1$
+    \item Addition von Zahlen (Ganzzahlen, Fließkommazahlen, rationalen Zahlen), z.B. $1+2.1 = 3.1$ oder $\frac{1}{3} + \frac{1}{3} = \frac{2}{3}$
     \item Addition von Symbolen und Termen, z.B. $x+y = x+y$ oder $x+(2*y)+2+(2*y)+x = 2*x+4*y+2$
     \item Multiplikation von Zahlen (Ganzzahlen, Fließkommazahlen, rationalen Zahlen), z.B. $1*2.1 = 2.1$
     \item Multiplikation von Symbolen und Termen, z.B. $x*y*x = x^2*y$
-    \item Auswertung von Potenzen von Zahlen, Symbolen und Terme inkl. Potenzregeln in Hinblick auf Genauigkeit des Ergebnis, z.B. $x^a*x^b=x^{(a+b)}$ oder $x^a*y^a = (x*y)^a$
+    \item Auswertung von Potenzen die Zahlen, Symbolen und Terme in Basis oder Exponent haben. Dabei sollen Potenzregeln in Hinblick auf Genauigkeit des Ergebnis ausgeführt werden, z.B. $x^a*x^b=x^{(a+b)}$ oder $x^a*y^a = (x*y)^a$
     \item Auswertung von Funktionen, die dynamisch hinzugefügt werden können sollen. Funktionen die dem CAS nicht bekannt sind, tauchen weiterhin in Termen auf, werden aber nicht ausgewertet, z.B. $sin(x)$ oder $sqrt(x)$
     \item Auswertung von Konstanten falls bekannt und gewollt
     \item Die Ausführungsreihenfolge in Termen lautet: Konstanten und Variablen $\rightarrow$ Funktion $\rightarrow$ Potenz $\rightarrow$ Multiplikation $\rightarrow$ Addition
@@ -564,7 +564,7 @@ Da wie bereits in der Einleitung gezeigt ein CAS sowohl einen sehr breiten Umfan
 Darüberhinaus sollen Terme soweit wie möglich mit bereits bestehenden Sprachmitteln erweitert und verglichen werden können, hierzu werden einige Operatorüberladungen implementiert. Bei der Auswertung der Terme soll die Möglichkeit bestehen auch ungenaue numerische Ergebnisse zu berechnen. Funkionen und Konstanten sollen einfach hinzugefügt werden können.
 
 \subsection{Überlauf und Ungenauigkeit}
-Ein bereits zu Beginn prominentes Problem für ein CAS ist das Handling von Ganzzahl-Überläufen und die Ungenaugikeiten von Rechnung mit Fließkommazahlen (siehe IEEE754). So gibt das folgende Programm in Rust einen falschen Wert für die Addition aus und bricht anschließend ab.
+Ein bereits zu Beginn prominentes Problem für ein CAS ist das Handling von Ganzzahl-Überläufen und die Ungenaugikeiten von Rechnung mit Fließkommazahlen \cite{IEEE754}. So gibt das folgende Programm in Rust einen falschen Wert für die Addition aus und bricht anschließend ab.
 
 \begin{lstlisting}[language=rust, caption={Überlauf und Ungenauigkeit}]
     let f1 = 0.1;
@@ -580,7 +580,7 @@ Ein bereits zu Beginn prominentes Problem für ein CAS ist das Handling von Ganz
     thread main panicked...
 \end{lstlisting}
 
-Ein Blick zu SymPy zeigt, dass bereits hier Lösungen direkt aus Python verwendet werden können, die in Rust nicht existieren. So besitzen Ganzzahltypen bereits eine unbegrenzte Präzision (\cite{PythonDocuIntPrecision}). Für Fliesskommazahlen ist die Klasse \codeword{Float} implementiert, die eine ungebrenzte Genauigkeit erlaubt. Dabei kann mit dem zweiten Parameter die eigentliche Präzision bestimmt werden. Es wird darüberhinaus angeraten den eigentlichen Wert als String zu übergeben, da der native float-Typ in Python bereits eine Ungenauigkeit hervorrufen kann. (siehe src code class Float(Number):)
+Ein Blick zu SymPy zeigt, dass bereits hier Lösungen direkt aus Python verwendet werden können, die in Rust nicht existieren. So besitzen Ganzzahltypen bereits eine unbegrenzte Präzision (\cite{PythonDocuIntPrecision}). Für Fließkommazahlen ist die Klasse \codeword{Float} implementiert, die eine ungebrenzte Genauigkeit erlaubt. Dabei kann mit dem zweiten Parameter die eigentliche Präzision bestimmt werden. Es wird darüberhinaus angeraten den eigentlichen Wert als String zu übergeben, da der native float-Typ in Python bereits eine Ungenauigkeit hervorrufen kann. (siehe src code class Float(Number):)
 
 \begin{lstlisting}[language=Python, caption={SymPy Precision}]
     x = fakultaet(100) // 158 Stellen
@@ -713,7 +713,7 @@ Es ist noch zu erwähnen, dass hier nicht definiert werden sollen, mit welchen \
 
 Ein weiterer Vorteil ist, dass direkt eine rationale Ausprägung des \codeword{enum} implementieren werden kann. Auch hier kann der Typ direkt die Rechnung übernehmen. Hierzu werden die Operatoren \codeword{std::ops::Add} und \codeword{std::ops::Mul} für den Enum selbst überladen. Im Hinblick auf die Bedingung, dass eine Subtraktion eine Addition ist, wird ebenso \codeword{std::ops::Mul} für einen Ganzzahlwert mit den Enums überladen. Ebenso kann es von Interesse sein, ob es sich um das neutrale Element der Addition oder Multiplikation handelt um einen Term zu vereinfachen. Für diesen Fall wird der Trait \codeword{PartialEq} für Ganzzahlen überladen, um hier nach Bedarf auch andere Werte zu überprüfen. Eine Alternative wären Methoden, die einen \codeword{bool}-Wert zurückgeben, ob es sich um einen solchen Wert handelt.
 
-In unserer Implementierung wird \codeword{PrimNum} solange wie möglich mit Ganzzahlen und Rationalen Werten arbeiten. Sobald ein Fliesskommawert addiert wird, werden die beiden anderen Werte zu einer Fliesskommazahl umgewandelt. Dies geht zulasten der Genauigkeit und könnte bei Bedarf so angepasst werden, dass ein Rationaler Typ erzeugt wird. Es wäre auch denkbar, Fliesskommazahlen und andere numerische Typen nicht standardmäßig zusammenzufassen.
+In unserer Implementierung wird \codeword{PrimNum} solange wie möglich mit Ganzzahlen und Rationalen Werten arbeiten. Sobald ein Fließkommawert addiert wird, werden die beiden anderen Werte zu einer Fließkommazahl umgewandelt. Dies geht zulasten der Genauigkeit und könnte bei Bedarf so angepasst werden, dass ein Rationaler Typ erzeugt wird. Es wäre auch denkbar, Fließkommazahlen und andere numerische Typen nicht standardmäßig zusammenzufassen.
 
 \paragraph{trait NumberType} Dieser Trait soll hauptsächlich als Typparameter oder als Einschränkung für Generics zum Einsatz kommen. Wie bereits erwähnt soll ein Teil des CAS mit verschiedenen Typen durchführbar sein und alle Typen, die diesen Trait implementieren können dann für das CAS genutzt werden. Im konkreten Fall werden dies die beiden \codeword{enums} sein, die gerade erwähnt worden sind. Zudem werden Funktionen als Bedingung definiert um die neutralen Elemente der Addition und der Multiplikation zurückzugeben als auch eine Möglichkeit einen Bruch zu kürzen. Diese müssen dann von den \codeword{enums} implementiert werden.
 
@@ -1041,7 +1041,7 @@ Zum Schluss können die Ergebnisse wieder in die Ausprägung \codeword{Ast::Add}
 
 Um dieses Verfahren zu implementieren, muss für das \codeword{Ast}-Enum noch die Traits \codeword{Eq}, \codeword{PartialEq} und \codeword{Hash} implementiert werden. Erst dann kann der Typ \codeword{Ast} als Key in der Map verwendet werden. Im einfachsten Fall, kann dies per Makro geschehen. In unserem geht dies aber nur für \codeword{PartialEq}. Da z.B. Vektoren die Traits \codeword{Eq} und \codeword{Hash} nicht implementieren, müssen wir dies selbst erledigen. Der \codeword{Eq} ist dabei aber nur deklarativ, es muss keine Funktion ausgefüllt werden, dies übernimmt der Compiler (https://doc.rust-lang.org/std/cmp/trait.Eq.html). Der \codeword{Hash}-Trait kann ebenfalls recht einfach implementiert werden, hier können wir alle vorhandenen Werte als Hash zusammenfassen.
 
-\paragraph{Ideen zur Verbesserung} Es ist zu überlegen, den Nummerntyp nicht zusammenzufassen, sodass Rationale Zahlen und Fliesskommazahlen nebeneinander existieren. In der momentanen Implementierung wird diese Addition zu einem Fliesskommazahlen vereinfacht. Der Vorteil dabei ist, dass sicher nur ein Zahlenwert vorhanden. Allerdings wird der Nachteil der Ungenauigkeit in Kauf genommen.
+\paragraph{Ideen zur Verbesserung} Es ist zu überlegen, den Nummerntyp nicht zusammenzufassen, sodass Rationale Zahlen und Fließkommazahlen nebeneinander existieren. In der momentanen Implementierung wird diese Addition zu einem Fließkommazahlen vereinfacht. Der Vorteil dabei ist, dass sicher nur ein Zahlenwert vorhanden. Allerdings wird der Nachteil der Ungenauigkeit in Kauf genommen.
 
 Bei der Zusammenfassung in der HashMap kann es natürlich zu Konflikten kommen. Eine andere Idee wäre hier als Key den Term als String zu verwenden. Hierzu müsste aber der Term auf jeden Fall vorher sortiert sein. Permutationen eines Terms ($x*y$ und $y*x$) können sonst nicht abgefangen werden. Hier hat das Hashing den Vorteil, das die Reihenfolge egal ist, da beide Symbole zusammen denselben Hashwert errechnen.
 
@@ -1206,7 +1206,7 @@ Das zweite Beispiel bezieht sich auf explizite klonen des Exponenten bei Potenze
 Die bisherige Implementierung des CAS ist noch rudimentär. Es wurden lediglich die wichtigsten Eigenschaften implementiert um Terme möglichst weit und genau zusammenzufassen.
 Die weiteren Implementierungen sollen nun einen Ausblick darauf geben, wie erweiterte Funktionalitäten implementitert werden können aufgrund der geschaffenen Basis. 
 
-\subsection{Terme mit Fliesskommazahlen berechnen oder auch Ungenauigkeit in Kauf nehmen} Um ein einzelnes numerisches Ergebnis zu erhalten, sofern alle Variablen im Term substitutiert sind, erhält das \codeword{Ast}-Enum zusätzlich die Methode \codeword{hard_eval}. Diese ruft die bereits vorgestellte Methode \codeword{eval_sub} auf und übergibt als Parameter, dass eine explizite Berechnung stattfinden soll. Dies kann mit einer gewissen Ungenaugkeit verbunden sein.
+\subsection{Terme mit Fließkommazahlen berechnen oder auch Ungenauigkeit in Kauf nehmen} Um ein einzelnes numerisches Ergebnis zu erhalten, sofern alle Variablen im Term substitutiert sind, erhält das \codeword{Ast}-Enum zusätzlich die Methode \codeword{hard_eval}. Diese ruft die bereits vorgestellte Methode \codeword{eval_sub} auf und übergibt als Parameter, dass eine explizite Berechnung stattfinden soll. Dies kann mit einer gewissen Ungenaugkeit verbunden sein.
 
 Den Parameter \codeword{hard_eval} sollen dabei alle berechnenden Funktionen - insbesondere auch später hinzugefügte Funktionen - weitergegeben werden. Dies kann durch die Typdefinition von EvalFn sichergestellt werden.
 
@@ -1214,7 +1214,7 @@ Als konkretes Beispiel wird die bestehende Funktion \codeword{perfect_nth_root} 
 
 Wenn nun \codeword{hard_eval} auf ``true'' gesetzt ist soll die Potenz ohne weitere Prüfung durchgeführt werden, falls es sich um Zahlen handelt. Dazu muss das trait \codeword{NumberType} noch die Methodendefinition \codeword{pow} forden, die in den eigenen Nummerntypen implementiert werden muss. In unserem Fall für \codeword{PrimNum} werden danach die entsprechenden Rust-Funktionen der primitiven Typen aufgerufen um eine Potenz zu berechnen.
 
-Als erstes Beispiel dient der Term $sqrt(2)$. Der Parser erkennt hierbei nur die Funktion. Bei einem Aufruf von \codeword{simple_eval} wird diese Funktion dann durch die bestehende Implementierung nach \codeword{Pow(Num(Int(2)), Num(Rational(1, 2)))} umgewandelt (vgl. Kapitel Wurzel und co.). Der Aufruf von \codeword{hard_eval} dagegen gibt den Fliesskommawert \codeword{1.4142135623730951} zurück, wodurch bereits eine Ungenauigkeit entstanden ist.
+Als erstes Beispiel dient der Term $sqrt(2)$. Der Parser erkennt hierbei nur die Funktion. Bei einem Aufruf von \codeword{simple_eval} wird diese Funktion dann durch die bestehende Implementierung nach \codeword{Pow(Num(Int(2)), Num(Rational(1, 2)))} umgewandelt (vgl. Kapitel Wurzel und co.). Der Aufruf von \codeword{hard_eval} dagegen gibt den Fließkommawert \codeword{1.4142135623730951} zurück, wodurch bereits eine Ungenauigkeit entstanden ist.
 
 Als zweites Beispiel dient der Term $sqrt(2)*sqrt(2)$. Durch die gewährleistete Ausführungsreihenfolge der Terme ist das Ergebnis mit \codeword{simple_eval} $2$. Dies kommt durch die Termzusammenfassung zustande, wie sie für die Addition in Kapitel x erläuertert ist. Bei der Ausführung mit \codeword{hard_eval} wird dagegen entsprechend das Ergebnis $2.0000000000000004$ zurückgegeben. Dies hat den Grund, da ja erst die Potenzen ausgeführt werden, und danach erst die Multiplikation durchgeführt wird. Andere Nummerntypen, die hier eine höhere Genauigkeit erlauben bzw. solche Sonderfälle abfangen, können hierbei natürlich auch immer noch ein genaueres Ergebnis liefern.
 
