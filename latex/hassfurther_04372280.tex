@@ -119,13 +119,16 @@
 \newpage
 
 \section{Einleitung}
-Computeralgebrasysteme - im folgender Arbeit abgekürzt CAS - nehmen in verschiedenen Bereichen der Wissenschaft eine wichtige Rolle ein. Sie ermöglichen es einerseits mathematische Ausdrücke mit Variablen darzustellen, diese Terme zu verändern und mit diesen zu arbeiten. Andererseits lassen sich wesentlich genauere Berechnung durchführen, indem z.B. nicht alle Ausdrücke in einem Term ausgewertet werden, wenn es hierdurch zu Ungenauigkeiten kommen kann.
+Computeralgebrasysteme - im folgenden abgekürzt durch CAS - nehmen in verschiedenen Bereichen der Wissenschaft eine wichtige Rolle ein. Sie ermöglichen es einerseits mathematische Ausdrücke mit Variablen darzustellen, diese Terme zu verändern und mit diesen zu arbeiten. Andererseits lassen sich wesentlich genauere Berechnung durchführen, indem z.B. nicht alle Ausdrücke in einem Term ausgewertet werden, wenn es hierdurch zu Ungenauigkeiten kommen kann. Die ``Fachgruppe Computeralgebra'' beschreibt ein solches System wie folgt \cite{FachgruppeDef}:
+\begin{quote}
+    Die Computeralgebra ist ein Wissenschaftsgebiet, das sich mit Methoden zum Lösen mathematisch formulierter Probleme durch symbolische Algorithmen und deren Umsetzung in Soft- und Hardware beschäftigt. Sie beruht auf der exakten endlichen Darstellung endlicher oder unendlicher mathematischer Objekte und Strukturen und ermöglicht deren symbolische und formelmäßige Behandlung durch eine Maschine. Strukturelles mathematisches Wissen wird dabei sowohl beim Entwurf als auch bei der Verifikation und Aufwandsanalyse der betreffenden Algorithmen verwendet. Die Computeralgebra kann damit wirkungsvoll eingesetzt werden bei der Lösung von mathematisch modellierten Fragestellungen in zum Teil sehr verschiedenen Gebieten der Informatik und Mathematik sowie in den Natur- und Ingenieurwissenschaften.
+\end{quote}
 
-Beispiele von Verwendungen eines CAS
+Anwendungsbeispiele für ein CAS finden sich in der Physik, Chemie, Sicherheitstechnik, Robotik und vielen anderen Bereichen \cite{FachgruppeEinsatz}. In ``Zum Einfluss von Computeralgebrasystemen auf mathematische Grundfertigkeiten'' werden sowohl Vor- als auch Nachteile bei der Verwendung während der Schulzeit diskutiert \cite[S. 17 ff.]{RN18}. Auch wenn also augenscheinlich die Verwendung eines CAS viele Bereiche entlasten kann, so sollte immer noch das Hintergrundwissen vorhanden sein, was ein CAS überhaupt macht.
 
-In der vorliegenden Arbeit soll ein solches CAS in Ansätzen mit der Programmiersprache Rust entwickelt werden. Es soll untersucht werden, inwieweit das Ownership- und Borrowing-System von Rust bei einem solchen komplexen System bei der Entwicklung unterstützt und wie die Performance zur Laufzeit ausfällt. Da System soll dabei einfach erweiterbar sein. Dabei sollen sowohl neue mathematische Funktionen einfach integriert werden können, als auch die Terme mit neuen Regeln zusammenfassbar sein.
+In der vorliegenden Arbeit soll ein solches CAS in Ansätzen mit der Programmiersprache Rust entwickelt werden. Es soll untersucht werden, inwieweit das Ownership- und Borrowing-System von Rust bei einem solchen komplexen System bei der Entwicklung unterstützt und wie die Performance zur Laufzeit ausfällt. Da System soll dabei einfach erweiterbar sein. Nicht implementierte mathematische Funktionen sollen einfach integriert werden können und Terme weiter zusammengefasst werden können als die Standardimplentierung erlaubt.
 
-Einen besonderen Stellenwert nimmt SymPy ein, da dieses System einerseits als Open-Source-Projekt verfügbar ist, als auch der Code in Python geschrieben ist und leicht verständlich ist. Der Code soll dabei natürlich nicht 1-zu-1 in Rust neu geschrieben werden, sondern mit den Möglichkeiten von Rust erweitert werden, auch wenn natürlich nur ein Teil des Umfangs von SymPy in dieser Arbeit möglich sein wird.
+Einen besonderen Stellenwert nimmt SymPy ein, da dieses System einerseits als Open-Source-Projekt verfügbar ist, als auch der Code in Python geschrieben ist und leicht verständlich und erweiterbar ist \cite[S. 1]{SympyPeerJ}. Die Verwendung dieser Bibliothek und die Vorstellung der Programmiersprache Rust während meines Studiums haben mir die Idee gegeben diese Arbeit zu schreiben. Einige Lösungen werden also von SymPy inspiriert sein. Der Code soll dabei natürlich nicht 1-zu-1 in Rust neu geschrieben werden, sondern mit den Möglichkeiten und Einschränkungen von Rust erweitert werden, auch wenn natürlich nur ein Teil des Umfangs von SymPy in dieser Arbeit möglich sein wird.
 
 \newpage
 
@@ -139,7 +142,7 @@ Bevor Rust vorgestellt wird und die genauen Regeln des Ownership und Borrowing e
     }
 \end{lstlisting}
 
- Im ersten Beispiel wird eine Funktion erstellt, die das Ownership der Matrix übernimmt und nach der Verarbeitung den Speicherplatz freigibt. Dies geschieht automatisch, da der Gültigkeitsbereich der Variable \codeword{matrix_fn} verlassen wird. In diesem Kontext bedeutet Ownership, dass der Wert vom Hauptprogramm in die Funktion verschoben wird und die neue Variable \codeword{matrix_fn} das alleinige Recht besitzt diesen Wert zu nutzen. Das Programm lässt sich so nicht kompilieren. Die zweite Ausgabe schlägt dabei fehl, da beim Aufruf der Funktion der Wert in die Funktion verschoben und freigegeben wird, der Zugriff auf den entsprechenden Speicherbereich im Hauptprogramm wäre undefiniert.
+ Im ersten Beispiel wird eine Funktion erstellt, die das Ownership der Matrix übernimmt und nach der Verarbeitung den Speicherplatz freigibt. Dies geschieht automatisch, da der Gültigkeitsbereich der Variable \codeword{matrix_fn} verlassen wird \cite{RustOwnershipFreed}. In diesem Kontext bedeutet Ownership, dass der Wert vom Hauptprogramm in die Funktion verschoben wird und die neue Variable \codeword{matrix_fn} das alleinige Recht besitzt diesen Wert zu nutzen \cite{RustMovingTerm}. Das Programm lässt sich so nicht kompilieren. Die zweite Ausgabe schlägt dabei fehl, da beim Aufruf der Funktion der Wert in die Funktion verschoben und freigegeben wird, der Zugriff auf den entsprechenden Speicherbereich im Hauptprogramm wäre undefiniert.
 
  \begin{lstlisting}[language=rust, caption={Einführendes Beispiel Ownership abgeben}]
     fn take_ownership(matrix_fn: LargeMatrix) {
@@ -169,7 +172,7 @@ Die zweite Funktion gibt das Ownership der Matrix wieder zurück, der Wert wird 
     println!("{:?}", matrix);
 \end{lstlisting}
 
-Im nächsten Beispiel erhält die Funktion nur eine Referenz auf die Matrix, gekennzeichnet durch das \codeword{&}-Zeichen. In Rust wird dieses Prinzip als ``Borrowing'' bezeichnet (quelle: https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html). Wie bereits im ersten Beispiel wird beim verlassen der Funktion der Speicherplatz der Variablen freigegeben, diesmal handelt es sich aber nur um den Zeiger und nicht um die eigentlichen Daten. Eine Verwendung nach dem Funktionsaufruf ist daher weiterhin möglich.
+Im nächsten Beispiel erhält die Funktion nur eine Referenz auf die Matrix, gekennzeichnet durch das \codeword{&}-Zeichen. In Rust wird dieses Prinzip als ``Borrowing'' bezeichnet \cite{RustBorrowing}. Wie bereits im ersten Beispiel wird beim verlassen der Funktion der Speicherplatz der Variablen freigegeben, diesmal handelt es sich aber nur um den Zeiger und nicht um die eigentlichen Daten. Eine Verwendung nach dem Funktionsaufruf ist daher weiterhin möglich.
 
 Da Variablen in Rust standardmäßig unveränderbar sind, ist ebenso sichergestellt, dass die Matrix in der Funktion nicht verändert worden ist. 
 
@@ -184,7 +187,7 @@ Da Variablen in Rust standardmäßig unveränderbar sind, ist ebenso sichergeste
     println!("{:?}", matrix);
 \end{lstlisting}
 
-Im letzten Beispiel soll nun durch die Verwendung des \codeword{mut}-Schlüsselworts ermöglich werden, die Daten der originalen Matrix zu verändern. Ansonsten gibt es keine Änderung zum vorherigen Beispiel, beim verlassen der Funktion wird auch wieder nur der Zeiger freigegeben.
+Im letzten Beispiel soll nun durch die Verwendung des \codeword{mut}-Schlüsselworts ermöglich werden, die Daten der originalen Matrix zu verändern. Ansonsten gibt es keine Änderung zum vorherigen Beispiel, beim verlassen der Funktion wird ebenfalls wieder nur der Zeiger freigegeben.
 
 \begin{lstlisting}[language=rust, caption={Einführendes Beispiel Veränderliche Referenz}]
     fn take_mutable_reference(matrix_ref: &mut LargeMatrix) {
@@ -198,7 +201,7 @@ Im letzten Beispiel soll nun durch die Verwendung des \codeword{mut}-Schlüsselw
     println!("{:?}", matrix);
 \end{lstlisting}
 
-Natürlich können die beiden letzten Funktionen auch einen Rückgabewert besitzen, der mit dem der eigentlich Matrix nichts zu tun hat. Eine besondere Stärke sind die Regeln, die für das Borrowing gelten. So ist z.B. zu jeder Zeit nur eine veränderbare Referenz auf eine Variable erlaubt, es ist daher leicht nachvollziehbar welcher Programmabschnitt die Daten tatsächlich verändern kann. Race-Conditions in nebenläufigen Anwendungen sind somit ausgeschlossen. Rust bietet für solche Einsatzzwecke spezielle Datenstrukturen wie (siehe Seminararbeit und Beispiel). Die genauen Regeln zu Ownership und Borrowing werden noch vorgestellt.
+Natürlich können die beiden letzten Funktionen auch einen Rückgabewert besitzen, der unabhängig von der übergebenen Matrix ist. Eine besondere Stärke sind die Regeln, die für das Borrowing gelten. So ist z.B. zu jeder Zeit nur eine veränderbare Referenz auf eine Variable erlaubt, es ist daher leicht nachvollziehbar welcher Programmabschnitt die Daten tatsächlich verändern kann. Race-Conditions in nebenläufigen Anwendungen sind somit ausgeschlossen. Rust bietet für solche Einsatzzwecke Messge Passing \cite{K1727} und threadsichere Referenzzähler \cite{ArcSrc} an. Die Regeln zu Ownership und Borrowing werden noch genauer vorgestellt.
 
 \subsection{Was ist Rust und warum verwenden?}
 Rust ist eine statisch typisierte Programmiersprache, welche vor allem mit den Eigenschaften Performance, Verlässlichkeit und Produktivität eine Alternative zu anderen Sprachen anbieten kann. Version 1.0 wurde 2015 veröffentlich, seitdem gibt es mit der ``Rust 2018 Edition'' und ``Rust 2021 Edition'' eine stetige Weiterentwicklung.
