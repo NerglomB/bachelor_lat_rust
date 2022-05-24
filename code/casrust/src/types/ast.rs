@@ -350,7 +350,7 @@ where
         match self {
             Ast::Add(vec) => {
                 let mut vec = vec.clone();
-                vec.sort_by(display_sort);
+                vec.sort_by(display_sort_add);
                 let mut s = "".to_owned();
                 let len = vec.len();
                 let mut current = 0;
@@ -386,7 +386,7 @@ where
                 } else {
                     vec.clone()
                 };
-                vec.sort_by(display_sort);
+                vec.sort_by(display_sort_mul);
 
                 if vec.len() == 2 {
                     if let Ast::Num(v) = &vec[0] {
@@ -463,7 +463,7 @@ where
     }
 }
 
-fn display_sort<N>(a: &Ast<N>, b: &Ast<N>) -> Ordering
+fn display_sort_add<N>(a: &Ast<N>, b: &Ast<N>) -> Ordering
 where
     N: NumberType,
 {
@@ -478,8 +478,26 @@ where
             }
             (Ast::Num(_), _) => Ordering::Less,
             (_, Ast::Num(_)) => Ordering::Greater,
-            _ => Ordering::Equal,
+            _ => a.cmp(b),
         },
-        _ => Ordering::Equal,
+        (Ast::Pow(_, _), _) => Ordering::Less,
+        (_, Ast::Pow(_, _)) => Ordering::Greater,
+        (Ast::Mul(_), Ast::Mul(_)) => Ordering::Equal,
+        (Ast::Mul(_), _) => Ordering::Less,
+        (_, Ast::Mul(_)) => Ordering::Greater,
+        (Ast::Num(_), _) => Ordering::Greater,
+        (_, Ast::Num(_)) => Ordering::Less,
+        _ => a.cmp(b),
+    }
+}
+
+fn display_sort_mul<N>(a: &Ast<N>, b: &Ast<N>) -> Ordering
+where
+    N: NumberType,
+{
+    match (a, b) {
+        (Ast::Num(_), _) => Ordering::Less,
+        (_, Ast::Num(_)) => Ordering::Greater,
+        _ => display_sort_add(a, b),
     }
 }

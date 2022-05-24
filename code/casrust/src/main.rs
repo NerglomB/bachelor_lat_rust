@@ -5,10 +5,11 @@ use casrust::types::prim_num::PrimNum;
 use std::str::FromStr;
 
 fn main() {
-    match Ast::from_str("(x+y)*(x+y)") {
+    match Ast::from_str("-1+y+x*2+x^2") {
         Ok(ast) => {
             let eval = base_evaluator();
             println!("{}", ast);
+            println!("{:?}", ast);
             println!("{}", ast.expand(&eval));
             // println!(
             //     "{:?}",

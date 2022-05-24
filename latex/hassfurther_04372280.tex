@@ -126,9 +126,9 @@ Computeralgebrasysteme - im folgenden abgekürzt durch CAS - nehmen in verschied
 
 Anwendungsbeispiele für ein CAS finden sich in der Physik, Chemie, Sicherheitstechnik, Robotik und vielen anderen Bereichen \cite{FachgruppeEinsatz}. In ``Zum Einfluss von Computeralgebrasystemen auf mathematische Grundfertigkeiten'' werden sowohl Vor- als auch Nachteile bei der Verwendung während der Schulzeit diskutiert \cite[S. 17 ff.]{RN18}. Auch wenn also augenscheinlich die Verwendung eines CAS viele Bereiche entlasten kann, so sollte immer noch das Hintergrundwissen vorhanden sein, was ein CAS überhaupt macht.
 
-In der vorliegenden Arbeit soll ein solches CAS in Ansätzen mit der Programmiersprache Rust entwickelt werden. Es soll untersucht werden, inwieweit das Ownership- und Borrowing-System von Rust bei einem solchen komplexen System bei der Entwicklung unterstützt und wie die Performance zur Laufzeit ausfällt. Da System soll dabei einfach erweiterbar sein. Nicht implementierte mathematische Funktionen sollen einfach integriert werden können und Terme weiter zusammengefasst werden können als die Standardimplentierung erlaubt.
+In der vorliegenden Arbeit soll ein solches CAS in Ansätzen mit der Programmiersprache Rust entwickelt werden. Es soll untersucht werden, inwieweit das Ownership- und Borrowing-System von Rust bei einem solchen komplexen System bei der Entwicklung unterstützt und wie die Performance zur Laufzeit ausfällt. Das System soll dabei einfach erweiterbar sein. Nicht implementierte mathematische Funktionen sollen einfach integriert werden können und Terme weiter zusammengefasst werden können als die Standardimplentierung erlaubt.
 
-Einen besonderen Stellenwert nimmt SymPy ein, da dieses System einerseits als Open-Source-Projekt verfügbar ist, als auch der Code in Python geschrieben ist und leicht verständlich und erweiterbar ist \cite[S. 1]{SympyPeerJ}. Die Verwendung dieser Bibliothek und die Vorstellung der Programmiersprache Rust während meines Studiums haben mir die Idee gegeben diese Arbeit zu schreiben. Einige Lösungen werden also von SymPy inspiriert sein. Der Code soll dabei natürlich nicht 1-zu-1 in Rust neu geschrieben werden, sondern mit den Möglichkeiten und Einschränkungen von Rust erweitert werden, auch wenn natürlich nur ein Teil des Umfangs von SymPy in dieser Arbeit möglich sein wird.
+Einen besonderen Stellenwert nimmt SymPy ein, da dieses System einerseits als Open-Source-Projekt verfügbar ist, als auch der Code in Python geschrieben ist und leicht verständlich und erweiterbar ist \cite[S. 1]{SympyPeerJ}. Die Verwendung dieser Bibliothek und die Vorstellung der Programmiersprache Rust während meines Studiums haben mir die Idee gegeben diese Arbeit zu schreiben. Einige Lösungen werden also von SymPy inspiriert sein. Der Code soll dabei natürlich nicht 1-zu-1 in Rust neu geschrieben werden, sondern mit den Möglichkeiten und Einschränkungen von Rust erweitert werden, auch wenn natürlich nur ein Teil des Umfangs von SymPy in dieser Arbeit abgebildet wird.
 
 \newpage
 
@@ -142,7 +142,7 @@ Bevor Rust vorgestellt wird und die genauen Regeln des Ownership und Borrowing e
     }
 \end{lstlisting}
 
- Im ersten Beispiel wird eine Funktion erstellt, die das Ownership der Matrix übernimmt und nach der Verarbeitung den Speicherplatz freigibt. Dies geschieht automatisch, da der Gültigkeitsbereich der Variable \codeword{matrix_fn} verlassen wird \cite{RustOwnershipFreed}. In diesem Kontext bedeutet Ownership, dass der Wert vom Hauptprogramm in die Funktion verschoben wird und die neue Variable \codeword{matrix_fn} das alleinige Recht besitzt diesen Wert zu nutzen \cite{RustMovingTerm}. Das Programm lässt sich so nicht kompilieren. Die zweite Ausgabe schlägt dabei fehl, da beim Aufruf der Funktion der Wert in die Funktion verschoben und freigegeben wird, der Zugriff auf den entsprechenden Speicherbereich im Hauptprogramm wäre undefiniert.
+ Im ersten Beispiel wird eine Funktion erstellt, die das Ownership der Matrix übernimmt und nach der Verarbeitung den Speicherplatz freigibt. Dies geschieht automatisch, da der Gültigkeitsbereich der Variable \codeword{matrix_fn} verlassen wird \cite{RustOwnershipFreed}. In diesem Kontext bedeutet Ownership, dass der Wert vom Hauptprogramm in die Funktion verschoben wird und die neue Variable \codeword{matrix_fn} das alleinige Recht besitzt diesen Wert zu nutzen \cite{RustMovingTerm}. Das Programm lässt sich so nicht kompilieren. Die zweite Ausgabe schlägt dabei fehl, da beim Aufruf der Funktion der Wert in die Funktion verschoben und freigegeben wurde, der Zugriff auf den entsprechenden Speicherbereich im Hauptprogramm wäre undefiniert.
 
  \begin{lstlisting}[language=rust, caption={Einführendes Beispiel Ownership abgeben}]
     fn take_ownership(matrix_fn: LargeMatrix) {
@@ -264,7 +264,7 @@ Bei der Auswertung der Variablen ist es zudem erlaubt mehrere Werte gleichzeitig
 \begin{lstlisting}[language=rust, caption={match}]
     let mut var = 19;
 
-    let match = match var {
+    let match_var = match var {
         1 => {
             var = 5;
             String::from("klein")
@@ -564,7 +564,7 @@ Da wie bereits in der Einleitung gezeigt ein CAS sowohl einen sehr breiten Umfan
 Darüberhinaus sollen Terme soweit wie möglich mit bereits bestehenden Sprachmitteln erweitert und verglichen werden können, hierzu werden einige Operatorüberladungen implementiert. Bei der Auswertung der Terme soll die Möglichkeit bestehen auch ungenaue numerische Ergebnisse zu berechnen. Funkionen und Konstanten sollen einfach hinzugefügt werden können.
 
 \subsection{Überlauf und Ungenauigkeit}
-Ein bereits zu Beginn prominentes Problem für ein CAS ist das Handling von Ganzzahl-Überläufen und die Ungenaugikeiten von Rechnung mit Fließkommazahlen \cite{IEEE754}. So gibt das folgende Programm in Rust einen falschen Wert für die Addition aus und bricht anschließend ab.
+Ein bereits zu Beginn auftretendes Problem für das CAS ist der Umang von Ganzzahl-Überläufen und die Ungenaugikeiten von Rechnung mit Fließkommazahlen \cite{IEEE754}. So gibt das folgende Programm in Rust einen falschen Wert für die Addition aus und bricht anschließend ab.
 
 \begin{lstlisting}[language=rust, caption={Überlauf und Ungenauigkeit}]
     let f1 = 0.1;
@@ -743,7 +743,7 @@ Mit dem Wissen über Generics und und den theoretischen Überlegungen zur Datens
 
 \paragraph{Const} Ein einfacher String, der einen Konstantennamen enthält, auch in UTF-8 möglich, z.B. $\pi$. Eigens hinzugefügte Funktionen können somit prüfen, um welche Konstante es sich handelt und entsprechend eine Vereinfachung implementieren. Es besteht darüberhinaus die Möglichkeit Konstanten als Wert zurückzugeben.
 
-\paragraph{Func} Diese Ausprägung besitzt ebenfalls zwei Parameter, den Namen der Funktion und die übergebenen Parameter als Vektor. Der Name kann somit einfach ausgewertet, die Parameter einfach übergeben werden. Beide Werte werden an die dynamisch hinzugefügten Auswertungsfunktionen übergeben.
+\paragraph{Func} Diese Ausprägung besitzt ebenfalls zwei Parameter, den Namen der Funktion und die übergebenen Parameter als Vektor. Der Name kann somit einfach ausgewertet, die Parameter einfach übergeben werden.
 
 \paragraph{Num} Diese Ausprägung enthält als Wert eine Variante, die das \codeword{trait} \codeword{NumberType} implementiert.
 
@@ -1219,7 +1219,14 @@ Als erstes Beispiel dient der Term $sqrt(2)$. Der Parser erkennt hierbei nur die
 Als zweites Beispiel dient der Term $sqrt(2)*sqrt(2)$. Durch die gewährleistete Ausführungsreihenfolge der Terme ist das Ergebnis mit \codeword{simple_eval} $2$. Dies kommt durch die Termzusammenfassung zustande, wie sie für die Addition in Kapitel x erläuertert ist. Bei der Ausführung mit \codeword{hard_eval} wird dagegen entsprechend das Ergebnis $2.0000000000000004$ zurückgegeben. Dies hat den Grund, da ja erst die Potenzen ausgeführt werden, und danach erst die Multiplikation durchgeführt wird. Andere Nummerntypen, die hier eine höhere Genauigkeit erlauben bzw. solche Sonderfälle abfangen, können hierbei natürlich auch immer noch ein genaueres Ergebnis liefern.
 
 \subsection{Implementierung der limit-Funktion}
-\subsection{Implementierung einer to string-Methode}
+\subsection{Term leserlich darstellen}
+Bisher wurde zur Ausgabe des Terms im \codeword{println!}-Makro der Platzhalter ``\{:?\}'' verwendet. Dieser erlaubt es \codeword{structs} und \codeword{enums} ohne weitere Formatierung auszugeben. In unserem Fall wird z.B. für den Term $-1+y+x*2+x^2$ die Ausgabe
+\begin{quote}
+    Add([Mul([Num(Int(2)), Symbol("x")]), Pow(Symbol("x"), Num(Int(2))), Symbol("y"), Num(Int(-1))])
+\end{quote}
+erzeugt. Da dies noch recht unleserlich ist, und die übliche Notation die Potenz an den Anfang stellen würde, wird der Trait \codeword{Display} implementiert.
+
+Sobald dieser implementiert ist, kann die Ausgabe auch mit \codeword{println!("{}", ast)} erfolgen. Für das Trait kann die Methode \codeword{fmt} überladen werden, die dann aufgerufen wird. Hier können die Vektoren von Add und Mul entsprechend sortiert werden, sodass eine übliche Ausgabe erfolgt. Die Implementierung in dieser Arbeit gibt für den oben genannten Term $x^2+x*2+y-1$ aus.
 
 \newpage
 
