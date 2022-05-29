@@ -107,6 +107,4 @@ where
         terms.remove(&cos_key.unwrap());
         terms.remove(&sin_key.unwrap());
     }
-
-    // vll noch erweitern für Term (z*sin(x)^2)+(z*cos(x)^2) + (a*sin(x)^2)+(a*cos(x)^2), nicht im expose
 }
