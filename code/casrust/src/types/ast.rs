@@ -167,6 +167,17 @@ where
             _ => self.clone(),
         }
     }
+
+    pub fn count_ops(&self) -> u32 {
+        match self {
+            Ast::Add(vec) | Ast::Mul(vec) => {
+                vec.iter().fold(0, |acc, v| acc + v.count_ops()) + (vec.len() - 1) as u32
+            }
+            Ast::Pow(base, exp) => base.count_ops() + exp.count_ops() + 1,
+            Ast::Func(_, args) => args.iter().fold(0, |acc, v| acc + v.count_ops()) + 1,
+            _ => 0,
+        }
+    }
 }
 
 impl<N> Eq for Ast<N> where N: PartialEq {}
