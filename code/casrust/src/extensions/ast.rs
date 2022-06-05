@@ -1,6 +1,7 @@
 use crate::evaluator::EvalFn;
 use crate::types::ast::Ast;
 use crate::types::NumberType;
+use std::collections::{hash_map::Entry, HashMap};
 
 impl<N> Ast<N>
 where
@@ -12,7 +13,8 @@ where
             Ast::Mul(vec) => {
                 let mut result: Vec<Ast<N>> = vec![];
 
-                for node in vec {
+                let v: Vec<Ast<N>> = vec.iter().map(|e| e.expand(evaler)).collect();
+                for node in v {
                     match node {
                         Ast::Add(v_add) => {
                             if result.is_empty() {
@@ -95,6 +97,78 @@ where
                         }
                         _ => Ast::Pow(Box::new(base), Box::new(exp)),
                     },
+                }
+            }
+            _ => self.clone(),
+        }
+    }
+
+    pub fn simplify(&self, evaler: &EvalFn<N>) -> Ast<N> {
+        self.simplify_ratio(1, evaler)
+    }
+
+    pub fn simplify_ratio(&self, ratio: u32, evaler: &EvalFn<N>) -> Ast<N> {
+        let simplified = self.simplify_wrapper(evaler);
+
+        if self.count_ops() == 0 || simplified.count_ops() / self.count_ops() >= ratio {
+            self.clone()
+        } else {
+            simplified
+        }
+    }
+
+    fn simplify_wrapper(&self, evaler: &EvalFn<N>) -> Ast<N> {
+        match self {
+            Ast::Mul(vec) => {
+                let mut result: Vec<Ast<N>> = vec![];
+                let mut t_result: Vec<Ast<N>> = vec![];
+
+                let v: Vec<Ast<N>> = vec.iter().map(|e| e.simplify_wrapper(evaler)).collect();
+                let mut pows: HashMap<Ast<N>, Ast<N>> = HashMap::new();
+                for node in v {
+                    match node {
+                        Ast::Pow(base, exp) => match pows.entry(*exp) {
+                            Entry::Occupied(mut o) => {
+                                *o.get_mut() = o.get().clone() * *base;
+                            }
+                            Entry::Vacant(v) => {
+                                v.insert(*base);
+                            }
+                        },
+                        _ => t_result.push(node),
+                    }
+                }
+
+                for (exp, base) in pows {
+                    t_result.push(Ast::Pow(Box::new(base), Box::new(exp)));
+                }
+
+                // Summen und anderes aufsplitten
+                let mut all_sums: Vec<Ast<N>> = vec![];
+                let mut all_others: Vec<Ast<N>> = vec![];
+                for node in t_result {
+                    match node {
+                        Ast::Add(_) => all_sums.push(node),
+                        _ => all_others.push(node),
+                    }
+                }
+
+                println!("{:?}", all_sums);
+                println!("{:?}", all_others);
+
+                // Alle summen for loop
+                // innerhalb alle anderen for loop
+                // für jedes Ersparnis im Gegensatz zum Original merken
+                // das jeweils kleinste nehmen
+                // wenn andere gefunden, dass kleiner, dann bisheriges merken und nochmal loopen
+
+                if result.len() == 1 {
+                    result.pop().unwrap()
+                } else {
+                    let mut result = Ast::Mul(result);
+                    result.shorten().sort();
+
+                    result
                 }
             }
             _ => self.clone(),

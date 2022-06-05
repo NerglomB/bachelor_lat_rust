@@ -5,13 +5,13 @@ use casrust::types::prim_num::PrimNum;
 use std::str::FromStr;
 
 fn main() {
-    match Ast::from_str("(a+b+c+d)^2") {
+    match Ast::from_str("(x^2+x)/x*a*(y+1)*c*d*e*(z+2)") {
         Ok(ast) => {
-            println!("{}", ast.count_ops());
-            // let eval = base_evaluator();
-            // println!("{}", ast);
-            // println!("{:?}", ast);
-            // println!("{}", ast.expand(&eval));
+            // println!("{}", ast.count_ops());
+            let eval = base_evaluator();
+            println!("{}", ast);
+            println!("{:?}", ast);
+            println!("{}", ast.simplify(&eval));
             // println!(
             //     "{:?}",
             //     ast.simple_eval_sub(&eval, &Some("x"), &Some(Ast::Num(PrimNum::Int(0))))
