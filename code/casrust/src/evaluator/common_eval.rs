@@ -89,7 +89,7 @@ where
         match &val {
             Ast::Num(v) => {
                 if *v == 0 {
-                    return Ast::Num(N::zero());
+                    return Ast::Num(N::one());
                 } else if *v == 1 {
                     result = result * sym;
                 } else {
