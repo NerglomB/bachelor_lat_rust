@@ -5,7 +5,7 @@ pub mod mul_eval;
 pub mod pow_eval;
 
 use crate::evaluator::{add_eval::*, function_eval::*, pow_eval::*};
-use crate::extensions::function_expand::*;
+use crate::extensions::{function_expand::*, function_simplify::*};
 use crate::types::{ast::Ast, constants::*, NumberType};
 use std::collections::HashMap;
 
@@ -16,6 +16,7 @@ pub struct EvalFn<N> {
     pub funcs: HashMap<String, fn(&Vec<Ast<N>>, &bool) -> Option<Ast<N>>>,
     pub consts: HashMap<String, fn() -> Ast<N>>,
     pub expand_funcs: HashMap<String, fn(&Vec<Ast<N>>) -> Option<Ast<N>>>,
+    pub simplify_funcs: Vec<fn(&Ast<N>) -> Ast<N>>,
 }
 
 pub fn base_evaluator<N>() -> EvalFn<N>
@@ -41,5 +42,6 @@ where
         funcs,
         consts,
         expand_funcs,
+        simplify_funcs: vec![simplify_log],
     }
 }

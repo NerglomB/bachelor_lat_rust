@@ -6,14 +6,16 @@ use casrust::types::prim_num::PrimNum;
 use std::str::FromStr;
 
 fn main() {
-    match Ast::from_str("(d^2+d)*(x^3+x^2+x)*(x^2+1)/x/d/y") {
+    match Ast::from_str("2*log(x)+log(b)") {
+        // match Ast::from_str("log(x^2*b)") {
         // match Ast::from_str("(x^3+x^2+x+1)/y") {
         Ok(ast) => {
             // println!("{}", ast.count_ops());
             let eval = base_evaluator();
             // println!("{}", ast);
             println!("{:?}", ast);
-            println!("{}", ast.simplify(SimplifyType::Base, &eval));
+            println!("{}", ast.simplify(SimplifyType::Funcs, &eval));
+            println!("{}", ast.expand(&eval));
             // println!(
             //     "{:?}",
             //     ast.simple_eval_sub(&eval, &Some("x"), &Some(Ast::Num(PrimNum::Int(0))))

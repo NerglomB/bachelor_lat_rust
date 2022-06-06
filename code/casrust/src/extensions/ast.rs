@@ -104,13 +104,14 @@ where
     }
 
     pub fn simplify(&self, s_type: SimplifyType, evaler: &EvalFn<N>) -> Ast<N> {
-        self.simplify_ratio(s_type, 1, evaler)
+        self.simplify_ratio(s_type, 1.0, evaler)
     }
 
-    pub fn simplify_ratio(&self, s_type: SimplifyType, ratio: u32, evaler: &EvalFn<N>) -> Ast<N> {
+    pub fn simplify_ratio(&self, s_type: SimplifyType, ratio: f64, evaler: &EvalFn<N>) -> Ast<N> {
         let simplified = self.simplify_wrapper(s_type, evaler);
 
-        if self.count_ops() == 0 || simplified.count_ops() / self.count_ops() >= ratio {
+        if self.count_ops() == 0 || simplified.count_ops() as f64 / self.count_ops() as f64 > ratio
+        {
             self.clone()
         } else {
             simplified
@@ -126,91 +127,102 @@ where
                     .map(|e| e.simplify_wrapper(s_type, evaler))
                     .collect();
 
-                if s_type == SimplifyType::Exp {
-                    let mut pows: HashMap<Ast<N>, Ast<N>> = HashMap::new();
-                    for node in v {
-                        match node {
-                            Ast::Pow(base, exp) => match pows.entry(*exp) {
-                                Entry::Occupied(mut o) => {
-                                    *o.get_mut() = o.get().clone() * *base;
-                                }
-                                Entry::Vacant(v) => {
-                                    v.insert(*base);
-                                }
-                            },
-                            _ => result.push(node),
-                        }
-                    }
-
-                    for (exp, base) in pows {
-                        result.push(Ast::Pow(Box::new(base), Box::new(exp)));
-                    }
-                } else if s_type == SimplifyType::Base {
-                    let mut all_sums: Vec<Ast<N>> = vec![];
-                    let mut all_others: Vec<Ast<N>> = vec![];
-                    for node in v {
-                        match node {
-                            Ast::Add(_) => all_sums.push(node),
-                            _ => all_others.push(node),
-                        }
-                    }
-                    let mut combinations = vec![all_others.len(); all_sums.len()];
-                    let mut combinations_save_count = vec![0; all_sums.len()];
-                    let mut sums_visited = vec![false; all_sums.len()];
-
-                    while sums_visited.contains(&false) {
-                        let idx = sums_visited.iter().position(|&x| x == false).unwrap();
-                        let base_count = all_sums[idx].count_ops() + 2;
-                        for (other_idx, other) in all_others.iter().enumerate() {
-                            let save_count = (all_sums[idx].clone() * other.clone())
-                                .expand(evaler)
-                                .simple_eval(evaler)
-                                .count_ops();
-                            if save_count < base_count {
-                                let save_count = base_count - save_count;
-
-                                if save_count > combinations_save_count[idx]
-                                    || combinations_save_count[idx] == 0
-                                {
-                                    match combinations.iter().position(|&x| x == other_idx) {
-                                        Some(before_idx)
-                                            if save_count > combinations_save_count[before_idx] =>
-                                        {
-                                            combinations_save_count[idx] = save_count;
-                                            combinations[idx] = other_idx;
-                                            combinations_save_count[before_idx] = 0;
-                                            combinations[before_idx] = all_others.len();
-                                        }
-                                        None => {
-                                            combinations_save_count[idx] = save_count;
-                                            combinations[idx] = other_idx;
-                                        }
-                                        _ => {}
+                match s_type {
+                    SimplifyType::Exp => {
+                        let mut pows: HashMap<Ast<N>, Ast<N>> = HashMap::new();
+                        for node in v {
+                            match node {
+                                Ast::Pow(base, exp) => match pows.entry(*exp) {
+                                    Entry::Occupied(mut o) => {
+                                        *o.get_mut() = o.get().clone() * *base;
                                     }
-                                }
+                                    Entry::Vacant(v) => {
+                                        v.insert(*base);
+                                    }
+                                },
+                                _ => result.push(node),
                             }
                         }
 
-                        sums_visited[idx] = true;
+                        for (exp, base) in pows {
+                            result.push(Ast::Pow(Box::new(base), Box::new(exp)));
+                        }
                     }
-                    println!("{:?}", combinations);
+                    SimplifyType::Base => {
+                        let mut all_sums: Vec<Ast<N>> = vec![];
+                        let mut all_others: Vec<Ast<N>> = vec![];
+                        for node in v {
+                            match node {
+                                Ast::Add(_) => all_sums.push(node),
+                                _ => all_others.push(node),
+                            }
+                        }
+                        let mut combinations = vec![all_others.len(); all_sums.len()];
+                        let mut combinations_save_count = vec![0; all_sums.len()];
+                        let mut sums_visited = vec![false; all_sums.len()];
 
-                    for (idx, val) in combinations.iter().enumerate() {
-                        if val < &all_others.len() {
-                            result.push(
-                                (all_sums[idx].clone() * all_others[*val].clone())
+                        while sums_visited.contains(&false) {
+                            let idx = sums_visited.iter().position(|&x| x == false).unwrap();
+                            let base_count = all_sums[idx].count_ops() + 2;
+                            for (other_idx, other) in all_others.iter().enumerate() {
+                                let save_count = (all_sums[idx].clone() * other.clone())
                                     .expand(evaler)
-                                    .simple_eval(evaler),
-                            );
-                        } else {
-                            result.push(all_sums[idx].clone());
+                                    .simple_eval(evaler)
+                                    .count_ops();
+                                if save_count < base_count {
+                                    let save_count = base_count - save_count;
+
+                                    if save_count > combinations_save_count[idx]
+                                        || combinations_save_count[idx] == 0
+                                    {
+                                        match combinations.iter().position(|&x| x == other_idx) {
+                                            Some(before_idx)
+                                                if save_count
+                                                    > combinations_save_count[before_idx] =>
+                                            {
+                                                combinations_save_count[idx] = save_count;
+                                                combinations[idx] = other_idx;
+                                                combinations_save_count[before_idx] = 0;
+                                                combinations[before_idx] = all_others.len();
+                                            }
+                                            None => {
+                                                combinations_save_count[idx] = save_count;
+                                                combinations[idx] = other_idx;
+                                            }
+                                            _ => {}
+                                        }
+                                    }
+                                }
+                            }
+
+                            sums_visited[idx] = true;
+                        }
+
+                        for (idx, val) in combinations.iter().enumerate() {
+                            if val < &all_others.len() {
+                                result.push(
+                                    (all_sums[idx].clone() * all_others[*val].clone())
+                                        .expand(evaler)
+                                        .simple_eval(evaler),
+                                );
+                            } else {
+                                result.push(all_sums[idx].clone());
+                            }
+                        }
+
+                        for (idx, _) in all_others.iter().enumerate() {
+                            if let None = combinations.iter().position(|&x| x == idx) {
+                                result.push(all_others[idx].clone());
+                            }
                         }
                     }
-
-                    for (idx, _) in all_others.iter().enumerate() {
-                        if let None = combinations.iter().position(|&x| x == idx) {
-                            result.push(all_others[idx].clone());
+                    SimplifyType::Funcs => {
+                        let mut simplifier: Ast<N> = self.clone();
+                        for fun in evaler.simplify_funcs.iter() {
+                            simplifier = fun(&simplifier);
                         }
+
+                        result.push(simplifier);
                     }
                 }
 
@@ -223,6 +235,25 @@ where
                     result
                 }
             }
+            Ast::Add(vec) => {
+                let res = Ast::Add(
+                    vec.iter()
+                        .map(|e| e.simplify_wrapper(s_type, evaler))
+                        .collect(),
+                );
+
+                match s_type {
+                    SimplifyType::Funcs => {
+                        let mut simplifier: Ast<N> = res;
+                        for fun in evaler.simplify_funcs.iter() {
+                            simplifier = fun(&simplifier);
+                        }
+
+                        simplifier
+                    }
+                    _ => res,
+                }
+            }
             _ => self.clone(),
         }
     }
@@ -232,4 +263,5 @@ where
 pub enum SimplifyType {
     Base,
     Exp,
+    Funcs,
 }
