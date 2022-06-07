@@ -20,10 +20,14 @@ where
             }
 
             match log_val {
-                Some(val) => Ast::Func(
-                    "log".to_owned(),
-                    vec![Ast::Pow(Box::new(val), Box::new(Ast::Mul(other)))],
-                ),
+                Some(val) => {
+                    let mut other = Ast::Mul(other);
+                    other.shorten().sort();
+                    Ast::Func(
+                        "log".to_owned(),
+                        vec![Ast::Pow(Box::new(val), Box::new(other))],
+                    )
+                }
                 None => ast.clone(),
             }
         }

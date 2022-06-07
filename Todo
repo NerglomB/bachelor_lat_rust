@@ -1,5 +1,4 @@
 // Offen
-simplify implementieren
 (8^(1/3))^(-1) = 8^(-1/3) evtl. noch implementieren
 
 // Gemacht
@@ -17,3 +16,4 @@ Alle clone() und * nochmal prüfen. Etl. ast funktion get_val implementieren ode
 Error-Typ nutzen in parser
 expand
 Multiplikation von Pows mit selber exp: a**x * b**x = (a*b)**x in simplify implementieren
+simplify implementieren

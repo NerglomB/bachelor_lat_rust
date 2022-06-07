@@ -1253,6 +1253,26 @@ Um das Problem zu umgehen bieten sich zwei Lösungen an. Einerseits kann das zur
 Das zweite Beispiel bezieht sich auf explizite klonen des Exponenten bei Potenzen, wenn die Basis eine Multiplikation ist. In der entsprechenden for-Schleife wird für jedes Element des Vektors der Basis dem Ergebnis ein neues hinzugefügt nach den oben genannten Regeln. Der Exponent bleibt aber in jedem Durchlauf dersselbe. Da \codeword{Ast} einerseits immer noch nicht den Copy-Trait implementiert und andererseits die Initialisierung von Box das Ownership des Wertes bekommt muss hier \codeword{.clone()} ausgeführt werden. Alle anderen \codeword{.clone()}-Aufrufe dieser Methode beheben prinzipiell dasselbe Problem.
 
 \subsection{Implementierung von simplify}
+Um andere Arten von Vereinfachungen vorzunehmen wird die Methode ``simplify'' in Anlehnung von SymPy \cite{SymPySimplify} erstellt. Hier werden verschiedene Möglichkeiten geprüft einen Term effizient zu vereinfachen.
+
+In dieser Arbeit sollen folgende Terme vereinfacht werden können:
+
+\begin{enumerate}
+    \item $a^x * b^x$ wird zu $(a*b)^x$.
+    \item $(x^3+x^2+x+1)/y/x*(y^2+y)/z$ wird zu $(x^2+x+1+1/x)*(y+1)/z$ Wichtig hierbei ist, dass die Divisoren richtig zugeordnet werden und eine möglichst große Vereinfachung bewirken.
+    \item Als Beispiel soll wieder die log-Funktion als Erweiterung implementiert werden. So wird aus $2*log(x)+log(b)$ der Term $log(x^2*b)$.
+\end{enumerate}
+
+Die zentrale Frage ist hierbei, wie die Komplexität eines Terms ermittelt wird. Die Standardimplementierung von SymPy zählt hierzu im Term die nötigen Operationen. So erhält der Term $(x**2+x+1)/y$ einen Wert von 4. In dieser Arbeit soll die Komplexität ebenfalls so ermittelt werden. Hierzu wird die Methode \codeword{count_ops} implementiert.
+
+Da sich die ersten beiden Regeln zum vereinfachen überschneiden können, soll darüberhinaus angegeben werden müssen, welche Art der Vereinfachung durchgeführt werden soll.
+
+Die am einfachsten zu implementierende Möglichkeit der Vereinfachung ist Regel 1. Hierzu werden in einem \codeword{Ast::Mul} alle Werte iteriert und wie bereits in der Standardauswertung eine HashMap befüllt. Diesmal ist der Key der HashMap allerdings der Exponent und der eigentliche Wert die Basis. 
+
+\begin{itemize}
+    \item \begin{verbatim}src/types/ast.rs\end{verbatim}
+    \item \begin{verbatim}src/extensions/ast.rs\end{verbatim}
+\end{itemize}
 
 \newpage
 

@@ -258,7 +258,6 @@ where
         }
     }
 }
-
 #[derive(Copy, Clone, PartialEq)]
 pub enum SimplifyType {
     Base,
