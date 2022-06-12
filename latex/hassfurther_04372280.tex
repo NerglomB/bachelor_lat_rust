@@ -128,7 +128,7 @@ Anwendungsbeispiele für ein CAS finden sich in der Physik, Chemie, Sicherheitst
 
 In der vorliegenden Arbeit soll ein solches CAS in Ansätzen mit der Programmiersprache Rust entwickelt werden. Es soll untersucht werden, inwieweit das Ownership- und Borrowing-System von Rust bei einem solchen komplexen System bei der Entwicklung unterstützt und wie die Performance zur Laufzeit ausfällt. Das System soll dabei einfach erweiterbar sein. Nicht implementierte mathematische Funktionen sollen einfach integriert werden können und Terme weiter zusammengefasst werden können als die Standardimplentierung erlaubt.
 
-Einen besonderen Stellenwert nimmt SymPy ein, da dieses System einerseits als Open-Source-Projekt verfügbar ist, als auch der Code in Python geschrieben ist und leicht verständlich und erweiterbar ist \cite[S. 1]{SympyPeerJ}. Die Verwendung dieser Bibliothek und die Vorstellung der Programmiersprache Rust während meines Studiums haben mir die Idee gegeben diese Arbeit zu schreiben. Einige Lösungen werden also von SymPy inspiriert sein. Der Code soll dabei natürlich nicht 1-zu-1 in Rust neu geschrieben werden, sondern mit den Möglichkeiten und Einschränkungen von Rust erweitert werden, auch wenn natürlich nur ein Teil des Umfangs von SymPy in dieser Arbeit abgebildet wird.
+Einen besonderen Stellenwert nimmt SymPy ein, da dieses System einerseits als Open-Source-Projekt verfügbar ist, als auch der Code in Python geschrieben ist und leicht verständlich und erweiterbar ist \cite[S. 1]{SympyPeerJ}. Die Verwendung dieser Bibliothek und die Vorstellung der Programmiersprache Rust während meines Studiums haben mir die Idee gegeben diese Arbeit zu schreiben. Einige Lösungen werden also von SymPy inspiriert sein. Der Code soll dabei natürlich nicht 1-zu-1 in Rust neu geschrieben werden, sondern mit den Möglichkeiten und Einschränkungen von Rust erweitert werden, auch wenn natürlich nur ein Teil des Umfangs von SymPy in dieser Arbeit abgebildet werden kann.
 
 \newpage
 
@@ -597,7 +597,7 @@ Ein Blick zu SymPy zeigt, dass bereits hier Lösungen direkt aus Python verwende
 
 In ``Modern Computer Algebra'' \cite[S. 29 ff.]{Gathen2013} und ``Computer Algebra - Concepts and Techniques'' \cite[S. 81 ff.]{Lamagna2019} sind theoretische Implementierungen für Ganzzahlwerte angegeben. Hiervon könnten wir in dieser Arbeit natürlich gebrauch machen und diese Typen selbst implementieren und für Fliesskommazahlen erweitern, da Rust diese Typen leider nicht selbst anbietet. Allerdings existieren bereits die beiden Crates (Abhängigkeiten im Rust-Ökosystem) ``num'' \cite{CrateNum} und ``bigdecimal'' \cite{CrateBigdecimal}, die Typen mit ungebrenzter Präszision anbieten.
 
-Folgend soll die Performance zwischen den primitiven Typen auf dem Stack, den primitiven Typen auf dem Heap und den Crates verglichen werden. Wie zu erwarten ist die Speicherung auf dem Stack am effizientesten, der Zugriff auf dem Heap kostet Zeit. Der zusätliche Zeitverlust bei den Crates lässt sich zum einen dadurch erklären, dass immer ein Überlauf geprüft werden muss um den Wert richtig zu verarbeiten, andererseits arbeit der Typ \codeword{BigInt} mit einem Vektor. Wie in \hyperref[sec:kap2d2]{Kapitel 2.2} bereits erwähnt, wird bei einem Zugriff zusätzlich geprüft, ob der Index gültig ist, was ebenfalls Zeit kostet.
+Folgend soll die Performance zwischen den primitiven Typen auf dem Stack, den primitiven Typen auf dem Heap und den Crates verglichen werden. Wie zu erwarten ist die Speicherung auf dem Stack am effizientesten, der Zugriff auf dem Heap kostet Zeit. Der zusätliche Zeitverlust bei den Crates lässt sich zum einen dadurch erklären, dass immer ein Überlauf geprüft werden muss um den Wert richtig zu verarbeiten, andererseits verwendet der Typ \codeword{BigInt} einen Vektor. Wie in \hyperref[sec:kap2d2]{Kapitel 2.2} bereits erwähnt, wird bei einem Zugriff zusätzlich geprüft, ob der Index gültig ist, was ebenfalls Zeit kostet.
 
 \begin{itemize}
     \item \begin{verbatim}benches/bench-num-types.rs\end{verbatim}
@@ -619,7 +619,7 @@ Leider ist es mit Rust-Benchmarks noch nicht möglich den Speicherverbrauch zu m
 
 \paragraph{Primitive Typen Heap} Der Speicherverbrauch der eigentlich Werte ist wie bei den primitiven Typen auf dem Stack. Davon entfallen aber 8 Bytes auf dem Heap statt auf dem Stack, zur Berechnung müssen die \codeword{Box}-Werte derefenziert werden. Zusätzlich befindet sich ein Zeiger auf dem Stack durch \codeword{Box}. Die Größe hiervon hängt von der verwendeten Architektur ab \cite{BoxExmaple}.
 
-\paragraph{num und bigdecimal} Bei dem Datentyp BigInt wird einerseits ein Vorzeichen verwendet, welches 1 Byte verbraucht \cite{EnumSize} als auch der Datentyp BigUint der wiederum einen Vektor mit BigDigit erhält. Das Vorzeichen ist als \codeword{Enum} umgesetzt \cite{BigIntSign}. Schaut man sich diese Definition an, kann dieser Typ zwischen 4 Bytes (u32) und 16 Bytes (i128) verbrauchen. Während des Debuggens auf verschiedenen Systemen wird in diesem Beispiel der Typ u64 angenommen und somit ein Speicherplatz von 8 Bytes benötigt. Mit größer werdenden Zahlen steigt allerdings dieser Verbrauch, da sich der Vektor vergrößert. Auch liegen nicht mehr alle Daten auf dem Stack, sondern alle BigDigits auf dem Heap, was die Zugriffsgeschwindigkeit wie ebenfalls erhöht erhöht.
+\paragraph{num und bigdecimal} Bei dem Datentyp BigInt wird einerseits ein Vorzeichen verwendet, welches 1 Byte verbraucht \cite{EnumSize} als auch der Datentyp BigUint der wiederum einen Vektor mit BigDigit erhält. Das Vorzeichen ist als \codeword{Enum} umgesetzt \cite{BigIntSign}. Schaut man sich diese Definition an, kann dieser Typ zwischen 4 Bytes (u32) und 16 Bytes (i128) verbrauchen. Während des Debuggens auf verschiedenen Systemen wird in diesem Beispiel der Typ u64 angenommen und somit ein Speicherplatz von 8 Bytes benötigt. Mit größer werdenden Zahlen steigt allerdings dieser Verbrauch, da sich der Vektor vergrößert. Auch liegen nicht mehr alle Daten auf dem Stack, sondern alle BigDigits auf dem Heap, was die Zugriffsgeschwindigkeit wieder ebenfalls erhöht.
 
 Der Typ bigdecimal verwendet laut Beschreibung den Typ BigInt und zusätzlich einen 64-Bit-Integer um die Position der Dezimalstelle zu bestimmen \cite{CrateBigdecimalDocs}. Dadurch erhöht sich der Speicherverbrauch also nur unwesentlich.
 
@@ -638,7 +638,7 @@ Eine erste Idee, wie die Datenstruktur aussehen könnte, war ein einfacher binä
         [.2 ]
     ]
 
-In Rust sähe die Implementierung folgendermaßen aus. Die Ausprägung Add benötigt für die Werte immer den Wrapper \codeword{Box} der die Daten auf den Heap speichert. Zur Compilezeit lässt sich die Größe auf dem Stack nicht bestimmen, da der Compiler nicht bestimmen wie viele Ebenen Add beinhaltet.
+In Rust sähe die Implementierung folgendermaßen aus. Die Ausprägung Add benötigt für die Werte immer den Wrapper \codeword{Box} der die Daten auf den Heap speichert. Zur Compilezeit lässt sich die Größe auf dem Stack nicht bestimmen, da nicht bestimmt ist, wie viele Ebenen Add beinhaltet \cite{RustRecursiveTypes}.
 
 \begin{lstlisting}[language=rust, caption={BTree Ast}]
     enum BTree {
@@ -673,7 +673,7 @@ Hier könnte nun versucht werden das Problem mit Referenzzählern (vgl. \cite{Rc
 
 Auch wäre die Nutzung von Rohzeigern in Verbindung mit \codeword{unsafe} möglich, was Code in Rust kennzeichnet, der auf undefinierten Speicherbereich zeigen kann \cite{RustUnsafe}.
 
-Da beide Varianten aber sich entweder auf den Codeumfang und -verständlichkeit auswirken oder der Hauptgrund Rust zu benutzen umgangen wird, soll, wenn möglich auf diese Möglichkeiten verzichtet werden.
+Da beide Varianten aber sich entweder auf den Codeumfang und -verständlichkeit auswirken oder der Hauptgrund Rust zu benutzen umgangen wird, soll, wenn möglich auf diese Möglichkeiten verzichtet werden. Damit ausgeschlossen ist aber auch die Möglichkeit den Baum in situ zu verändern
 
 Eine Alternative wäre nur lesende Referenzen zu erzeugen, über diese zu iterieren und dann einen neuen Baum zu erstellen. Wenn aber sowieso alle Werte benötigt werden um diese zusammenfassen zu können, könnten diese auch in in einem Vektor  gespeichert werden. Für Addition und Multiplikation würde dann der Baum für den Term $myfunc(a, b*c)+1+2+x*y*2^z$ beispielsweise so aussehen:
 
@@ -1053,6 +1053,7 @@ Die Überladungen für \codeword{Ast} sollen dabei gleich Zusammenfassungen übe
         )
 \end{lstlisting}
 
+\label{sec:kapAddnundMult}
 \subsection{Addieren und Multiplizieren (Standardauswertung von Termen)}
 Die prinzipielle Vorgehensweise um Additionen und Multiplikationen auszuführen orientiert sich an dem Vorgehen aus SymPy (vgl. \cite{SymPyAddFlatten} und \cite{SymPyMulFlatten}). Beide Verfahren sind im Grunde identisch, nur ändert sich der entsprechende Operator und das Ergebnis. So wird aus $x+x$ eine Multiplikation der Form $2*x$. Aus $x*x$ wird die Potenz $x^2$. 
 
@@ -1092,7 +1093,7 @@ Um dieses Verfahren zu implementieren, muss für das \codeword{Ast}-Enum noch di
 \subsection{Umgang mit Brüchen, Potenzen und Wurzeln}
 Um auch genauere Werte zu erlauben, sollen rationale Zahlen in Form von Brüchen implementiert werden. So können mithilfe der Operatorenüberladungen diese dann zusammengefasst und gekürzt werden. Für rationale Zahlen sind im Enum \codeword{PrimNum} für Zähler und Nenner nur ganze Zahlen erlaubt, sowohl jeweils postiv und negativ. Der Term $1/3+1/3$ wird also zu \codeword{Num(Rational(2, 3))} ausgewertet. Der Term $1/3+1/3+1/3$ soll zu \codeword{Num(Int(1))} ausgewertet werden können.
 
-Terme wie $1/x$ werden durch das CAS in die Form \codeword{Pow(Symbol("x"), Num(Int(-1)))} umgeformt. Dabei ist ``x'' entsprechend die Basis und ``-1'' der Exponent. In der Standardimplementierung soll es außerdem bereits möglich sein die Potenzregel $a^{b^{c}} = a^{(b*c)}$ anzuwenden. Durch die bisherige Implementierung der Multiplikation wird außerdem bereits die Potenzregel $x^a*x^b = x^{(a+b)}$ angewendet. Die letzte Regel $x^a*y^a = (x*y)^a$ soll wiederum als erweitere Funktionalität implementiert werden, da hier eine andere Vorgehensweise bei dem Zusammenfassen des Terms notwendig ist, als die bisher implementierte und in Kapitel x vorgestellte.
+Terme wie $1/x$ werden durch das CAS in die Form \codeword{Pow(Symbol("x"), Num(Int(-1)))} umgeformt. Dabei ist ``x'' entsprechend die Basis und ``-1'' der Exponent. In der Standardimplementierung soll es außerdem bereits möglich sein die Potenzregel $a^{b^{c}} = a^{(b*c)}$ anzuwenden. Durch die bisherige Implementierung der Multiplikation wird außerdem bereits die Potenzregel $x^a*x^b = x^{(a+b)}$ angewendet. Die letzte Regel $x^a*y^a = (x*y)^a$ soll wiederum als erweitere Funktionalität implementiert werden, da hier eine andere Vorgehensweise bei dem Zusammenfassen des Terms notwendig ist, als die bisher implementierte und im Kapitel zur \hyperref[sec:kapAddnundMult]{Addition und Multiplikation} vorgestellte vorgehensweise.
 
 Glücklicherweise können Wurzeln ebenfalls als Potenzen dargestellt werden, so ist z.B. $\sqrt{2} = 2^{1/2}$ oder $\sqrt[3]{8} = 8^{1/3}$. So können alle bisherigen Regeln hierrauf einfach angewendet werden. Zudem sollen die Funktionen \codeword{sqrt} und \codeword{nthroot} im Term verwendet werden können, die dann entsprechende \codeword{Ast}-Elemente erzeugen.
 
@@ -1124,15 +1125,15 @@ Um die Erweiterbarkeit des Systems zu gewährleisten wird das Struct \codeword{E
     \item \begin{verbatim}src/evaluator/mod.rs\end{verbatim}
 \end{itemize}
 
-\paragraph{Allgemeines} Da das Enum \codeword{Ast} bereits einen Generic-Parameter enthält, muss dieser ebenfalls bei EvalFn angegeben werden. Die Felder sind teils Vektoren, teils HashMaps, die entsprechende Funktionen zur Vereinfachung vorhalten. Der Parameter mit dem Typ \codeword{&mut HashMap<Ast<N>} wurde bereits genauer vorgestellt. Durch die Übergabe der Map anstelle des ausgewerteten \codeword{Ast}-Typs erhoffe ich mir eine einfachere Handhabung in den auswertendenden Funktionen. In der Funktion ``add\_sin\_cos'' müsste ansonsten direkt der Term aufgeteilt werden um alle Elemente durchzuiterieren, mit einer Map geht dies ohne Umwege.
+\paragraph{Allgemeines} Da das Enum \codeword{Ast} bereits einen Generic-Parameter enthält, muss dieser ebenfalls bei EvalFn angegeben werden. Die Felder sind teils Vektoren, teils HashMaps, die entsprechende Funktionen zur Vereinfachung vorhalten. Der Parameter mit dem Typ \codeword{&mut HashMap<Ast<N>} wurde bereits genauer vorgestellt.
 
-\paragraph{adders} Funktionen, die den Typ \codeword{Ast::Add} weiter vereinfachen können. So können entsprechend die Einträge der HashMap geprüft und verändert werden. Der zweite Parameter vom Typ \codeword{bool} gibt an, ob es sich um eine explizite Berechnung handeln soll. Dies soll noch Relevant werden, wenn auch ungenaue Werte berechnet werden sollen. Ein Beispiel ist die bereits mehrfach angesprochene Vereinfachung $cos(x)^2+sin(x)^2 = 1$.
+\paragraph{adders} Funktionen, die den Typ \codeword{Ast::Add} weiter vereinfachen können. So können entsprechend die Einträge der HashMap geprüft und verändert werden. Der zweite Parameter vom Typ \codeword{bool} gibt an, ob es sich um eine explizite Berechnung handeln soll. Dies soll noch Relevant werden, wenn auch ungenaue Werte berechnet werden sollen.
 
 \paragraph{muls} Funktionen, die den Typ \codeword{Ast::Mul} weiter vereinfachen können. Die Parameter sind identisch wie bereits bei \codeword{adders}. Dieses Feld ist der Vollständigkeithalber implementiert, da ich kein Beispielterm finden konnte, bei dem dies relevant ist.
 
 \paragraph{pows} Funktionen, die die Basis und den Exponenten erhalten und Auswerten können. So kann z.B. der Term $(x*4)^{(1/2)}$ zu $x^{(1/2)}*2$ vereinfacht werden. Auch hier gibt es wieder die Möglichkeit eine Explizite Berechnung zu erwzwingen. Diese Funktion besitzt darüberhinaus einen Rückgabewert. Da der entsprechende \codeword{Ast} nicht direkt bearbeitet wird, da sich dieser auch in der Ausprägung verändern kann. In diesem Beispiel wird aus einem \codeword{Ast::Pow} ein \codeword{Ast::Mul}.
 
-\paragraph{funcs} Funktionen, die angegebene Funktionen im Term umschreiben bzw. auswerten sollen. So kann z.B. der Term $sin(0) + 2$ direkt vereinfacht werden in $0 + 2 = 2$. Der Term $sqrt(4)$ kann zu $2$ vereinfacht werden. Dabei bleiben Funktionen, die \codeword{EvalFn} nicht bekannt sind natürlich im Term unverändert erhalten. Falls eine Auswertung nicht möglich ist, ist dies ebenfalls der Fall. Ansonsten steht der Funktion natürlich immer offen den Term entsprechend in ein anderes \codeword{Ast}-Objekt umzuwandeln. Dieses Feld ist als HashMap implementiert, da eine Funktion nur eine Auswertung besitzt. Das Überschreiben einer bereits bestehenden Funktion ist somit simpel.
+\paragraph{funcs} Funktionen, die angegebene Funktionen im Term umschreiben bzw. auswerten sollen. So kann z.B. der Term $sin(0) + 2$ direkt vereinfacht werden in $0 + 2 = 2$. Der Term $sqrt(4)$ kann zu $2$ vereinfacht werden. Dabei bleiben Funktionen, die \codeword{EvalFn} nicht bekannt sind natürlich im Term unverändert erhalten. Falls eine Auswertung nicht möglich ist, ist dies ebenfalls der Fall. Ansonsten steht der Funktion natürlich immer offen den Term entsprechend in ein anderes \codeword{Ast}-Objekt umzuwandeln. Dieses Feld ist als HashMap implementiert, da eine Funktion nur eine Auswertung besitzt.
 
 \paragraph{consts} Funktionen die nur ein \codeword{Ast} zurückgeben. Dies wird in den meisten Fällen ein numerischer Wert sein. Dieses Feld ist ebenso als HashMap umgesetzt.
 
@@ -1201,9 +1202,9 @@ Zu überlegen ist noch, ob der übergebene Term vor der Substituierung ebenfalls
 \end{itemize}
 
 \subsection{Implementierung von expand}
-Eventuell ist es interessant einen Term vereinfacht vorliegen zu haben. Auch wenn der Name ``expand'' nicht danach klingt, einen Term zu vereinfachen, so kann dies durchaus der Fall sein, wie der folgende Term zeigt $(x + 1)*(x - 2) - (x - 1)*x$ \cite{SymPyExpand}. Wird der Term ausmultipliziert kann dieser anschließend auf $-2$ vereinfacht werden. Im folgenden sollen die folgende Terme auf dieser Art vereinfacht werden können.
+Auch ist es interessant einen Term vereinfacht vorliegen zu haben. Auch wenn der Name ``expand'' nicht danach klingt, einen Term zu vereinfachen, so kann dies durchaus der Fall sein, wie der folgende Term zeigt $(x + 1)*(x - 2) - (x - 1)*x$ \cite{SymPyExpand}. Wird der Term ausmultipliziert kann dieser anschließend auf $-2$ vereinfacht werden. Im folgenden sollen die folgende Terme auf dieser Art vereinfacht werden können.
 
-\paragraph{Multiplikation über Addition bzw. einzelne Elemente} Hierbei soll der Term $x*(a+b)$ zu $x*a+x*b$ umgeformt werden, der Term $(a+b)*(c+d)*e$ soll entsprechend zu $a*c*e + a*d*e + b*c*e + b*d*e$ umgeformt werden.
+\paragraph{Multiplikation von Additionen bzw. einzelnen Elementen} Hierbei soll der Term $x*(a+b)$ zu $x*a+x*b$ umgeformt werden, der Term $(a+b)*(c+d)*e$ soll entsprechend zu $a*c*e + a*d*e + b*c*e + b*d*e$ umgeformt werden.
 
 Die Implementierung hiervon ist recht einfach. Bei der Ausprägung \codeword{Ast::Mul} wird ein leerer Ergebnisvektor erstellt. Danach muss über jedes Element im Vektor iteriert werden. Handelt es sich nicht um die Ausprägung \codeword{Ast::Add} wird das Element dem Ergebnis hinzugefügt falls dieser noch leer ist, ansonsten wird jedes Element im Ergebnisvektor mit dem derzeitigen Element Multipliziert, dabei können die Elemente direkt im Vektor verändert werden.
 
@@ -1259,7 +1260,7 @@ In dieser Arbeit sollen folgende Terme vereinfacht werden können:
 
 \begin{enumerate}
     \item $a^x * b^x$ wird zu $(a*b)^x$.
-    \item $(x^3+x^2+x+1)/y/x*(y^2+y)/z$ wird zu $(x^2+x+1+1/x)*(y+1)/z$ Wichtig hierbei ist, dass die Divisoren richtig zugeordnet werden und eine möglichst große Vereinfachung bewirken.
+    \item $(x^3+x^2+x+1)/y/x*(y^2+y)/z$ wird zu $(x^2+x+1+\frac{1}{x})*(y+1)/z$ Wichtig hierbei ist, dass die Divisoren richtig zugeordnet werden und eine möglichst große Vereinfachung bewirken.
     \item Als Beispiel soll wieder die log-Funktion als Erweiterung implementiert werden. So wird aus $2*log(x)+log(b)$ der Term $log(x^2*b)$.
 \end{enumerate}
 
@@ -1269,15 +1270,17 @@ Da sich die ersten beiden Regeln zum vereinfachen überschneiden können, soll d
 
 \paragraph{Regel 1} Die am einfachsten zu implementierende Möglichkeit der Vereinfachung ist die erste Regel. Hierzu werden in einem \codeword{Ast::Mul} alle Werte iteriert und wie bereits in der Standardauswertung eine HashMap befüllt. Diesmal ist der Key der HashMap allerdings der Exponent und der eigentliche Wert die Basis. Zum Schluss wird für jeden Eintrag entsprechend ein neues \codeword{Ast::Pow}-Element erzeugt und dem Ergebnis hinzugefügt.
 
-\paragraph{Regel 2} Bei der zweiten Regel ist die Zuordnung der Divisoren zu den Additionstermen eine Schwierigkeit, die gelöst werden muss. Schlussendlich habe ich mich für eine Lösung entschieden, die jedem Divisor einer Addition zuordnet, die die größte Einsparung erbringt, diese Kombination wird dann durchgeführt. SymPy löst dies anders. Der Term $(x^3+x^2+x+1)/x*(x^2+x)$ wird hierbei ausmultipliziert und dann ein größter gemeinsamer Nenner gesucht (vgl. \cite{SymPySimplify} Aufrufe \codeword{cancel}, \codeword{_mexpand}, \codeword{together}). Einerseits erscheint mir diese Möglichkeit sehr mächtig, aber auch recht komplex und fehleranfällig zu implementieren.
+\paragraph{Regel 2} Bei der zweiten Regel ist die Zuordnung der Divisoren zu den Additionstermen eine Schwierigkeit, die gelöst werden muss. Schlussendlich habe ich mich für eine Lösung entschieden, die jedem Divisor einem Dividenden zuordnet, die die größte Einsparung erbringt, diese Kombination wird dann durchgeführt. Die Zuordnung läuft dabei so ab, dass alle Möglichen Divisoren für alle möglichen Dividenden geprüft werden. Hierbei wird die Komplexität des Terms davor und nach Durchführung der Division gemessen und verglichen.
 
-Um meine bisher gesammelten Erfahrungen in diese Arbeit zu bringen habe ich mich für eine eigene Implemeniterung entschieden. Später bei einem Vergleich zwischen SymPy und diesem System können eventuelle Unterschiede aufgezeigt und verglichen werden.
+SymPy löst dies anders. Der Term $(x^3+x^2+x+1)/x*(x^2+x)$ wird hierbei ausmultipliziert und dann ein größter gemeinsamer Teiler gesucht (vgl. \cite{SymPySimplifySrc} Aufrufe \codeword{cancel}, \codeword{_mexpand}, \codeword{together}). Einerseits erscheint mir diese Möglichkeit sehr mächtig, aber auch recht komplex und fehleranfällig zu implementieren.
 
-\paragraph{Regel 3} Die letzte Regel soll es erlauben benutzerdefinierte Regeln zur Zusammenfassung hinzuzufügen. Hierzu wird wieder das Struct \codeword{EvalFn} erweitert, um Funktionen hinzufügen zu können, die nacheinander aufgerufen werden. Als Beispiel dient hierbei die \codeword{log}-Funktion, die nun das Gegenteil wie in ``expand'' macht. Eine Besonderheit hierbei ist gleich, dass diese Funktion sowohl in Multiplikationstermen als auch in Additionstermen aufgerufen werden muss.
+Um meine bisher gesammelten Erfahrungen in diese Arbeit zu bringen habe ich mich für eine eigene Implementierung entschieden. Später bei einem Vergleich zwischen SymPy und diesem System können eventuelle Unterschiede aufgezeigt und verglichen werden.
+
+\paragraph{Regel 3} Die letzte Regel soll es erlauben, benutzerdefinierte Regeln zur Zusammenfassung hinzuzufügen. Hierzu wird wieder das Struct \codeword{EvalFn} erweitert, um Funktionen hinzufügen zu können, die nacheinander aufgerufen werden. Als Beispiel dient hierbei die \codeword{log}-Funktion, die nun das Gegenteil wie in ``expand'' macht. Eine Besonderheit hierbei ist gleich, dass diese Funktion sowohl in Multiplikationstermen als auch in Additionstermen aufgerufen werden muss.
 
 \paragraph{Besonderheiten mit Rust} Gerade bei der Implementierung der zweiten Regel ist der Aspekt ``Borrowing'' hervorgetreten. Die Ursprüngliche Idee ist, im Term alle Summen und alle anderen Terme zu trennen. Hiernach sollte über alle Summen iteriert werden und der richtige Divisor gefunden werden. Sollte sich bei einer späteren Summe herausstellen, dass der Divisor eine größere Einsparung bringt, soll die vorherige Summe noch einmal mit anderen Divisoren überprüft werden. Allerdings ist es durch das ``Borrowing'' nicht möglich einem Vektor ein Element hinzuzufügen, über den gerade iteriert wird.
 
-Die Lösung hierfür ist einen eigenen Iterator zu implementieren, der dieses Problem umgeht. Hierbei soll über ein zweites Array gespeichert werden, ob es noch ein Element gibt, das überprüft werden soll anhand eines ``bool''. Nach der Iteration muss der entsprechende Index im Hilfsarray auf ``true'' gesetzt werden. Im Falle, dass der Divisor wechselt muss der entsprechende Index auf ``false'' gesetzt werden. Der Iterator läuft dann solange ein ``false''-Wert im Hilfsarray vorhanden ist. 
+Die Lösung wird dabei folgendermaßen implementiert. Über ein zweites Array wird gespeichert, ob es noch ein Element gibt, das überprüft werden. Dies geschieht durch einen ``bool''-Wert am entsprechenden Index. Nach der Iteration muss der entsprechende Index im Hilfsarray auf ``true'' gesetzt werden. Im Falle, dass der Divisor wechselt muss der entsprechende Index auf ``false'' gesetzt werden. Die Schleife läuft dann solange wie ein ``false''-Wert im Hilfsarray vorhanden ist.
 
 \begin{itemize}
     \item \begin{verbatim}src/evaluator/mod.rs\end{verbatim}
@@ -1324,11 +1327,12 @@ Sobald dieser implementiert ist, kann die Ausgabe auch mit \codeword{println!("{
 
 \section{Fazit}
 \subsection{Erweiterungs- und Verbesserungsideen des Systems}
-Im Rahmen dieser Arbeit wurde nicht für alle Implementierungen die bestmögliche Lösung vorgenommen. Auch sind einige Aspkete Verbesserungswürdig, die einen angenehmen Umgang mit dieser Bibliothek sorgen würden. Diese Punkte sollen der Vollständigkeithalber mit aufgeführt werden.
+Im Rahmen dieser Arbeit wurde nicht für alle Implementierungen die bestmögliche Lösung vorgenommen. Auch sind einige Aspkete Verbesserungswürdig, die einen angenehmeren Umgang mit dieser Bibliothek sorgen würden. Diese Punkte sollen der Vollständigkeithalber mit aufgeführt werden.
 \begin{itemize}
     \item Da Rust keine weiteren Besonderheiten für Rekursion bietet, würde eine iterative Lösung die Elemente des \codeword{Ast} zu verarbeiten wahrscheinlich Performanter sein.
     \item Der Parser könnte erweitert werden, sodass auch $3x$ anstelle von $3*x$ erkannt wird. Auch die Möglich dynamisch Operatoren hinzuzufügen wäre interessant, sodass z.B. für die Fakultät einfach $x!$ angegeben werden kann, anstelle eines Funktionsaufrufs.
-    \item Bei der Zusammenfassung der Terme ist zu überlegen, den Nummerntyp nicht zusammenzufassen. Rationale Zahlen und Fließkommazahlen könnten nebeneinander existieren. In der momentanen Implementierung wird diese Addition zu einer Fließkommazahl vereinfacht. Der Vorteil dabei ist, dass sicher nur ein Zahlenwert vorhanden. Allerdings wird der Nachteil der Ungenauigkeit in Kauf genommen. Bei der Zusammenfassung in der HashMap kann es natürlich zu Konflikten kommen. Eine andere Idee wäre hier als Key den Term als String zu verwenden. Hierzu müsste aber der Term auf jeden Fall vorher sortiert sein. Permutationen eines Terms ($x*y$ und $y*x$) können sonst nicht abgefangen werden. Hier hat das Hashing den Vorteil, das die Reihenfolge egal ist, da beide Symbole zusammen denselben Hashwert errechnen.
+    \item Bei der Zusammenfassung der Terme ist zu überlegen, den Nummerntyp nicht zusammenzufassen. Rationale Zahlen und Fließkommazahlen könnten nebeneinander existieren. In der momentanen Implementierung wird diese Addition zu einer Fließkommazahl vereinfacht. Der Vorteil dabei ist, dass sicher nur ein Zahlenwert vorhanden. Allerdings wird der Nachteil der Ungenauigkeit in Kauf genommen.
+    \item Bei der Zusammenfassung von Termen in der HashMap kann es zu Konflikten kommen. Eine andere Idee wäre hier als Key den Term als String zu verwenden. Hierzu müsste aber der Term auf jeden Fall vorher sortiert sein. Permutationen eines Terms ($x*y$ und $y*x$) können sonst nicht abgefangen werden. Hier hat das Hashing den Vorteil, das die Reihenfolge egal ist, da beide Symbole zusammen denselben Hashwert errechnen.
     \item Im moment wird $cos(x)^2+sin(x)^2 = 1$ nur in einfachen Fällen zusammengefasst. Der Term $(z*sin(x)^2)+(z*cos(x)^2) + (a*sin(x)^2)+(a*cos(x)^2)$ könnte entsprechend auch zusammengefasst werden.
 \end{itemize}
 

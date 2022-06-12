@@ -41,4 +41,22 @@ fn main() {
     //         println!("error in term")
     //     }
     // };
+
+    enum BTree {
+        Number(i64),
+        Symbol(String),
+        Add(Box<BTree>, Box<BTree>),
+    }
+    let tree = BTree::Add(
+        Box::new(BTree::Add(
+            Box::new(BTree::Symbol("x".to_owned())),
+            Box::new(BTree::Number(1)),
+        )),
+        Box::new(BTree::Number(2)),
+    );
+
+    let mut leave_1 = BTree::Number(1);
+    let mut leave_2 = BTree::Number(2);
+    let mut parent_1 = BTree::Add(Box::new(leave_1), Box::new(leave_2));
+    let mut refs = vec![&mut parent_1, &mut leave_1, &mut leave_2];
 }
