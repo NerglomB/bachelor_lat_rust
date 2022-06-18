@@ -119,7 +119,7 @@
 \newpage
 
 \section{Einleitung}
-Computeralgebrasysteme - im folgenden abgekürzt durch CAS - nehmen in verschiedenen Bereichen der Wissenschaft eine wichtige Rolle ein. Sie ermöglichen es einerseits mathematische Ausdrücke mit Variablen darzustellen, diese Terme zu verändern und mit diesen zu arbeiten. Andererseits lassen sich wesentlich genauere Berechnung durchführen, indem z.B. nicht alle Ausdrücke in einem Term ausgewertet werden, wenn es hierdurch zu Ungenauigkeiten kommen kann. Die ``Fachgruppe Computeralgebra'' beschreibt ein solches System wie folgt \cite{FachgruppeDef}:
+Computeralgebrasysteme - im folgenden abgekürzt durch CAS - nehmen in verschiedenen Bereichen der Wissenschaft eine wichtige Rolle ein. Sie ermöglichen es einerseits mathematische Ausdrücke mit Variablen darzustellen, diese Terme zu verändern und mit diesen zu arbeiten. Andererseits lassen sich wesentlich genauere Berechnungen durchführen, indem z.B. nicht alle Ausdrücke in einem Term ausgewertet werden, wenn es hierdurch zu Ungenauigkeiten kommen kann. Die ``Fachgruppe Computeralgebra'' beschreibt ein solches System wie folgt \cite{FachgruppeDef}:
 \begin{quote}
     Die Computeralgebra ist ein Wissenschaftsgebiet, das sich mit Methoden zum Lösen mathematisch formulierter Probleme durch symbolische Algorithmen und deren Umsetzung in Soft- und Hardware beschäftigt. Sie beruht auf der exakten endlichen Darstellung endlicher oder unendlicher mathematischer Objekte und Strukturen und ermöglicht deren symbolische und formelmäßige Behandlung durch eine Maschine. Strukturelles mathematisches Wissen wird dabei sowohl beim Entwurf als auch bei der Verifikation und Aufwandsanalyse der betreffenden Algorithmen verwendet. Die Computeralgebra kann damit wirkungsvoll eingesetzt werden bei der Lösung von mathematisch modellierten Fragestellungen in zum Teil sehr verschiedenen Gebieten der Informatik und Mathematik sowie in den Natur- und Ingenieurwissenschaften.
 \end{quote}
@@ -133,10 +133,10 @@ Einen besonderen Stellenwert nimmt SymPy ein, da dieses System einerseits als Op
 \newpage
 
 \section{Vorstellung der Programmiersprache Rust}
-\subsection{Einführendes Beispiel Ownership und Borrowing}
+\subsection{Einführendes Beispiel: Ownership und Borrowing}
 Bevor Rust vorgestellt wird und die genauen Regeln des Ownership und Borrowing erläutert werden, soll das Prinzip anhand eines Beispiels verdeutlicht werden. Hierzu wird ein \codeword{struct} - vergleichbar mit Klassen - angelegt, welches z.B. eine große Matrix beinhaltet, die verarbeitet werden soll.
 
-\begin{lstlisting}[language=rust, caption={Einführendes Beispiel struct}]
+\begin{lstlisting}[language=rust, caption={Einführendes Beispiel: struct}]
     struct LargeMatrix {
         matrix: Vec<i32>,
     }
@@ -144,7 +144,7 @@ Bevor Rust vorgestellt wird und die genauen Regeln des Ownership und Borrowing e
 
  Im ersten Beispiel wird eine Funktion erstellt, die das Ownership der Matrix übernimmt und nach der Verarbeitung den Speicherplatz freigibt. Dies geschieht automatisch, da der Gültigkeitsbereich der Variable \codeword{matrix_fn} verlassen wird \cite{RustOwnershipFreed}. In diesem Kontext bedeutet Ownership, dass der Wert vom Hauptprogramm in die Funktion verschoben wird und die neue Variable \codeword{matrix_fn} das alleinige Recht besitzt diesen Wert zu nutzen \cite{RustMovingTerm}. Das Programm lässt sich so nicht kompilieren. Die zweite Ausgabe schlägt dabei fehl, da beim Aufruf der Funktion der Wert in die Funktion verschoben und freigegeben wurde, der Zugriff auf den entsprechenden Speicherbereich im Hauptprogramm wäre undefiniert.
 
- \begin{lstlisting}[language=rust, caption={Einführendes Beispiel Ownership abgeben}]
+ \begin{lstlisting}[language=rust, caption={Einführendes Beispiel: Ownership abgeben}]
     fn take_ownership(matrix_fn: LargeMatrix) {
         // ...
     }
@@ -155,9 +155,9 @@ Bevor Rust vorgestellt wird und die genauen Regeln des Ownership und Borrowing e
     println!("{:?}", matrix); // <- Fehler
 \end{lstlisting}
 
-Die zweite Funktion gibt das Ownership der Matrix wieder zurück, der Wert wird also wieder zurückgeschoben und kann nach dem Funktionsaufruf weiter verwendet werden. Dies geschieht aber nur, wenn der Variablen im Hauptprogramm der Rückgabewert zugewiesen wird. Hierzu muss die Variable \codeword{matrix} explizit als veränderbar mit dem Schlüsselwort \codeword{mut} definiert werden Ein Nachteil dieser Methode ist, dass nicht klar ist, ob es sich um die originale Matrix handelt, oder über eine neu initialisierte Matrix.
+Die zweite Funktion gibt das Ownership der Matrix wieder zurück, der Wert wird also wieder zurückgeschoben und kann nach dem Funktionsaufruf weiter verwendet werden. Dies geschieht aber nur, wenn der Variablen im Hauptprogramm der Rückgabewert zugewiesen wird. Hierzu muss die Variable \codeword{matrix} explizit als veränderbar mit dem Schlüsselwort \codeword{mut} definiert werden Ein Nachteil dieser Methode ist, dass nicht klar ist, ob es sich um die originale Matrix handelt, oder um eine neu initialisierte Matrix.
 
-\begin{lstlisting}[language=rust, caption={Einführendes Beispiel Ownership zurückgeben}]
+\begin{lstlisting}[language=rust, caption={Einführendes Beispiel: Ownership zurückgeben}]
     fn give_back_ownership(matrix_fn: LargeMatrix) -> LargeMatrix {
         // ...
         // Originale Matrix zurückgeben
@@ -172,11 +172,11 @@ Die zweite Funktion gibt das Ownership der Matrix wieder zurück, der Wert wird 
     println!("{:?}", matrix);
 \end{lstlisting}
 
-Im nächsten Beispiel erhält die Funktion nur eine Referenz auf die Matrix, gekennzeichnet durch das \codeword{&}-Zeichen. In Rust wird dieses Prinzip als ``Borrowing'' bezeichnet \cite{RustBorrowing}. Wie bereits im ersten Beispiel wird beim verlassen der Funktion der Speicherplatz der Variablen freigegeben, diesmal handelt es sich aber nur um den Zeiger und nicht um die eigentlichen Daten. Eine Verwendung nach dem Funktionsaufruf ist daher weiterhin möglich.
+Im nächsten Beispiel erhält die Funktion nur eine Referenz auf die Matrix, gekennzeichnet durch das \codeword{&}-Zeichen. In Rust wird dieses Prinzip als ``Borrowing'' bezeichnet \cite{RustBorrowing}. Wie bereits im ersten Beispiel wird beim Verlassen der Funktion der Speicherplatz der Variablen freigegeben, diesmal handelt es sich aber nur um den Zeiger und nicht um die eigentlichen Daten. Eine Verwendung nach dem Funktionsaufruf ist daher weiterhin möglich.
 
 Da Variablen in Rust standardmäßig unveränderbar sind, ist ebenso sichergestellt, dass die Matrix in der Funktion nicht verändert worden ist. 
 
-\begin{lstlisting}[language=rust, caption={Einführendes Beispiel Unveränderliche Referenz}]
+\begin{lstlisting}[language=rust, caption={Einführendes Beispiel: Unveränderliche Referenz}]
     fn take_reference(matrix_ref: &LargeMatrix) {
         // ...
     }
@@ -187,9 +187,9 @@ Da Variablen in Rust standardmäßig unveränderbar sind, ist ebenso sichergeste
     println!("{:?}", matrix);
 \end{lstlisting}
 
-Im letzten Beispiel soll nun durch die Verwendung des \codeword{mut}-Schlüsselworts ermöglich werden, die Daten der originalen Matrix zu verändern. Ansonsten gibt es keine Änderung zum vorherigen Beispiel, beim verlassen der Funktion wird ebenfalls wieder nur der Zeiger freigegeben.
+Im letzten Beispiel soll nun durch die Verwendung des \codeword{mut}-Schlüsselworts ermöglicht werden, die Daten der originalen Matrix zu verändern. Ansonsten gibt es keine Änderung zum vorherigen Beispiel, beim Verlassen der Funktion wird ebenfalls wieder nur der Zeiger freigegeben.
 
-\begin{lstlisting}[language=rust, caption={Einführendes Beispiel Veränderliche Referenz}]
+\begin{lstlisting}[language=rust, caption={Einführendes Beispiel: Veränderliche Referenz}]
     fn take_mutable_reference(matrix_ref: &mut LargeMatrix) {
         matrix_ref.matrix[0] = 0;
         // ...
@@ -204,21 +204,21 @@ Im letzten Beispiel soll nun durch die Verwendung des \codeword{mut}-Schlüsselw
 Natürlich können die beiden letzten Funktionen auch einen Rückgabewert besitzen, der unabhängig von der übergebenen Matrix ist. Eine besondere Stärke sind die Regeln, die für das Borrowing gelten. So ist z.B. zu jeder Zeit nur eine veränderbare Referenz auf eine Variable erlaubt, es ist daher leicht nachvollziehbar welcher Programmabschnitt die Daten tatsächlich verändern kann. Race-Conditions in nebenläufigen Anwendungen sind somit ausgeschlossen. Rust bietet für solche Einsatzzwecke Messge Passing \cite{K1727} und threadsichere Referenzzähler \cite{ArcSrc} an. Die Regeln zu Ownership und Borrowing werden noch genauer vorgestellt.
 
 \label{sec:kap2d2}
-\subsection{Was ist Rust und warum verwenden?}
+\subsection{Was ist Rust und warum sollte es verwendet werden}
 Rust ist eine statisch typisierte Programmiersprache, welche vor allem mit den Eigenschaften Performance, Verlässlichkeit und Produktivität eine Alternative zu anderen Sprachen anbieten soll \cite{RustPromises}. Version 1.0 wurde 2015 veröffentlich, seitdem gibt es mit der ``Rust 2018 Edition'' und ``Rust 2021 Edition'' eine stetige Weiterentwicklung \cite{RustEditions}.
 
-Die Performance begründet sich durch zwei wesentliche Aspekte. So werden alle Regeln die das Ownership und das Borrowing betreffen bereits zur Compilezeit durchgeführt. Ein zusätlicher Overhead zur Laufzeit des Programms wird so vermieden. Der andere Aspkekt ist die Implementierung von Featurs in Rust. So wird beispielsweise Monomorphisierung zur Compilezeit von Generics eingesetzt (vgl. \cite[S. 196 ff.]{SK19}). Für jeden implementierten Typen des Generics gibt es somit eine eigene Implementierung im Compilat. Hierdurch entfallen Typechecks wie sie z.B. in Java möglich sein können \cite{JavaGenerics}.
+Die Performance begründet sich durch zwei wesentliche Aspekte. So werden alle Regeln die das Ownership und das Borrowing betreffen bereits zur Compilezeit durchgeführt. Ein zusätzlicher Overhead zur Laufzeit des Programms wird so vermieden. Der andere Aspkekt ist die Implementierung von Featurs in Rust. So wird beispielsweise Monomorphisierung zur Compilezeit von Generics eingesetzt (vgl. \cite[S. 196 ff.]{SK19}). Für jeden implementierten Typen des Generics gibt es somit eine eigene Implementierung im Compilat. Hierdurch entfallen Typechecks wie sie z.B. in Java möglich sein können \cite{JavaGenerics}.
 
-Die Verlässlichkeit beruht ebenfalls auf dem Ownership- und Borrowing-System. Hierdurch ist zu jeder Zeit klar, welche Variablen welche Daten enthalten. Ein unbeabsichtigtes Verändern der Daten oder Dangling References werden ebenfalls bereits zur Compilezeit ausgeschlossen, dieses Prinzip funktioniert ebenfalls in nebenläufigen Anwendungen. Zudem stellt Rust sicher, dass man nicht außerhalb eines Puffers lesen oder schreiben kann, dies kann aber zu Umständen zu einem Programmabbruch führen. Das spezielle \codeword{Option} \codeword{enum} bietet eine fehlerunanfällige Variante des \codeword{NULL}-Werts, das in Rust nicht existiert.
+Die Verlässlichkeit beruht ebenfalls auf dem Ownership- und Borrowing-System. Hierdurch ist zu jeder Zeit klar, welche Variablen welche Daten enthalten. Ein unbeabsichtigtes Verändern der Daten oder Dangling References werden ebenfalls bereits zur Compilezeit ausgeschlossen, dieses Prinzip funktioniert ebenfalls in nebenläufigen Anwendungen. Zudem stellt Rust sicher, dass man nicht außerhalb eines Puffers lesen oder schreiben kann, dies kann aber unter Umständen zu einem Programmabbruch führen. Das spezielle \codeword{Option} \codeword{enum} bietet eine fehlerunanfällige Variante des \codeword{NULL}-Werts, das in Rust nicht existiert.
 
-Um die Produktivität zu unterstützen bieten die beiden Tools \codeword{rustup} und \codeword{cargo} alles notwendige um den kompletten Entwicklungsprozess eines Rust-Programms zu erfüllen. Dies betrifft z.B. konkret eine Abhängigkeitsverwaltung, die Erstellung von Dokumentation und das ausführen von Tests und Benchmarks.
+Um die Produktivität zu unterstützen bieten die beiden Tools \codeword{rustup} und \codeword{cargo} alles Notwendige um den kompletten Entwicklungsprozess eines Rust-Programms zu erfüllen. Dies betrifft z.B. konkret eine Abhängigkeitsverwaltung, die Erstellung von Dokumentationen und das Ausführen von Tests und Benchmarks.
 
-Wo nötig setzt Rust auf etablierte Lösungen, so wird LLVM genutzt um ausführbare Programme zu erzeugen (vgl. \cite{RustcCodegen2} und \cite{RustcCodegen}). Rust wird mittlerweile in Verschiedenen Projekten genutzt (z.B. Android OS \cite{GoogleExample}, Linux Kernel \cite{LinuxExample}, Windows-API \cite{WindowsRust}). Alles zusammen rechtfertigt zumindest die Überlegung ein komplexes System - wie eben ein CAS - in Rust zu implementieren.
+Wo nötig setzt Rust auf etablierte Lösungen, so wird LLVM genutzt um ausführbare Programme zu erzeugen (vgl. \cite{RustcCodegen2} und \cite{RustcCodegen}). Rust wird mittlerweile in verschiedenen Projekten genutzt (z.B. Android OS \cite{GoogleExample}, Linux Kernel \cite{LinuxExample}, Windows-API \cite{WindowsRust}). Alles zusammen rechtfertigt zumindest die Überlegung ein komplexes System - wie eben ein CAS - in Rust zu implementieren.
 
 \subsection{Grundlegendes}
 \paragraph{Expression und Statements} Rust unterscheided bei Code-Anweisungen zwischen Statements und Expressions. Statements führen lediglich einen Codeblock aus, während Expressions stets einen Rückgabewert besitzen. Nahezu alle Sprachelemente in Rust sind als Expression implementiert (vgl. \cite[S. 122 ff.]{BO18}).
 
-\begin{lstlisting}[language=rust, caption={Expression Einführendes Beispiel}]
+\begin{lstlisting}[language=rust, caption={Expression Einführendes Beispiel:}]
     let test_var = if bedingung_1 { false } else { true };
 \end{lstlisting}
 
@@ -329,9 +329,9 @@ Dies wird exemplarisch für das bestehende \codeword{Option} \codeword{enum} ver
     }
 \end{lstlisting}
 
-Im Zusammenspiel mit Traits kann ein entsprechender Typparameter begrenzt werden. Ein Nachteil der Monomorphie ist, dass ein Typparameter immer nur von einem konkreten Typ ersetzt werden kann. Eine Lösung hierfür bieten \codeword{trait objects}.
+Im Zusammenspiel mit \codeword{traits} kann ein entsprechender Typparameter begrenzt werden. Ein Nachteil der Monomorphie ist, dass ein Typparameter immer nur von einem konkreten Typ ersetzt werden kann. Eine Lösung hierfür bieten \codeword{trait objects}.
 
-Im folgenden Beispiel dazu werden zuallerst ein \codeword{trait} und zwei \codeword{structs} definiert, die ein \codeword{trait} implementieren. Das \codeword{ScreenTraitObject} kann im Vektor \codeword{components} beide Structs unabhängig voneinander vorhalten, da \codeword{trait objects} verwendet werden. \codeword{ScreenGeneric} benutzt allerdings nur einen einfachen Generic-Parameter für den Vektor, sodass tatsächlich nur eine konkrete Implementierung von \codeword{Draw} hinzugefügt werden.
+Im folgenden Beispiel dazu werden ein \codeword{trait} und zwei \codeword{structs} definiert, die ein \codeword{trait} implementieren. Das \codeword{ScreenTraitObject} kann im Vektor \codeword{components} beide Structs unabhängig voneinander vorhalten, da \codeword{trait objects} verwendet werden. \codeword{ScreenGeneric} benutzt allerdings nur einen einfachen Generic-Parameter für den Vektor, sodass tatsächlich nur eine konkrete Implementierung von \codeword{Draw} hinzugefügt werden kann.
 
 Durch den \codeword{Box}-Typ werden die Werte auf dem Heap abgelegt, da nicht von vornherein klar ist, wie viel Speicher auf dem Stack benötigt wird.
 
@@ -421,7 +421,7 @@ Im folgenden sollen die Konzepte Ownership, Borrowing und Lifetimes vorgestellt 
     \item Referenzen müssen immer gültig (d.h. deklariert sein und der Owner muss mindestens denselben Gültigkeitsbereich wie die Referenz haben) sein
 \end{itemize}
 
-Das Ownership-Prinzip deckt dabei bereits die ersten drei Regeln ab. Zu jedem Zeitpunkt kann jeder Wert nur durch eine Variable angesprochen werden. Liegt der Wert auf dem Stack oder wird das \codeword{Copy}-Trait implementiert wird bei einer Zuweisung der Wert kopiert \cite{CopyTraitOwner}. Liegt der Wert hingegen auf dem Heap, wie z.B. bei einem \codeword{Vector} oder einem \codeword{String} wird das Ownership an die neue Variable übergeben.
+Das Ownership-Prinzip deckt dabei bereits die ersten drei Regeln ab. Zu jedem Zeitpunkt kann jeder Wert nur durch eine Variable angesprochen werden. Liegt der Wert auf dem Stack oder wird das \codeword{Copy}-Trait implementiert, wird bei einer Zuweisung der Wert kopiert \cite{CopyTraitOwner}. Liegt der Wert hingegen auf dem Heap, wie z.B. bei einem \codeword{Vector} oder einem \codeword{String} wird das Ownership an die neue Variable übergeben.
 
 \begin{lstlisting}[language=rust, caption={ownership}]
     let mut a = 2;
@@ -435,7 +435,7 @@ Das Ownership-Prinzip deckt dabei bereits die ersten drei Regeln ab. Zu jedem Ze
     println!("{}", s1); // Fehler, Ownership wurde s2 übertragen
 \end{lstlisting}
 
-Um nun nicht ständig den Owner von Daten ändern zu müssen z.B. bei einem Funktionsaufruf werden mit dem Borrowing Referenzen erstellt. Hierauf beziehen sich die beiden letzten Regeln. Dabei gilt außerdem, dass es nur veränderbare Referenzen geben kann, wenn der Owner veränderbar ist und falls es eine veränderbare Referenz gibt, kann der Wert auch nur exklusiv durch diese verändert werden. Zur Referenzierung und Dereferenzierung kommen die \codeword{&}- und \codeword{*}-Operatoren zum Einsatz.
+Um nun nicht ständig den Owner der Daten ändern zu müssen z.B. bei einem Funktionsaufruf werden mit dem Borrowing Referenzen erstellt. Hierauf beziehen sich die beiden letzten Regeln. Dabei gilt außerdem, dass es nur veränderbare Referenzen geben kann, wenn der Owner veränderbar ist und falls es eine veränderbare Referenz gibt, kann der Wert auch nur exklusiv durch diese verändert werden. Zur Referenzierung und Dereferenzierung kommen die \codeword{&}- und \codeword{*}-Operatoren zum Einsatz.
 
 \begin{lstlisting}[language=rust, caption={borrowing}]
     // Nicht zulässig, da zwei mutable Referenzen
@@ -546,7 +546,7 @@ Um insgesamt weniger Bedingungen für mathematische Operationen zu haben, ist ge
     \item Bei Divisionen werden Zahlen zu rationalen Zahlen, also $2/3 = \frac{2}{3}$ und $-(2/3) = \frac{-2}{3}$. Symbole und Terme werden zu einer Multiplikation vereinfacht, also $a/b = b^{(-1)} * a$ und $(a*b*c)/(d+1) = (d+1)^{-1} * (a*b*c)$
     \item Das Kommutativgesetz soll beachtet werden: $x+y = y+x$ also auch $2*(x+y) + (y+x)*2 = 4*(x+y)$
     \item Das Assoziativgesetz soll beachtet werden: $a+(b+c) = (a+b)+c = a+b+c$
-    \item Das Distributivgesetz soll beacht werden: $a*(x+y) = a*x + a*y$
+    \item Das Distributivgesetz soll beachtet werden: $a*(x+y) = a*x + a*y$
 \end{itemize}
 
 \subsection{Funktionsumfang}
@@ -556,16 +556,16 @@ Da wie bereits in der Einleitung gezeigt ein CAS sowohl einen sehr breiten Umfan
     \item Addition von Symbolen und Termen, z.B. $x+y = x+y$ oder $x+(2*y)+2+(2*y)+x = 2*x+4*y+2$
     \item Multiplikation von Zahlen (Ganzzahlen, Fließkommazahlen, rationalen Zahlen), z.B. $1*2.1 = 2.1$
     \item Multiplikation von Symbolen und Termen, z.B. $x*y*x = x^2*y$
-    \item Auswertung von Potenzen die Zahlen, Symbolen und Terme in Basis oder Exponent haben. Dabei sollen Potenzregeln in Hinblick auf Genauigkeit des Ergebnis ausgeführt werden, z.B. $x^a*x^b=x^{(a+b)}$ oder $x^a*y^a = (x*y)^a$
-    \item Auswertung von Funktionen, die dynamisch hinzugefügt werden können sollen. Funktionen die dem CAS nicht bekannt sind, tauchen weiterhin in Termen auf, werden aber nicht ausgewertet, z.B. $sin(x)$ oder $sqrt(x)$
+    \item Auswertung von Potenzen die Zahlen, Symbolen und Terme in Basis oder Exponent haben. Dabei sollen Potenzregeln in Hinblick auf Genauigkeit des Ergebnisses ausgeführt werden, z.B. $x^a*x^b=x^{(a+b)}$ oder $x^a*y^a = (x*y)^a$
+    \item Auswertung von Funktionen, die dynamisch hinzugefügt werden können. Funktionen die dem CAS nicht bekannt sind, tauchen weiterhin in Termen auf, werden aber nicht ausgewertet, z.B. $sin(x)$ oder $sqrt(x)$
     \item Auswertung von Konstanten falls bekannt und gewollt
     \item Die Ausführungsreihenfolge in Termen lautet: Konstanten und Variablen $\rightarrow$ Funktion $\rightarrow$ Potenz $\rightarrow$ Multiplikation $\rightarrow$ Addition
 \end{itemize}
 
-Darüberhinaus sollen Terme soweit wie möglich mit bereits bestehenden Sprachmitteln erweitert und verglichen werden können, hierzu werden einige Operatorüberladungen implementiert. Bei der Auswertung der Terme soll die Möglichkeit bestehen eventuell ungenaue numerische Ergebnisse zu berechnen. Funktionen und Konstanten sollen später einfach hinzugefügt werden können.
+Darüberhinaus sollen Terme soweit wie möglich mit bereits bestehenden Sprachmitteln erweitert und verglichen werden können. Hierzu werden einige Operatorüberladungen implementiert. Bei der Auswertung der Terme soll die Möglichkeit bestehen eventuell ungenaue numerische Ergebnisse zu berechnen. Funktionen und Konstanten sollen später einfach hinzugefügt werden können.
 
 \subsection{Überlauf und Ungenauigkeit}
-Ein bereits zu Beginn auftretendes Problem für das CAS ist der Umang von Ganzzahl-Überläufen und die Ungenaugikeiten von Rechnung mit Fließkommazahlen \cite{IEEE754}. So gibt das folgende Programm in Rust einen falschen Wert für die Addition aus und bricht anschließend ab.
+Ein bereits zu Beginn auftretendes Problem für das CAS ist der Umang von Ganzzahlüberläufen und die Ungenaugikeiten der Rechnung mit Fließkommazahlen \cite{IEEE754}. So gibt das folgende Programm in Rust einen falschen Wert für die Addition aus und bricht anschließend ab.
 
 \begin{lstlisting}[language=rust, caption={Überlauf und Ungenauigkeit}]
     let f1 = 0.1;
@@ -595,9 +595,9 @@ Ein Blick zu SymPy zeigt, dass bereits hier Lösungen direkt aus Python verwende
     // 0.30000000000000004
 \end{lstlisting}
 
-In ``Modern Computer Algebra'' \cite[S. 29 ff.]{Gathen2013} und ``Computer Algebra - Concepts and Techniques'' \cite[S. 81 ff.]{Lamagna2019} sind theoretische Implementierungen für Ganzzahlwerte angegeben. Hiervon könnten wir in dieser Arbeit natürlich gebrauch machen und diese Typen selbst implementieren und für Fliesskommazahlen erweitern, da Rust diese Typen leider nicht selbst anbietet. Allerdings existieren bereits die beiden Crates (Abhängigkeiten im Rust-Ökosystem) ``num'' \cite{CrateNum} und ``bigdecimal'' \cite{CrateBigdecimal}, die Typen mit ungebrenzter Präszision anbieten.
+In ``Modern Computer Algebra'' \cite[S. 29 ff.]{Gathen2013} und ``Computer Algebra - Concepts and Techniques'' \cite[S. 81 ff.]{Lamagna2019} sind theoretische Implementierungen für Ganzzahlwerte angegeben. Hiervon könnten wir in dieser Arbeit natürlich gebrauch machen und diese Typen selbst implementieren und für Fließkommazahlen erweitern, da Rust diese Typen leider nicht selbst anbietet. Allerdings existieren bereits die beiden Crates (Abhängigkeiten im Rust-Ökosystem) ``num'' \cite{CrateNum} und ``bigdecimal'' \cite{CrateBigdecimal}, die Typen mit ungebrenzter Präszision anbieten.
 
-Folgend soll die Performance zwischen den primitiven Typen auf dem Stack, den primitiven Typen auf dem Heap und den Crates verglichen werden. Wie zu erwarten ist die Speicherung auf dem Stack am effizientesten, der Zugriff auf dem Heap kostet Zeit. Der zusätliche Zeitverlust bei den Crates lässt sich zum einen dadurch erklären, dass immer ein Überlauf geprüft werden muss um den Wert richtig zu verarbeiten, andererseits verwendet der Typ \codeword{BigInt} einen Vektor. Wie in \hyperref[sec:kap2d2]{Kapitel 2.2} bereits erwähnt, wird bei einem Zugriff zusätzlich geprüft, ob der Index gültig ist, was ebenfalls Zeit kostet.
+Folgend soll die Performance zwischen den primitiven Typen auf dem Stack, den primitiven Typen auf dem Heap und den Crates verglichen werden. Wie zu erwarten ist die Speicherung auf dem Stack am effizientesten, der Zugriff auf dem Heap kostet Zeit. Der zusätzliche Zeitverlust bei den Crates lässt sich zum einen dadurch erklären, dass immer ein Überlauf geprüft werden muss um den Wert richtig zu verarbeiten, andererseits verwendet der Typ \codeword{BigInt} einen Vektor. Wie in \hyperref[sec:kap2d2]{Kapitel 2.2} bereits erwähnt, wird bei einem Zugriff zusätzlich geprüft, ob der Index gültig ist, was ebenfalls Zeit kostet.
 
 \begin{itemize}
     \item \begin{verbatim}benches/bench-num-types.rs\end{verbatim}
@@ -615,9 +615,9 @@ Folgend soll die Performance zwischen den primitiven Typen auf dem Stack, den pr
 
 Leider ist es mit Rust-Benchmarks noch nicht möglich den Speicherverbrauch zu messen. Allerdings können wir diesen für unsere Beispiele auch selbst gut bestimmen. Hierbei geht es nur um die eigentlichen Werte, mit denen Berechnungen durchgeführt werden.
 
-\paragraph{Primitive Typen Stack} Der Datentyp \codeword{i64} und \codeword{f64} verbrauchen 8 Bytes. Es werden also nie mehr als $8*4=32$ Bytes für die eigentlichen Daten benötigt. Die Variable $x$, die das Ergebnis enthält beansprucht davon 8 Bytes. Der Schleifenparameter $i$ wird ebenfalls als \codeword{i64} (bzw. \codeword{i32} im Falle der Benchmarks mit \codeword{f64}) behandelt durch die Addition mit $x$ (bzw. dem TypeCasting) und verbraucht ebenfalls 8 Bytes. Bei der Addition $x+i$ wird nun wie bereits erwähnt bei einem Funktionsaufruf eine Kopie der Werte erstellt, die den Copy-Trait implementiert haben. Der Typ \codeword{i64} und \codeword{f64} haben diesen implementiert \cite{Rusti64Copy} und somit wird sowohl von $x$ als auch von $i$ zur Addition eine Kopie erzeugt.
+\paragraph{Primitive Typen Stack} Die Datentypen \codeword{i64} und \codeword{f64} verbrauchen 8 Bytes. Es werden also nie mehr als $8*4=32$ Bytes für die eigentlichen Daten benötigt. Die Variable $x$, die das Ergebnis enthält beansprucht davon 8 Bytes. Der Schleifenparameter $i$ wird ebenfalls als \codeword{i64} (bzw. \codeword{i32} im Falle der Benchmarks mit \codeword{f64}) behandelt durch die Addition mit $x$ (bzw. dem TypeCasting) und verbraucht ebenfalls 8 Bytes. Bei der Addition $x+i$ wird nun wie bereits erwähnt bei einem Funktionsaufruf eine Kopie der Werte erstellt, die den Copy-Trait implementiert haben. Die Typen \codeword{i64} und \codeword{f64} haben diesen implementiert \cite{Rusti64Copy} und somit wird sowohl von $x$ als auch von $i$ zur Addition eine Kopie erzeugt.
 
-\paragraph{Primitive Typen Heap} Der Speicherverbrauch der eigentlich Werte ist wie bei den primitiven Typen auf dem Stack. Davon entfallen aber 8 Bytes auf dem Heap statt auf dem Stack, zur Berechnung müssen die \codeword{Box}-Werte derefenziert werden. Zusätzlich befindet sich ein Zeiger auf dem Stack durch \codeword{Box}. Die Größe hiervon hängt von der verwendeten Architektur ab \cite{BoxExmaple}.
+\paragraph{Primitive Typen Heap} Der Speicherverbrauch der eigentlich Werte ist wie bei den primitiven Typen auf dem Stack. Davon entfallen aber 8 Bytes auf dem Heap statt auf dem Stack, zur Berechnung müssen die \codeword{Box}-Werte dereferenzieren werden. Zusätzlich befindet sich ein Zeiger auf dem Stack durch \codeword{Box}. Die Größe hiervon hängt von der verwendeten Architektur ab \cite{BoxExmaple}.
 
 \paragraph{num und bigdecimal} Bei dem Datentyp BigInt wird einerseits ein Vorzeichen verwendet, welches 1 Byte verbraucht \cite{EnumSize} als auch der Datentyp BigUint der wiederum einen Vektor mit BigDigit erhält. Das Vorzeichen ist als \codeword{Enum} umgesetzt \cite{BigIntSign}. Schaut man sich diese Definition an, kann dieser Typ zwischen 4 Bytes (u32) und 16 Bytes (i128) verbrauchen. Während des Debuggens auf verschiedenen Systemen wird in diesem Beispiel der Typ u64 angenommen und somit ein Speicherplatz von 8 Bytes benötigt. Mit größer werdenden Zahlen steigt allerdings dieser Verbrauch, da sich der Vektor vergrößert. Auch liegen nicht mehr alle Daten auf dem Stack, sondern alle BigDigits auf dem Heap, was die Zugriffsgeschwindigkeit wieder ebenfalls erhöht.
 
@@ -628,7 +628,7 @@ Der Typ bigdecimal verwendet laut Beschreibung den Typ BigInt und zusätzlich ei
 Da Rust Generics untersützt wurde die Entscheidung getroffen, das CAS in Teilen mit Generics umzusetzen, sodass beide Kombinationen verwendet werden können. Dabei sollen alle Funktionen des Systems mit den primitiven Typen funktionieren und einige Beispielimplementierungen mit den Crate-Typen gemacht werden. Dies erlaubt einerseits eine spätere Erweiterung der Crate-Typen als auch die Entwicklung der eigenen Typen.
 
 \subsection{Grundlegende Datenstruktur}
-Eine erste Idee, wie die Datenstruktur aussehen könnte, war ein einfacher binärer Baum, dessen Knoten die Operanden und die Blätter Einzelne Werte sind. Dies entspricht dem abstrakten Syntaxbaum nach dem Parsen. Für den Term $x+1+2$ ergibt sich folgender Baum.
+Eine erste Idee, wie die Datenstruktur aussehen könnte, war ein einfacher binärer Baum, dessen Knoten die Operanden und die Blätter einzelne Werte sind. Dies entspricht dem abstrakten Syntaxbaum nach dem Parsen. Für den Term $x+1+2$ ergibt sich folgender Baum.
 
 \Tree[.+
         [.+
@@ -658,7 +658,7 @@ In Rust sähe die Implementierung folgendermaßen aus. Die Ausprägung Add benö
 
 Bei der direkten Änderung bzw. Zusammenfassung des Baums ergibt sich nun durch das Ownership ein Problem. Man bräuchte auf jeden Knoten und Blatt eine veränderbare Referenz. In unserem Beispiel würden im einfachsten Fall das untere \codeword{BTree::Add} durch \codeword{BTree::Symbol} ersetzt werden und das rechte \codeword{BTree::Number} aktualisiert werden.
 
-Würde versucht werden die Referenzen in einem Vektor zu speichern ist das zumindest bereits für Add nicht möglich. Da \codeword{Box} das Ownership des Wertes nimmt kann dazu parallel keine veränderbare Referenz existieren. Dasselbe Problem tritt auf, wenn die Blätter bereits der entsprechende \codeword{Box}-Wert sind, dann würde das Ownership immer noch an \codeword{parent_1} übergeben werden.
+Würde versucht werden die Referenzen in einem Vektor zu speichern, ist das zumindest bereits für \codeword{Add} nicht möglich. Da \codeword{Box} das Ownership des Wertes nimmt, kann dazu parallel keine veränderbare Referenz existieren. Dasselbe Problem tritt auf, wenn die Blätter bereits der entsprechende \codeword{Box}-Wert sind, dann würde das Ownership immer noch an \codeword{parent_1} übergeben werden.
 
 \begin{lstlisting}[language=rust, caption={get refs}]
     let mut leave_1 = BTree::Number(1);
@@ -675,7 +675,7 @@ Auch wäre die Nutzung von Rohzeigern in Verbindung mit \codeword{unsafe} mögli
 
 Da beide Varianten aber sich entweder auf den Codeumfang und -verständlichkeit auswirken oder der Hauptgrund Rust zu benutzen umgangen wird, soll, wenn möglich auf diese Möglichkeiten verzichtet werden. Damit ausgeschlossen ist aber auch die Möglichkeit den Baum in situ zu verändern
 
-Eine Alternative wäre nur lesende Referenzen zu erzeugen, über diese zu iterieren und dann einen neuen Baum zu erstellen. Wenn aber sowieso alle Werte benötigt werden um diese zusammenfassen zu können, könnten diese auch in in einem Vektor  gespeichert werden. Für Addition und Multiplikation würde dann der Baum für den Term $myfunc(a, b*c)+1+2+x*y*2^z$ beispielsweise so aussehen:
+Eine Alternative wäre nur lesende Referenzen zu erzeugen, über diese zu iterieren und dann einen neuen Baum zu erstellen. Wenn aber sowieso alle Werte benötigt werden um diese zusammenfassen zu können, könnten diese auch in in einem Vektor  gespeichert werden. Für die Addition und Multiplikation würde dann der Baum für den Term $myfunc(a, b*c)+1+2+x*y*2^z$ beispielsweise so aussehen:
 
 \Tree[.+-Vektor
         [.func
@@ -719,13 +719,13 @@ Eine ähnliche Struktur findet sich ebenfalls in ``SymbolicC++'' \cite[S. 284 ff
 
 \subsection{Grundtypen des CAS}
 In diesem Kapitel soll definiert werden, welche \codeword{structs}, \codeword{traits} oder \codeword{enums} benötigt werden, um das CAS zu erstellen. Darüberhinaus soll grob umrissen werden, welche Implementierungen im weiteren Verlauf sinnvoll sein können und welchen Zweck diese erfüllen.
-Es ist noch zu erwähnen, dass hier nicht definiert werden sollen, mit welchen \codeword{Derive macros} diese Typen erweitert werden sollen. In Rust ist es üblich \codeword{structs} und \codeword{enums} mit diesen Makros zu erweitern, um z.B. anzugeben, dass der Typ kopiert oder sortiert werden kann. Die Implementierung dieser Funktionalität wird dann teilweise zur Compilezeit vom Makro übernommen.
+Es ist noch zu erwähnen, dass hier nicht definiert werden soll, mit welche \codeword{Derive macros} diese Typen erhalten. In Rust ist es üblich \codeword{structs} und \codeword{enums} mit diesen Makros zu erweitern, um z.B. anzugeben, dass der Typ kopiert oder sortiert werden kann. Die Implementierung dieser Funktionalität wird dann teilweise zur Compilezeit vom Makro übernommen.
 
-\paragraph{enum PrimNum und enum PrecisionNum} Diese beiden \codeword{enums} sollen als Implementierung für den Generic-Parameter im CAS dienen. Ebenso bieten diese den Vorteil, dass später ein allgemeiner Nummern-Typ existiert mit dem gerechnet werden kann, und nicht ständig manuell Type Castings durchgeführt werden müssen. So ist in Rust nicht möglich eine Addition oder Multiplikation von i32 und f64 durchzuführen. Hierzu muss einer der beiden Werte erst in den anderen manuell überführt werden.
+\paragraph{enum PrimNum und enum PrecisionNum} Diese beiden \codeword{enums} sollen als Implementierung für den Generic-Parameter im CAS dienen. Ebenso bieten diese den Vorteil, dass später ein allgemeiner Nummern-Typ existiert mit dem gerechnet werden kann, und nicht ständig manuell Type Castings durchgeführt werden müssen. So ist es in Rust nicht möglich eine Addition oder Multiplikation von i32 und f64 durchzuführen. Hierzu muss einer der beiden Werte erst in den anderen manuell überführt werden.
 
-Ein weiterer Vorteil ist, dass direkt eine rationale Ausprägung des \codeword{enum} implementieren werden kann. Auch hier kann der Typ direkt die Rechnung übernehmen. Hierzu werden die Operatoren \codeword{std::ops::Add} und \codeword{std::ops::Mul} für den Enum selbst überladen. Im Hinblick auf die Bedingung, dass eine Subtraktion eine Addition ist, wird ebenso \codeword{std::ops::Mul} für einen Ganzzahlwert mit den Enums überladen. Ebenso kann es von Interesse sein, ob es sich um das neutrale Element der Addition oder Multiplikation handelt um einen Term zu vereinfachen. Für diesen Fall wird der Trait \codeword{PartialEq} für Ganzzahlen überladen, um hier nach Bedarf auch andere Werte zu überprüfen. Eine Alternative wären Methoden, die einen \codeword{bool}-Wert zurückgeben, ob es sich um einen solchen Wert handelt.
+Ein weiterer Vorteil ist, dass direkt eine rationale Ausprägung des \codeword{enum} implementiert werden kann. Auch hier kann der Typ direkt die Rechnung übernehmen. Hierzu werden die Operatoren \codeword{std::ops::Add} und \codeword{std::ops::Mul} für das Enum selbst überladen. Im Hinblick auf die Bedingung, dass eine Subtraktion eine Addition ist, wird ebenso \codeword{std::ops::Mul} für einen Ganzzahlwert mit den Enums überladen. Ebenso kann es von Interesse sein, ob es sich um das neutrale Element der Addition oder Multiplikation handelt um einen Term zu vereinfachen. Für diesen Fall wird der Trait \codeword{PartialEq} für Ganzzahlen überladen, um hier nach Bedarf auch andere Werte zu überprüfen. Eine Alternative wären Methoden, die einen \codeword{bool}-Wert zurückgeben, ob es sich um einen solchen Wert handelt.
 
-In unserer Implementierung wird \codeword{PrimNum} solange wie möglich mit Ganzzahlen und Rationalen Werten arbeiten. Sobald ein Fließkommawert addiert wird, werden die beiden anderen Werte zu einer Fließkommazahl umgewandelt. Dies geht zulasten der Genauigkeit und könnte bei Bedarf so angepasst werden, dass ein Rationaler Typ erzeugt wird. Es wäre auch denkbar, Fließkommazahlen und andere numerische Typen nicht standardmäßig zusammenzufassen.
+In unserer Implementierung wird \codeword{PrimNum} solange wie möglich mit Ganzzahlen und Rationalen Werten arbeiten. Sobald ein Fließkommawert addiert wird, werden die beiden anderen Werte zu einer Fließkommazahl umgewandelt. Dies geht zulasten der Genauigkeit und könnte bei Bedarf so angepasst werden, dass eine rationale Zahl erzeugt wird. Es wäre auch denkbar, Fließkommazahlen und andere numerische Typen nicht standardmäßig zusammenzufassen.
 
 \begin{itemize}
     \item \begin{verbatim}src/types/prim_num.rs\end{verbatim}
@@ -780,9 +780,9 @@ Mit dem Wissen über Generics und und den theoretischen Überlegungen zur Datens
 
 In unserem System wird die Methode rekursiv implementiert. Eine iterative Lösung wäre ebenfalls möglich, aufgrund des Ownership und Borrowing in Rust aber tatsächlich recht komplex und weniger leserlich und verständlich \cite{RustRecToItAst}.
 
-Bei der entsprechenden Auswertung einer Auspragung des \codeword{Ast} werden dabei erst alle ``Kindelemente'' ausgewertet. Für die Addition bedeutet dies konkret, dass erst alle Elemente im Vektor ausgewertet werden und danach erst versucht wird zu addieren. Für Potenzen werden entsprechend erst Basis und Exponent ausgewertet.
+Bei der entsprechenden Auswertung einer Ausprägung des \codeword{Ast} werden dabei erst alle ``Kindelemente'' ausgewertet. Für die Addition bedeutet dies konkret, dass erst alle Elemente im Vektor ausgewertet werden und danach erst versucht wird zu addieren. Für Potenzen werden entsprechend erst Basis und Exponent ausgewertet.
 
-Eine erste Implementierung hierfür sieht folgendermaßen aus. Die beiden zusätlichen Parameter \codeword{evaler} und \codeword{hard_eval} werden noch näher in den Kapiteln zu ``\hyperref[sec:kapErRustUndBei]{Erweiterbarkeit in Rust und Beispiele}'' und ``\hyperref[sec:ungenauigkeitenKapitel]{Ungenauigkeiten erlauben}'' näher erläuert.
+Eine erste Implementierung hierfür sieht folgendermaßen aus. Die beiden zusätzlichen Parameter \codeword{evaler} und \codeword{hard_eval} werden noch näher in den Kapiteln zu ``\hyperref[sec:kapErRustUndBei]{Erweiterbarkeit in Rust und Beispiele}'' und ``\hyperref[sec:ungenauigkeitenKapitel]{Ungenauigkeiten erlauben}'' näher erläuert.
 
 Bei der Entscheidung, ob das Element direkt bearbeitet wird oder ein neuer \codeword{Ast} zurückgegeben wird, wurde der Definition von SymPy gefolgt, dass der originale Term nicht verändert wird und ein neuer erstellt wird \cite{SymPySubs}.
 
@@ -839,9 +839,9 @@ pub fn eval(
     }
 \end{lstlisting}
 
-\paragraph{Allgemeine Anmerkungen} Der Generic-Typparameter \codeword{N} soll den gewählten Nummerntyp darstellen. Dieser wird aber noch nicht eingeschränkt, da sonst diese Einschränkungen später für alle implementieren Blöcke gelten muss. Dies kann z.B. nicht gewünscht sein, wenn eine Grundlegend andere Art implementiert werden soll um Terme zu verarbeiten, bei der der Trait \codeword{NumberType} keine Verwendung finden soll. Mit diesem Ansatz kann auch die definierte Ausführungsreihenfolge der Ausprägungen bestimmt werden. Bevor also \codeword{Ast::Add} ausgewertet wird, werden zuerst alle Elemente des Vektors ausgewertet. Eventuelle vereinfachungen sind dann bereits vorgenommen.
+\paragraph{Allgemeine Anmerkungen} Der Generic-Typparameter \codeword{N} soll den gewählten Nummerntyp darstellen. Dieser wird aber noch nicht eingeschränkt, da sonst diese Einschränkungen später für alle implementierenden Blöcke gelten muss. Dies kann z.B. nicht gewünscht sein, wenn eine grundlegend andere Art implementiert werden soll um Terme zu verarbeiten, bei der der Trait \codeword{NumberType} keine Verwendung finden soll. Mit diesem Ansatz kann auch die definierte Ausführungsreihenfolge der Ausprägungen bestimmt werden. Bevor also \codeword{Ast::Add} ausgewertet wird, werden zuerst alle Elemente des Vektors ausgewertet. Eventuelle Vereinfachungen sind dann bereits vorgenommen.
 
-\paragraph{Datenstruktur auf dem Speicher} Mit dieser Implementierung werden nahezu alle Daten auf dem Heap abgelegt. Einzig die Variante \codeword{Ast::Num<PrimNum>} kann komplett auf dem Stack abgelegt werden, da diese eine definierte Größe hat. String und Vec speichern die Daten auf dem Heap und halten nur einen Zeiger auf dem Stack falls es das oberste Element ist. Box legt die Daten wie bereits besprochen aus Gründen der ungewissen Speicheranforderung auch auf dem Heap an, lediglich der Zeiger kann sich auf dem Stack befinden.
+\paragraph{Datenstruktur auf dem Speicher} Mit dieser Implementierung werden nahezu alle Daten auf dem Heap abgelegt. Einzig die Variante \codeword{Ast::Num<PrimNum>} kann komplett auf dem Stack abgelegt werden, da diese eine definierte Größe hat. String und Vec speichern die Daten auf dem Heap und halten nur einen Zeiger auf dem Stack, falls es das oberste Element ist. Box legt die Daten wie bereits besprochen aus Gründen der ungewissen Speicheranforderung auch auf dem Heap an, lediglich der Zeiger kann sich auf dem Stack befinden.
 
 Zwei konkrete Beispiele sollen dies veranschaulichen. Der String bei \codeword{Symbol(x)} wird intern als Vektor mit dem Typ \codeword{u8} repräsentiert \cite{StringSrc}.
 \begin{lstlisting}[language=rust, caption={Term 1 Stack und Heap}]
@@ -898,7 +898,7 @@ Ziel dieses Kapitels ist die Nutzung bzw. Implementierung der lexikalischen Anal
 \subsection{Prüfung von bestehenden Bibliotheken zum Parsen}
 \paragraph{mexprp Rust} \cite{CrateMexprp} Diese Bibliothek wurde geprüft, da einerseits beim Parsen eine beliebige Genauigkeit möglich ist. Andererseits schien nach einem kurzen Blick in den Code es auch möglich den Term einfach in unsere gewünschte Form zu bringen, da das Enum \codeword{Term} anscheinend einen Abstract Syntax Tree implementiert wie am Anfang angedacht. Über diesen müsste nur einmal iteriert werden um zu unserer modifizierten Version zu gelangen.
 
-Die Abhängigkeit ``rug'' soll die beliebige Genauigkeit ermöglichen. Dabei handelt sich um ein Interface zu den GNU-Bibliotheken GMP, MPFR, MPC. Für diese müssen aber unter GNU/Linux, macOs und Windows jeweils andere Abhängigkeiten installiert werden. Ein schnelles testen auf anderen Rechnern ist somit ausgeschlossen. Aus diesem Grund wird diese Bibliothek nicht verwendet. Ebenso wird deshalb ``rug'' nicht als Bibliothek für die beliebige Genaugikeit verwendet, sondern num und bigdecimal.
+Die Abhängigkeit ``rug'' soll die beliebige Genauigkeit ermöglichen. Dabei handelt sich um ein Interface zu den GNU-Bibliotheken GMP, MPFR, MPC. Für diese müssen aber unter GNU/Linux, macOs und Windows jeweils andere Abhängigkeiten installiert werden. Ein schnelles Testen auf anderen Rechnern ist somit ausgeschlossen. Aus diesem Grund wird diese Bibliothek nicht verwendet. Ebenso wird deshalb ``rug'' nicht als Bibliothek für die beliebige Genaugikeit verwendet, sondern num und bigdecimal.
 
 \paragraph{meval Rust} \cite{CrateMeval} Diese Bibliothek erscheint recht unkompliziert und einfach zu nutzen. Die geparsten Tokens werden als UPN (umgekehrte polnische Notation) ausgewertet. Dies könnte man prinzipiell dazu nutzen unseren modifizierten Ast zu erzeugen. Ein kleiner Nachteil ist, dass nur Fließkommazahlen ausgewertet werden. Sollte man den Lexer irgendwann erweitern wollen, sodass eine beliebige Genauigkeit erreicht werden soll, müsste man diesen Part neu schreiben. Zudem habe ich diese Bibliothek leider nicht bei meiner initialen Recherche in Betracht gezogen und nicht weiter überprüft. Erst während der Entwicklung habe ich Interessehalber weiter reingesehen und die Enums \codeword{Operator} und \codeword{Token} größtenteils übernommen. Hätte ich den Lexer nicht bereits zu einem großen Teil implementiert, hätte ich die Möglichkeit genutzt, die Tokens aus dieser Bibliothek zu erzeugen.
 
@@ -906,13 +906,13 @@ Die Abhängigkeit ``rug'' soll die beliebige Genauigkeit ermöglichen. Dabei han
     \item \begin{verbatim}src/types/mods.rs\end{verbatim}
 \end{itemize}
 
-\paragraph{evalexpr Rust} \cite{CrateEvalexpr} Diese Bibliothek erscheint sehr Umfangreich. Allerdings lässt sich eigentlich nur die \codeword{eval}-Funktion nutzen, da fast alle anderen Strukturen nicht mit dem Schlüsselwort \codeword{pub} versehen sind. Es war mir daher nicht möglich, den Tokenizer bzw. den Baum direkt zu nutzen, in dem sich ein bereits geparster String befindet. Daher schied diese Bibliothek ebenfalls aus.
+\paragraph{evalexpr Rust} \cite{CrateEvalexpr} Diese Bibliothek erscheint sehr umfangreich. Allerdings lässt sich eigentlich nur die \codeword{eval}-Funktion nutzen, da fast alle anderen Strukturen nicht mit dem Schlüsselwort \codeword{pub} versehen sind. Es war mir daher nicht möglich, den Tokenizer bzw. den Baum direkt zu nutzen, in dem sich ein bereits geparster String befindet. Daher schied diese Bibliothek ebenfalls aus.
 
 \paragraph{tinyexpr C} \cite{CTinyexpr} Da es in Rust auch möglich ist, bereits bestehenden C-Code zu nutzen, wurde ebenfalls geprüft eine einfache C-Bibliothek zu nutzen, sodass auch das die notwendige Schnittstelle des Parsers nicht allzu kompliziert wird. Hier habe ich mir tinyexpr näher angesehen. Leider müssen Variablen bereits vor der lexikalischen Analyse zumindest bekannt sein \cite{CTinyexprReadme}. Da ich mich generell gegen diesen Schritt entschieden habe, wurde auch diese Bibliothek nicht verwendet.
 
 \paragraph{Fazit} Eine geeignete Bibliothek zu finden, die den Anwendungszweck erfüllt und dabei nicht allzu weit weg vom eigentlich Ziel ist, ist leider in meinen Augen nicht möglich gewesen. Daher wurde sowohl die lexikalische Analyse als auch das Parsing selbst implementiert. Die wichtigsten Eigenschaften hierzu habe ich aus dem Kurs 01810 Übersetzerbau herausgearbeitet, den ich im Wintersemester 17/18 belegt habe.
 
-\subsection{Implementierung der lexikalischen Analyse bzw. Tokenizer} In diesem Schritt soll aus einer übergebenen Zeichenkette ein Vektor mit Tokens erstellt werden. Hierbei wird Zeichenweise gearbeitet und nicht über reguläre Ausdrücke. Eine besonderheit in Rust, dass ein Char in einem String nicht über einen Index angesprochen werden kann. Da Strings als UTF-8 gespeichert werden, ist mit dem Index nicht eindeutig, ob das entsprechende Byte oder Zeichen angesprochen werden soll. Daher muss der String hier erst in einen Vektor des Typ \codeword{Char} umgewandelt werden.
+\subsection{Implementierung der lexikalischen Analyse bzw. Tokenizer} In diesem Schritt soll aus einer übergebenen Zeichenkette ein Vektor mit Tokens erstellt werden. Hierbei wird zeichenweise gearbeitet und nicht über reguläre Ausdrücke. Eine Besonderheit in Rust ist, dass ein Char in einem String nicht über einen Index referenziert werden kann. Da Strings als UTF-8 gespeichert werden, ist mit dem Index nicht eindeutig, ob das entsprechende Byte oder Zeichen angesprochen werden soll. Daher muss der String hier erst in einen Vektor des Typ \codeword{Char} umgewandelt werden.
 
 Die Tokens werden dabei wieder als Enum implementiert. In diesem Abschnitt verzichten wir auf Generics und implementieren den \codeword{struct} nur für den Typ \codeword{PrimNum}.
 
@@ -945,11 +945,11 @@ pub enum Token {
 \end{itemize}
 
 \subsection{Implementierung Parser}
-Als Parser kommt eine einfache Implementierung der Operator-Vorranganalyse in Frage, wie Sie in Kurs 1810  Kurseinheit 3 Kapitel 3.3.2 beschrieben ist \cite[S. 83 ff.]{K1810}. Es handelt sich also um eine Bottom-Up-Analyse. Dabei wird der Algorithmus so implementiert, dass der momentan gültige Operator in einer \codeword{while}-Schleife läuft, um einen Vektor befüllen zu können. Die erste Element des Vektors wird dabei jeweils vor der Schleife geparst, die restlichen Elemente in der Schleife. Dazu werden auch gleich Operatorenüberladungen des \codeword{Ast}-Enum verwendet.
+Als Parser kommt eine einfache Implementierung der Operator-Vorranganalyse in Frage, wie sie in Kurs 1810  Kurseinheit 3 Kapitel 3.3.2 beschrieben ist \cite[S. 83 ff.]{K1810}. Es handelt sich also um eine Bottom-Up-Analyse. Dabei wird der Algorithmus so implementiert, dass der momentan gültige Operator in einer \codeword{while}-Schleife läuft, um einen Vektor befüllen zu können. Das erste Element des Vektors wird dabei jeweils vor der Schleife geparst, die restlichen Elemente in der Schleife. Dazu werden auch gleich Operatorenüberladungen des \codeword{Ast}-Enum verwendet.
 
-Es handelt sich um einen LR(1)-Parser, da der Parser ein Zeichen vorrausschauen kann um die nächste Aktion zu bestimmen. Der Stack ist im weitesten Sinne bereits ein gültiges \codeword{Ast}-Element, das befüllt wird. Die \codeword{shift}-Funktion kann als Voranschreiten im Iterator angesehen werden. Die \codeword{reduce}-Funktion entpricht dem Anwenden der Operatorenüberladen auf dem gültigen \codeword{Ast}-Element.
+Es handelt sich um einen LR(1)-Parser, da der Parser ein Zeichen vorrausschauen kann, um die nächste Aktion zu bestimmen. Der Stack ist im weitesten Sinne bereits ein gültiges \codeword{Ast}-Element, das befüllt wird. Die \codeword{shift}-Funktion kann als Voranschreiten im Iterator angesehen werden. Die \codeword{reduce}-Funktion entpricht dem Anwenden der Operatorenüberladungen auf dem gültigen \codeword{Ast}-Element.
 
-Beim Parsing von Funktionsargument in mathematischen Ausdrücken, fangen die Parameter dabei wieder mit der Funktion zum Parsen von ``+'' und ``-'' an. Auch werden bereits Variablen und Konstanten unterschieden.
+Beim Parsing von Funktionsargumenten in mathematischen Ausdrücken, fangen die Parameter dabei wieder mit der Funktion zum Parsen von ``+'' und ``-'' an. Auch werden bereits Variablen und Konstanten unterschieden.
 
 Darüberhinaus werden entsprechende Prüfungen eingebaut, sodass der Term $a+b+(c+d)$ nicht wie der folgende Baum geparst wird:
 
@@ -980,7 +980,7 @@ Es entsteht vielmehr gleich der Baum:
 \section{Grundfunktionlitäten}
 In diesem Abschnitt sollen Grundlegende Funktionalitäten des CAS implementiert werden. Dies betrifft sowohl den Aufbau des Codes in Rust, um das CAS einfach erweiterbar zu machen, als auch das grundsätzliche Rechnen des Systems. So wird es beispielsweise keine Standardfunktionalität sein, dass $cos(x)^2+sin(x)^2 = 1$ erkannt wird. Dies soll über eine Erweiterung erkannt und verarbeitet werden. Das Zusammenfassen von $x+x=2*x$ ist hingegen aber eine Grundfunktionlität.
 
-\subsection{Änderung des Terms mihilfe Operatorenüberladung}
+\subsection{Änderung des Terms mihilfe von Operatorenüberladung}
 Der Trait \codeword{NumberType} soll bereits die meisten nötigen Operatorenüberladungen von den zu implementierenden Typen verlangen. Die wichtigsten Operationen werden ``Add'' und ``Mul'' sein, da diese vom CAS benutzt werden. Operatoren die ebenfalls interessant im weiteren Verlauf sein können sind der Modulo-Operator (z.B. Auswertung der sin- oder cos-Funktion), aber auch die Möglichkeit Werte vergleichen zu können. Deshalb soll noch \codeword{PartialEq} und \codeword{PartialOrd} implementiert werden um die Funktionen ``NumberType == 1'' und ``NumberType > 1'' zu ermöglichen. Daraus ergibt sich die Definition und die Implementierungen für \codeword{PrimNum}:
 
 \begin{lstlisting}[language=rust, caption={trait NumberType 1. Iteration}]
@@ -999,7 +999,7 @@ impl ops::Mul<PrimNum> for PrimNum { ... }
 impl ops::Rem<i128> for PrimNum { ... }
 \end{lstlisting}
 
-Ebenso soll für das Enum \codeword{Ast} ebenfalls Operatoren überladen werden. Hier beschränken wir uns auf die Operatoren ``Add'' und ``Mul''. Mit dem zusätlichen Generic-Typ ergibt sich die Defintion:
+Ebenso soll für das Enum \codeword{Ast} ebenfalls Operatoren überladen werden. Hier beschränken wir uns auf die Operatoren ``Add'' und ``Mul''. Mit dem zusätzlichen Generic-Typ ergibt sich die Defintion:
 
 \begin{lstlisting}[language=rust, caption={Ast Operatorenüberladung}]
 impl<N> ops::Add<Ast<N>> for Ast<N>
@@ -1055,12 +1055,12 @@ Die Überladungen für \codeword{Ast} sollen dabei gleich Zusammenfassungen übe
 
 \label{sec:kapAddnundMult}
 \subsection{Addieren und Multiplizieren (Standardauswertung von Termen)}
-Die prinzipielle Vorgehensweise um Additionen und Multiplikationen auszuführen orientiert sich an dem Vorgehen aus SymPy (vgl. \cite{SymPyAddFlatten} und \cite{SymPyMulFlatten}). Beide Verfahren sind im Grunde identisch, nur ändert sich der entsprechende Operator und das Ergebnis. So wird aus $x+x$ eine Multiplikation der Form $2*x$. Aus $x*x$ wird die Potenz $x^2$. 
+Die prinzipielle Vorgehensweise um Additionen und Multiplikationen auszuführen, orientiert sich an dem Vorgehen aus SymPy (vgl. \cite{SymPyAddFlatten} und \cite{SymPyMulFlatten}). Beide Verfahren sind im Grunde identisch, nur ändert sich der entsprechende Operator und das Ergebnis. So wird aus $x+x$ eine Multiplikation der Form $2*x$. Aus $x*x$ wird die Potenz $x^2$. 
 
 Das Verfahren wird exemplarisch für die Addition beschrieben, die Multiplikation wird aber ebenfalls im System implementiert. Kernstück ist eine HashMap der Form
 
 \codeword{HashMap<Ast<N>, Ast<N>>}. Key und Wert sind hierbei eigenständige Terme. Der Key ist hierbei der eigentliche Term, der in der Addition auftritt. Der Wert ist sozusagen der Multiplikator wie häufig der Term auftritt. Zudem gibt es einige Sonderfälle. Als Beispiel dient der Term 
-$2*x*y + x*y + 3 + a - a$. Um diesen Zusammenzufassen wird über alle Elemente des Vektors iteriert. Die HashMap ist zu Anfang leer, ein gesondertes ``Zahlenergebnis'' wird auf 0 gesetzt.
+$2*x*y + x*y + 3 + a - a$. Um diesen zusammenzufassen, wird über alle Elemente des Vektors iteriert. Die HashMap ist zu Anfang leer, ein gesondertes ``Zahlenergebnis'' wird auf 0 gesetzt.
 
 \begin{itemize}
     \item 1. Wert: Die Multiplikation ist gleich ein Sonderfall. Hier wird versucht eine Zahl aus dem Subterm zu extrahieren, dies ist hier möglich mit der $2$. Die HashMap erhält den Eintrag ``[x*y] = 2''
@@ -1072,7 +1072,7 @@ $2*x*y + x*y + 3 + a - a$. Um diesen Zusammenzufassen wird über alle Elemente d
 
 Nachdem diese Vereinfachungen in der HashMap gespeichert sind, besteht die Möglichkeit auf dieser HashMap durch externe Funktionen noch weitere Vereinfachungen vorzunehmen. Dieses Vorgehen wird noch genauer im Kapitel ``\hyperref[sec:kapErRustUndBei]{Erweiterbarkeit in Rust und Beispiele}'' näher erläutert.
 
-Zum Schluss können die Ergebnisse wieder in die Ausprägung \codeword{Ast::Add} überführt werden. Das Zahlergebnis kann hierbei einfach hinzugefügt werden. Bei der HashMap hängt dies vom Wert zum Key ab. 
+Zum Schluss können die Ergebnisse wieder in die Ausprägung \codeword{Ast::Add} überführt werden. Das Zahlenergebnis kann hierbei einfach hinzugefügt werden. Bei der HashMap hängt dies vom Wert zum Key ab. 
 
 \begin{itemize}
     \item Wert == 0: Key wird dem Vektor nicht hinzugefügt
@@ -1080,7 +1080,7 @@ Zum Schluss können die Ergebnisse wieder in die Ausprägung \codeword{Ast::Add}
     \item Alles andere: Es wird dem Vektor ``Ast::Mul(vec![Wert, Key])'' hinzugefügt
 \end{itemize}
 
-Um dieses Verfahren zu implementieren, muss für das \codeword{Ast}-Enum noch die Traits \codeword{Eq}, \codeword{PartialEq} und \codeword{Hash} implementiert werden. Erst dann kann der Typ \codeword{Ast} als Key in der Map verwendet werden. Im einfachsten Fall, kann dies per Makro geschehen. In unserem geht dies aber nur für \codeword{PartialEq}. Da z.B. Vektoren die Traits \codeword{Eq} und \codeword{Hash} nicht implementieren, müssen wir dies selbst erledigen. Der \codeword{Eq} ist dabei aber nur deklarativ, es muss keine Funktion ausgefüllt werden, dies übernimmt der Compiler \cite{RustEqTrait}. Der \codeword{Hash}-Trait kann ebenfalls recht einfach implementiert werden, hier können wir alle vorhandenen Werte als Hash zusammenfassen.
+Um dieses Verfahren zu implementieren, müssen für das \codeword{Ast}-Enum noch die Traits \codeword{Eq}, \codeword{PartialEq} und \codeword{Hash} implementiert werden. Erst dann kann der Typ \codeword{Ast} als Key in der Map verwendet werden. Im einfachsten Fall, kann dies per Makro geschehen. In unserem Fall geht dies aber nur für \codeword{PartialEq}. Da z.B. Vektoren die Traits \codeword{Eq} und \codeword{Hash} nicht implementieren, müssen wir dies selbst erledigen. Der \codeword{Eq} ist dabei aber nur deklarativ, es muss keine Funktion ausgefüllt werden, dies übernimmt der Compiler \cite{RustEqTrait}. Der \codeword{Hash}-Trait kann ebenfalls recht einfach implementiert werden, hier können wir alle vorhandenen Werte als Hash zusammenfassen.
 
 \begin{itemize}
     \item \begin{verbatim}src/evaluator/common_eval.rs\end{verbatim}
@@ -1093,7 +1093,7 @@ Um dieses Verfahren zu implementieren, muss für das \codeword{Ast}-Enum noch di
 \subsection{Umgang mit Brüchen, Potenzen und Wurzeln}
 Um auch genauere Werte zu erlauben, sollen rationale Zahlen in Form von Brüchen implementiert werden. So können mithilfe der Operatorenüberladungen diese dann zusammengefasst und gekürzt werden. Für rationale Zahlen sind im Enum \codeword{PrimNum} für Zähler und Nenner nur ganze Zahlen erlaubt, sowohl jeweils postiv und negativ. Der Term $1/3+1/3$ wird also zu \codeword{Num(Rational(2, 3))} ausgewertet. Der Term $1/3+1/3+1/3$ soll zu \codeword{Num(Int(1))} ausgewertet werden können.
 
-Terme wie $1/x$ werden durch das CAS in die Form \codeword{Pow(Symbol("x"), Num(Int(-1)))} umgeformt. Dabei ist ``x'' entsprechend die Basis und ``-1'' der Exponent. In der Standardimplementierung soll es außerdem bereits möglich sein die Potenzregel $a^{b^{c}} = a^{(b*c)}$ anzuwenden. Durch die bisherige Implementierung der Multiplikation wird außerdem bereits die Potenzregel $x^a*x^b = x^{(a+b)}$ angewendet. Die letzte Regel $x^a*y^a = (x*y)^a$ soll wiederum als erweitere Funktionalität implementiert werden, da hier eine andere Vorgehensweise bei dem Zusammenfassen des Terms notwendig ist, als die bisher implementierte und im Kapitel zur \hyperref[sec:kapAddnundMult]{Addition und Multiplikation} vorgestellte vorgehensweise.
+Terme wie $1/x$ werden durch das CAS in die Form \codeword{Pow(Symbol("x"), Num(Int(-1)))} umgeformt. Dabei ist ``x'' entsprechend die Basis und ``-1'' der Exponent. In der Standardimplementierung soll es außerdem bereits möglich sein die Potenzregel $a^{b^{c}} = a^{(b*c)}$ anzuwenden. Durch die bisherige Implementierung der Multiplikation wird außerdem bereits die Potenzregel $x^a*x^b = x^{(a+b)}$ angewendet. Die letzte Regel $x^a*y^a = (x*y)^a$ soll wiederum als erweiterte Funktionalität implementiert werden, da hier eine andere Vorgehensweise bei dem Zusammenfassen des Terms notwendig ist, als die bisher implementierte und im Kapitel zur \hyperref[sec:kapAddnundMult]{Addition und Multiplikation} vorgestellte Vorgehensweise.
 
 Glücklicherweise können Wurzeln ebenfalls als Potenzen dargestellt werden, so ist z.B. $\sqrt{2} = 2^{1/2}$ oder $\sqrt[3]{8} = 8^{1/3}$. So können alle bisherigen Regeln hierrauf einfach angewendet werden. Zudem sollen die Funktionen \codeword{sqrt} und \codeword{nthroot} im Term verwendet werden können, die dann entsprechende \codeword{Ast}-Elemente erzeugen.
 
@@ -1127,17 +1127,17 @@ Um die Erweiterbarkeit des Systems zu gewährleisten wird das Struct \codeword{E
 
 \paragraph{Allgemeines} Da das Enum \codeword{Ast} bereits einen Generic-Parameter enthält, muss dieser ebenfalls bei EvalFn angegeben werden. Die Felder sind teils Vektoren, teils HashMaps, die entsprechende Funktionen zur Vereinfachung vorhalten. Der Parameter mit dem Typ \codeword{&mut HashMap<Ast<N>} wurde bereits genauer vorgestellt.
 
-\paragraph{adders} Funktionen, die den Typ \codeword{Ast::Add} weiter vereinfachen können. So können entsprechend die Einträge der HashMap geprüft und verändert werden. Der zweite Parameter vom Typ \codeword{bool} gibt an, ob es sich um eine explizite Berechnung handeln soll. Dies soll noch Relevant werden, wenn auch ungenaue Werte berechnet werden sollen.
+\paragraph{adders} Funktionen, die den Typ \codeword{Ast::Add} weiter vereinfachen können. So ist es möglich entsprechend die Einträge der HashMap zu überprüfen und zu verändern. Der zweite Parameter vom Typ \codeword{bool} gibt an, ob es sich um eine explizite Berechnung handelt. Dies wird relevant, wenn auch ungenaue Werte berechnet werden sollen.
 
-\paragraph{muls} Funktionen, die den Typ \codeword{Ast::Mul} weiter vereinfachen können. Die Parameter sind identisch wie bereits bei \codeword{adders}. Dieses Feld ist der Vollständigkeithalber implementiert, da ich kein Beispielterm finden konnte, bei dem dies relevant ist.
+\paragraph{muls} Funktionen, die den Typ \codeword{Ast::Mul} weiter vereinfachen können. Die Parameter sind identisch wie bereits bei \codeword{adders}. Dieses Feld ist der Vollständigkeit halber implementiert, da ich kein Beispielterm finden konnte, bei dem dies relevant ist.
 
-\paragraph{pows} Funktionen, die die Basis und den Exponenten erhalten und Auswerten können. So kann z.B. der Term $(x*4)^{(1/2)}$ zu $x^{(1/2)}*2$ vereinfacht werden. Auch hier gibt es wieder die Möglichkeit eine Explizite Berechnung zu erwzwingen. Diese Funktion besitzt darüberhinaus einen Rückgabewert. Da der entsprechende \codeword{Ast} nicht direkt bearbeitet wird, da sich dieser auch in der Ausprägung verändern kann. In diesem Beispiel wird aus einem \codeword{Ast::Pow} ein \codeword{Ast::Mul}.
+\paragraph{pows} Funktionen, die die Basis und den Exponenten erhalten und Auswerten können. So kann z.B. der Term $(x*4)^{(1/2)}$ zu $x^{(1/2)}*2$ vereinfacht werden. Auch hier gibt es wieder die Möglichkeit eine explizite Berechnung zu erwzwingen. Diese Funktion besitzt darüberhinaus einen Rückgabewert, da der entsprechende \codeword{Ast} nicht direkt bearbeitet wird, da sich dieser auch in der Ausprägung verändern kann. In diesem Beispiel wird aus einem \codeword{Ast::Pow} ein \codeword{Ast::Mul}.
 
 \paragraph{funcs} Funktionen, die angegebene Funktionen im Term umschreiben bzw. auswerten sollen. So kann z.B. der Term $sin(0) + 2$ direkt vereinfacht werden in $0 + 2 = 2$. Der Term $sqrt(4)$ kann zu $2$ vereinfacht werden. Dabei bleiben Funktionen, die \codeword{EvalFn} nicht bekannt sind natürlich im Term unverändert erhalten. Falls eine Auswertung nicht möglich ist, ist dies ebenfalls der Fall. Ansonsten steht der Funktion natürlich immer offen den Term entsprechend in ein anderes \codeword{Ast}-Objekt umzuwandeln. Dieses Feld ist als HashMap implementiert, da eine Funktion nur eine Auswertung besitzt.
 
 \paragraph{consts} Funktionen die nur ein \codeword{Ast} zurückgeben. Dies wird in den meisten Fällen ein numerischer Wert sein. Dieses Feld ist ebenso als HashMap umgesetzt.
 
-\subsection{Implementierung von Substitution} Um nun endlich einen Term mit Variablen auszuwerten, müssen wir diese im \codeword{Ast}-Enum substituieren können. Diese Funktionalität kann recht einfach implementiert werden. Hierzu wird die bestehende \codeword{eval}-Methode erweitert, sodass nun auch Variablen überprüft werden. Als zusätliche Parameter erhält die Methode einen Variablennamen und den zu substituierenden Term. Sind beide gesetzt und es handelt sich bei der Auswertung um die Variable wird der Term anstelle der Variable zurückgegeben. Da Rust keine Methodenüberladung unterstützt, werden ebenfalls Methoden implementiert, die den Funktionsaufruf auch mit weniger Argumenten unterstützen und entsprechend Standardwerte übergeben, die keinen Einfluss auf die Berechnung haben.
+\subsection{Implementierung von Substitution} Um nun endlich einen Term mit Variablen auszuwerten, müssen wir diese im \codeword{Ast}-Enum substituieren können. Diese Funktionalität kann recht einfach implementiert werden. Hierzu wird die bestehende \codeword{eval}-Methode erweitert, sodass nun auch Variablen überprüft werden. Als zusätzliche Parameter erhält die Methode einen Variablennamen und den zu substituierenden Term. Sind beide gesetzt und es handelt sich bei der Auswertung um die Variable wird der Term anstelle der Variable zurückgegeben. Da Rust keine Methodenüberladung unterstützt, werden ebenfalls Methoden implementiert, die den Funktionsaufruf auch mit weniger Argumenten unterstützen und entsprechend Standardwerte übergeben, die keinen Einfluss auf die Berechnung haben.
 
 Die Erweiterung der Methode besitzt zwei weitere Parameter, den optionalen Variablennamen, der ersetzt werden soll, und das entsprechend \codeword{Ast}, mit dem substituiert werden soll.
 \begin{lstlisting}[language=rust, caption={Erweiterung pub fn eval}]
@@ -1202,17 +1202,17 @@ Zu überlegen ist noch, ob der übergebene Term vor der Substituierung ebenfalls
 \end{itemize}
 
 \subsection{Implementierung von expand}
-Auch ist es interessant einen Term vereinfacht vorliegen zu haben. Auch wenn der Name ``expand'' nicht danach klingt, einen Term zu vereinfachen, so kann dies durchaus der Fall sein, wie der folgende Term zeigt $(x + 1)*(x - 2) - (x - 1)*x$ \cite{SymPyExpand}. Wird der Term ausmultipliziert kann dieser anschließend auf $-2$ vereinfacht werden. Im folgenden sollen die folgende Terme auf dieser Art vereinfacht werden können.
+Unter Umständen ist es interessant einen Term vereinfacht vorliegen zu haben. Auch wenn der Name ``expand'' nicht danach klingt, einen Term zu vereinfachen, so kann dies durchaus der Fall sein, wie der folgende Term zeigt $(x + 1)*(x - 2) - (x - 1)*x$ \cite{SymPyExpand}. Wird der Term ausmultipliziert kann dieser anschließend auf $-2$ vereinfacht werden. Im folgenden sollen die folgende Terme auf dieser Art vereinfacht werden können.
 
 \paragraph{Multiplikation von Additionen bzw. einzelnen Elementen} Hierbei soll der Term $x*(a+b)$ zu $x*a+x*b$ umgeformt werden, der Term $(a+b)*(c+d)*e$ soll entsprechend zu $a*c*e + a*d*e + b*c*e + b*d*e$ umgeformt werden.
 
-Die Implementierung hiervon ist recht einfach. Bei der Ausprägung \codeword{Ast::Mul} wird ein leerer Ergebnisvektor erstellt. Danach muss über jedes Element im Vektor iteriert werden. Handelt es sich nicht um die Ausprägung \codeword{Ast::Add} wird das Element dem Ergebnis hinzugefügt falls dieser noch leer ist, ansonsten wird jedes Element im Ergebnisvektor mit dem derzeitigen Element Multipliziert, dabei können die Elemente direkt im Vektor verändert werden.
+Die Implementierung hiervon ist recht einfach. Bei der Ausprägung \codeword{Ast::Mul} wird ein leerer Ergebnisvektor erstellt. Danach muss über jedes Element im Vektor iteriert werden. Handelt es sich nicht um die Ausprägung \codeword{Ast::Add}, wird das Element dem Ergebnis hinzugefügt falls dieser noch leer ist. Ansonsten wird jedes Element im Ergebnisvektor mit dem derzeitigen Element multipliziert, dabei können die Elemente direkt im Vektor verändert werden.
 
-Handelt es sich jedoch um die Ausprägung \codeword{Ast::Add} wird prinzipiell mit demselben Verfahren gearbeitet. Diesmal muss nur zusätlich über alle Elemente im Vektor von \codeword{Ast::Add} iteriert werden um das derzeitige Element zu bestimmen. Diesmal kann die Veränderung nicht direkt im Vektor erfolgen, da ansonsten bereits der Ergebnisvektor verändert wird, bevor alle Elemente mit diesem Multipliziert werden konnten.
+Handelt es sich jedoch um die Ausprägung \codeword{Ast::Add} wird prinzipiell mit demselben Verfahren gearbeitet. Diesmal muss nur zusätzlich über alle Elemente im Vektor von \codeword{Ast::Add} iteriert werden um das derzeitige Element zu bestimmen. Die Veränderung kann nicht direkt im Vektor erfolgen, da ansonsten bereits der Ergebnisvektor verändert wird, bevor alle Elemente mit diesem multipliziert werden konnten.
 
 \paragraph{Potenzen mit ganzzahligen positiven Exponenten} Bei Potenzen der Form $(x+y+z)^n, n \in \mathbb{N}$ kann die entsprechende Basis n-mal in den Vektor für \codeword{Ast::Mul} eingefügt werden. Hiernach kann die expand-Funktion für \codeword{Ast::Mul} aufgerufen werden um den Term auszumultiplizieren. 
 
-\paragraph{Addition im Exponent} Potenzen der Form $n^{x+y}$ sollen in die Form $n^x*n^y$ überführt werden. Die Prüfung kann dabei durch eine einfache \codeword{match}-Anweisung erfolgen. Eine weitere Vereinfachung des Terms ist nach fertigstellung nicht notwendig.
+\paragraph{Addition im Exponent} Potenzen der Form $n^{x+y}$ sollen in die Form $n^x*n^y$ überführt werden. Die Prüfung kann dabei durch eine einfache \codeword{match}-Anweisung erfolgen. Eine weitere Vereinfachung des Terms ist nach Fertigstellung nicht notwendig.
 
 \paragraph{Potenzen mit Multiplikation in der Basis} Potenzen der Form $(x*y)^a$ sollen in die Form $x^a*y^a$ überführt werden. Die Prüfung kann dabei durch eine einfache \codeword{match}-Anweisung erfolgen.
 
@@ -1234,11 +1234,11 @@ Das neue Feld ``expand\_funcs'' enthält Funktionen um mathematische Funktionen 
     \item \begin{verbatim}src/extensions/function_expand.rs\end{verbatim}
 \end{itemize}
 
-\paragraph{Besonderheiten mit Rust} Bei der Implementierung dieser Methode sind deutlich das strenge Typensystem von Rust als auch das Ownership und Borrowing in Erscheinung getreten. Explementarisch soll dies an zwei Beispielen erläutert werden, da sich dieses Verhalten ähnlich in anderen Fällen wiederholt.
+\paragraph{Besonderheiten mit Rust} Bei der Implementierung dieser Methode sind das strenge Typensystem von Rust als auch das Ownership und Borrowing in Erscheinung getreten. Explementarisch soll dies an zwei Beispielen erläutert werden, da sich dieses Verhalten ähnlich in anderen Fällen wiederholt.
 
-Für das Enum \codeword{Ast} wurden die Methoden \codeword{shorten} und \codeword{sort} implementiert um generell die Handhabung des Typen zu verbessern. Beide Methoden erhalten eine veränderbare Referenz auf das eigene Objekt und geben auch solch eine wieder zurück. Die Implementierung von \codeword{expand} gibt allerdings eine eigenständige Instanz von \codeword{Ast} zurück, und gibt somit das Ownership in diesem Fall ab. Da \codeword{Ast} nicht den Copy-Trait implementieren kann, kann der entsprechende Rückgabewert von \codeword{shorten} und \codeword{sort} nicht einfach derefenziert werden.
+Für das Enum \codeword{Ast} wurden die Methoden \codeword{shorten} und \codeword{sort} implementiert um generell die Handhabung des Typen zu verbessern. Beide Methoden erhalten eine veränderbare Referenz auf das eigene Objekt und geben auch solch eine wieder zurück. Die Implementierung von \codeword{expand} gibt allerdings eine eigenständige Instanz von \codeword{Ast} zurück und gibt somit das Ownership in diesem Fall ab. Da \codeword{Ast} nicht den Copy-Trait implementieren kann, kann der entsprechende Rückgabewert von \codeword{shorten} und \codeword{sort} nicht einfach dereferenziert werden.
 
-Um das Problem zu umgehen bieten sich zwei Lösungen an. Einerseits kann das zurückgegebene Objekt mit \codeword{.clone()} geklont und als eigenständiges Objekt zurückgeben werden, oder es werden die Funktionen auf dem Objekt aufgerufen um danach das Objekt als solches zurückgegeben.
+Um das Problem zu umgehen bieten sich zwei Lösungen an. Einerseits kann das zurückgegebene Objekt mit \codeword{.clone()} geklont und als eigenständiges Objekt zurückgeben werden oder es werden die Funktionen auf dem Objekt aufgerufen um danach das Objekt als solches zurückgegeben.
 
 \begin{lstlisting}[language=rust, caption={Mögliche Lösungen für Rückgabewerte}]
     // 1. Möglichkeit
@@ -1251,10 +1251,10 @@ Um das Problem zu umgehen bieten sich zwei Lösungen an. Einerseits kann das zur
     result
 \end{lstlisting}
 
-Das zweite Beispiel bezieht sich auf explizite klonen des Exponenten bei Potenzen, wenn die Basis eine Multiplikation ist. In der entsprechenden for-Schleife wird für jedes Element des Vektors der Basis dem Ergebnis ein neues hinzugefügt nach den oben genannten Regeln. Der Exponent bleibt aber in jedem Durchlauf dersselbe. Da \codeword{Ast} einerseits immer noch nicht den Copy-Trait implementiert und andererseits die Initialisierung von Box das Ownership des Wertes bekommt muss hier \codeword{.clone()} ausgeführt werden. Alle anderen \codeword{.clone()}-Aufrufe dieser Methode beheben prinzipiell dasselbe Problem.
+Das zweite Beispiel bezieht sich auf das explizite Klonen des Exponenten bei Potenzen, wenn die Basis eine Multiplikation ist. In der entsprechenden for-Schleife wird für jedes Element des Vektors der Basis dem Ergebnis ein neues hinzugefügt nach den oben genannten Regeln. Der Exponent bleibt aber in jedem Durchlauf dersselbe. Da \codeword{Ast} einerseits immer noch nicht den Copy-Trait implementiert und andererseits die Initialisierung von Box das Ownership des Wertes bekommt muss hier \codeword{.clone()} ausgeführt werden. Alle anderen \codeword{.clone()}-Aufrufe dieser Methode beheben prinzipiell dasselbe Problem.
 
 \subsection{Implementierung von simplify}
-Um andere Arten von Vereinfachungen vorzunehmen wird die Methode ``simplify'' in Anlehnung von SymPy \cite{SymPySimplify} erstellt. Hier werden verschiedene Möglichkeiten geprüft einen Term effizient zu vereinfachen.
+Um andere Arten von Vereinfachungen vorzunehmen, wird die Methode ``simplify'' in Anlehnung von SymPy \cite{SymPySimplify} erstellt. Hier werden verschiedene Möglichkeiten geprüft einen Term effizient zu vereinfachen.
 
 In dieser Arbeit sollen folgende Terme vereinfacht werden können:
 
@@ -1266,21 +1266,21 @@ In dieser Arbeit sollen folgende Terme vereinfacht werden können:
 
 Die zentrale Frage ist hierbei, wie die Komplexität eines Terms ermittelt wird. Die Standardimplementierung von SymPy zählt hierzu im Term die nötigen Operationen. So erhält der Term $(x**2+x+1)/y$ einen Wert von 4. In dieser Arbeit soll die Komplexität ebenfalls so ermittelt werden. Hierzu wird die Methode \codeword{count_ops} implementiert.
 
-Da sich die ersten beiden Regeln zum vereinfachen überschneiden können, soll darüberhinaus angegeben werden müssen, welche Art der Vereinfachung durchgeführt werden soll.
+Da sich die ersten beiden Regeln zum Vereinfachen überschneiden können, soll darüberhinaus angegeben werden, welche Art der Vereinfachung durchgeführt werden soll.
 
 \paragraph{Regel 1} Die am einfachsten zu implementierende Möglichkeit der Vereinfachung ist die erste Regel. Hierzu werden in einem \codeword{Ast::Mul} alle Werte iteriert und wie bereits in der Standardauswertung eine HashMap befüllt. Diesmal ist der Key der HashMap allerdings der Exponent und der eigentliche Wert die Basis. Zum Schluss wird für jeden Eintrag entsprechend ein neues \codeword{Ast::Pow}-Element erzeugt und dem Ergebnis hinzugefügt.
 
-\paragraph{Regel 2} Bei der zweiten Regel ist die Zuordnung der Divisoren zu den Additionstermen eine Schwierigkeit, die gelöst werden muss. Schlussendlich habe ich mich für eine Lösung entschieden, die jedem Divisor einem Dividenden zuordnet, die die größte Einsparung erbringt, diese Kombination wird dann durchgeführt. Die Zuordnung läuft dabei so ab, dass alle Möglichen Divisoren für alle möglichen Dividenden geprüft werden. Hierbei wird die Komplexität des Terms davor und nach Durchführung der Division gemessen und verglichen.
+\paragraph{Regel 2} Bei der zweiten Regel ist die Zuordnung der Divisoren zu den Additionstermen eine Schwierigkeit, die gelöst werden muss. Schlussendlich habe ich mich für eine Lösung entschieden, die jedem Divisor einem Dividenden zuordnet, die die größte Einsparung erbringt, diese Kombination wird dann durchgeführt. Die Zuordnung läuft dabei so ab, dass alle möglichen Divisoren für alle möglichen Dividenden geprüft werden. Hierbei wird die Komplexität des Terms davor und nach Durchführung der Division gemessen und verglichen.
 
 SymPy löst dies anders. Der Term $(x^3+x^2+x+1)/x*(x^2+x)$ wird hierbei ausmultipliziert und dann ein größter gemeinsamer Teiler gesucht (vgl. \cite{SymPySimplifySrc} Aufrufe \codeword{cancel}, \codeword{_mexpand}, \codeword{together}). Einerseits erscheint mir diese Möglichkeit sehr mächtig, aber auch recht komplex und fehleranfällig zu implementieren.
 
-Um meine bisher gesammelten Erfahrungen in diese Arbeit zu bringen habe ich mich für eine eigene Implementierung entschieden. Später bei einem Vergleich zwischen SymPy und diesem System können eventuelle Unterschiede aufgezeigt und verglichen werden.
+Um meine bisher gesammelten Erfahrungen in diese Arbeit zu bringen, habe ich mich für eine eigene Implementierung entschieden. Bei einem späteren Vergleich zwischen SymPy und diesem System, können eventuelle Unterschiede aufgezeigt und verglichen werden.
 
-\paragraph{Regel 3} Die letzte Regel soll es erlauben, benutzerdefinierte Regeln zur Zusammenfassung hinzuzufügen. Hierzu wird wieder das Struct \codeword{EvalFn} erweitert, um Funktionen hinzufügen zu können, die nacheinander aufgerufen werden. Als Beispiel dient hierbei die \codeword{log}-Funktion, die nun das Gegenteil wie in ``expand'' macht. Eine Besonderheit hierbei ist gleich, dass diese Funktion sowohl in Multiplikationstermen als auch in Additionstermen aufgerufen werden muss.
+\paragraph{Regel 3} Die letzte Regel soll es erlauben, benutzerdefinierte Regeln zur Zusammenfassung hinzuzufügen. Hierzu wird wieder das Struct \codeword{EvalFn} erweitert, um Funktionen hinzufügen zu können, die nacheinander aufgerufen werden. Als Beispiel dient hierbei die \codeword{log}-Funktion, die nun das Gegenteil wie in ``expand'' macht. Eine Besonderheit hierbei ist, dass diese Funktion sowohl in Multiplikationstermen als auch in Additionstermen aufgerufen werden muss.
 
-\paragraph{Besonderheiten mit Rust} Gerade bei der Implementierung der zweiten Regel ist der Aspekt ``Borrowing'' hervorgetreten. Die Ursprüngliche Idee ist, im Term alle Summen und alle anderen Terme zu trennen. Hiernach sollte über alle Summen iteriert werden und der richtige Divisor gefunden werden. Sollte sich bei einer späteren Summe herausstellen, dass der Divisor eine größere Einsparung bringt, soll die vorherige Summe noch einmal mit anderen Divisoren überprüft werden. Allerdings ist es durch das ``Borrowing'' nicht möglich einem Vektor ein Element hinzuzufügen, über den gerade iteriert wird.
+\paragraph{Besonderheiten mit Rust} Gerade bei der Implementierung der zweiten Regel ist der Aspekt ``Borrowing'' hervorgetreten. Die ursprüngliche Idee ist, im Term alle Summen und alle anderen Terme zu trennen. Hiernach sollte über alle Summen iteriert werden und der richtige Divisor gefunden werden. Sollte sich bei einer späteren Summe herausstellen, dass der Divisor eine größere Einsparung bringt, soll die vorherige Summe noch einmal mit anderen Divisoren überprüft werden. Allerdings ist es durch das ``Borrowing'' nicht möglich einem Vektor ein Element hinzuzufügen, über den gerade iteriert wird.
 
-Die Lösung wird dabei folgendermaßen implementiert. Über ein zweites Array wird gespeichert, ob es noch ein Element gibt, das überprüft werden. Dies geschieht durch einen ``bool''-Wert am entsprechenden Index. Nach der Iteration muss der entsprechende Index im Hilfsarray auf ``true'' gesetzt werden. Im Falle, dass der Divisor wechselt muss der entsprechende Index auf ``false'' gesetzt werden. Die Schleife läuft dann solange wie ein ``false''-Wert im Hilfsarray vorhanden ist.
+Die Lösung wird dabei folgendermaßen implementiert. Durch ein zweites Array wird gespeichert, ob es noch ein Element gibt, das überprüft werden muss. Dies geschieht durch einen ``bool''-Wert am entsprechenden Index. Nach der Iteration muss der entsprechende Index im Hilfsarray auf ``true'' gesetzt werden. Im Falle, dass der Divisor wechselt, muss der entsprechende Index auf ``false'' gesetzt werden. Die Schleife läuft dann solange wie ein ``false''-Wert im Hilfsarray vorhanden ist.
 
 \begin{itemize}
     \item \begin{verbatim}src/evaluator/mod.rs\end{verbatim}
@@ -1297,15 +1297,15 @@ Die weiteren Implementierungen sollen nun einen Ausblick darauf geben, wie erwei
 \label{sec:ungenauigkeitenKapitel}
 \subsection{Terme mit Fließkommazahlen berechnen oder auch Ungenauigkeit in Kauf nehmen} Um ein einzelnes numerisches Ergebnis zu erhalten, sofern alle Variablen im Term substitutiert sind, erhält das \codeword{Ast}-Enum zusätzlich die Methode \codeword{hard_eval}. Diese ruft die bereits vorgestellte Methode \codeword{eval_sub} auf und übergibt als Parameter, dass eine explizite Berechnung stattfinden soll. Dies kann mit einer gewissen Ungenaugkeit verbunden sein.
 
-Den Parameter \codeword{hard_eval} sollen dabei alle berechnenden Funktionen - insbesondere auch später hinzugefügte Funktionen - weitergegeben werden. Dies kann durch die Typdefinition von EvalFn sichergestellt werden.
+Dem Parameter \codeword{hard_eval} sollen dabei alle berechnenden Funktionen - insbesondere auch später hinzugefügte Funktionen - weitergegeben werden. Dies kann durch die Typdefinition von EvalFn sichergestellt werden.
 
 Als konkretes Beispiel wird die bestehende Funktion \codeword{perfect_nth_root} erweitert. Als Rückgabewert ist das Enum \codeword{Option} angegeben worden. Bisher gibt diese Funktion \codeword{None} zurück, wenn es sich um kein exaktes Ergebnis handelt. Ansonsten wird ein entsprechendes \codeword{Ast}-Element zurückgegeben.
 
-Wenn nun \codeword{hard_eval} auf ``true'' gesetzt ist soll die Potenz ohne weitere Prüfung durchgeführt werden, falls es sich um Zahlen handelt. Dazu muss das trait \codeword{NumberType} noch die Methodendefinition \codeword{pow} forden, die in den eigenen Nummerntypen implementiert werden muss. In unserem Fall für \codeword{PrimNum} werden danach die entsprechenden Rust-Funktionen der primitiven Typen aufgerufen um eine Potenz zu berechnen.
+Wenn nun \codeword{hard_eval} auf ``true'' gesetzt ist, soll die Potenz ohne weitere Prüfung durchgeführt werden, falls es sich um Zahlen handelt. Dazu muss das trait \codeword{NumberType} noch die Methodendefinition \codeword{pow} forden, die in den eigenen Nummerntypen implementiert werden muss. In unserem Fall für \codeword{PrimNum} werden danach die entsprechenden Rust-Funktionen der primitiven Typen aufgerufen um eine Potenz zu berechnen.
 
 Als erstes Beispiel dient der Term $sqrt(2)$. Der Parser erkennt hierbei nur die Funktion. Bei einem Aufruf von \codeword{simple_eval} wird diese Funktion dann durch die bestehende Implementierung nach \codeword{Pow(Num(Int(2)), Num(Rational(1, 2)))} umgewandelt. Der Aufruf von \codeword{hard_eval} dagegen gibt den Fließkommawert \codeword{1.4142135623730951} zurück, wodurch bereits eine Ungenauigkeit entstanden ist.
 
-Als zweites Beispiel dient der Term $sqrt(2)*sqrt(2)$. Durch die gewährleistete Ausführungsreihenfolge der Terme ist das Ergebnis mit \codeword{simple_eval} $2$. Dies kommt durch die Termzusammenfassung zustande, wie sie für die Addition erläutert ist. Bei der Ausführung mit \codeword{hard_eval} wird dagegen entsprechend das Ergebnis $2.0000000000000004$ zurückgegeben. Dies hat den Grund, da ja erst die Potenzen ausgeführt werden, und danach erst die Multiplikation durchgeführt wird. Andere Nummerntypen, die hier eine höhere Genauigkeit erlauben bzw. solche Sonderfälle abfangen, können hierbei natürlich auch immer noch ein genaueres Ergebnis liefern.
+Als zweites Beispiel dient der Term $sqrt(2)*sqrt(2)$. Durch die gewährleistete Ausführungsreihenfolge der Terme ist das Ergebnis mit \codeword{simple_eval} $2$. Dies kommt durch die Termzusammenfassung zustande, wie sie für die Addition erläutert ist. Bei der Ausführung mit \codeword{hard_eval} wird dagegen entsprechend das Ergebnis $2.0000000000000004$ zurückgegeben. Dies hat den Grund, da ja erst die Potenzen ausgeführt werden und danach erst die Multiplikation durchgeführt wird. Andere Nummerntypen, die hier eine höhere Genauigkeit erlauben bzw. solche Sonderfälle abfangen, können hierbei natürlich auch immer noch ein genaueres Ergebnis liefern.
 
 \subsection{Implementierung der limit-Funktion}
 \subsection{Terme leserlich darstellen}
@@ -1313,7 +1313,7 @@ Bisher wurde zur Ausgabe des Terms im \codeword{println!}-Makro der Platzhalter 
 \begin{quote}
     Add([Mul([Num(Int(2)), Symbol("x")]), Pow(Symbol("x"), Num(Int(2))), Symbol("y"), Num(Int(-1))])
 \end{quote}
-erzeugt. Da dies noch recht unleserlich ist, und die übliche Notation die Potenz an den Anfang stellen würde, wird der Trait \codeword{Display} implementiert.
+erzeugt. Da dies noch recht unleserlich ist und die übliche Notation die Potenz an den Anfang stellen würde, wird der Trait \codeword{Display} implementiert.
 
 Sobald dieser implementiert ist, kann die Ausgabe auch mit \codeword{println!("{}", ast)} erfolgen. Für das Trait kann die Methode \codeword{fmt} überladen werden, die dann aufgerufen wird. Hier können die Vektoren von Add und Mul entsprechend sortiert werden, sodass eine übliche Ausgabe erfolgt. Die Implementierung in dieser Arbeit gibt für den oben genannten Term $x^2+2*x+y-1$ aus.
 
@@ -1327,18 +1327,18 @@ Sobald dieser implementiert ist, kann die Ausgabe auch mit \codeword{println!("{
 
 \section{Fazit}
 \subsection{Erweiterungs- und Verbesserungsideen des Systems}
-Im Rahmen dieser Arbeit wurde nicht für alle Implementierungen die bestmögliche Lösung vorgenommen. Auch sind einige Aspkete Verbesserungswürdig, die einen angenehmeren Umgang mit dieser Bibliothek sorgen würden. Diese Punkte sollen der Vollständigkeithalber mit aufgeführt werden.
+Im Rahmen dieser Arbeit wurde nicht für alle Implementierungen die bestmögliche Lösung vorgenommen. Auch sind einige Aspkete verbesserungswürdig, die für einen angenehmeren Umgang mit dieser Bibliothek sorgen würden. Diese Punkte sollen der Vollständigkeithalber mit aufgeführt werden.
 \begin{itemize}
     \item Da Rust keine weiteren Besonderheiten für Rekursion bietet, würde eine iterative Lösung die Elemente des \codeword{Ast} zu verarbeiten wahrscheinlich Performanter sein.
-    \item Der Parser könnte erweitert werden, sodass auch $3x$ anstelle von $3*x$ erkannt wird. Auch die Möglich dynamisch Operatoren hinzuzufügen wäre interessant, sodass z.B. für die Fakultät einfach $x!$ angegeben werden kann, anstelle eines Funktionsaufrufs.
-    \item Bei der Zusammenfassung der Terme ist zu überlegen, den Nummerntyp nicht zusammenzufassen. Rationale Zahlen und Fließkommazahlen könnten nebeneinander existieren. In der momentanen Implementierung wird diese Addition zu einer Fließkommazahl vereinfacht. Der Vorteil dabei ist, dass sicher nur ein Zahlenwert vorhanden. Allerdings wird der Nachteil der Ungenauigkeit in Kauf genommen.
+    \item Der Parser könnte erweitert werden, sodass auch $3x$ anstelle von $3*x$ erkannt wird. Auch die Möglichkeit dynamisch Operatoren hinzuzufügen wäre interessant, sodass z.B. für die Fakultät einfach $x!$ angegeben werden kann, anstelle eines Funktionsaufrufs.
+    \item Bei der Zusammenfassung der Terme ist zu überlegen, den Nummerntyp nicht zusammenzufassen. Rationale Zahlen und Fließkommazahlen könnten nebeneinander existieren. In der momentanen Implementierung wird diese Addition zu einer Fließkommazahl vereinfacht. Der Vorteil dabei ist, dass sicher nur ein Zahlenwert vorhanden ist. Allerdings wird der Nachteil der Ungenauigkeit in Kauf genommen.
     \item Bei der Zusammenfassung von Termen in der HashMap kann es zu Konflikten kommen. Eine andere Idee wäre hier als Key den Term als String zu verwenden. Hierzu müsste aber der Term auf jeden Fall vorher sortiert sein. Permutationen eines Terms ($x*y$ und $y*x$) können sonst nicht abgefangen werden. Hier hat das Hashing den Vorteil, das die Reihenfolge egal ist, da beide Symbole zusammen denselben Hashwert errechnen.
-    \item Im moment wird $cos(x)^2+sin(x)^2 = 1$ nur in einfachen Fällen zusammengefasst. Der Term $(z*sin(x)^2)+(z*cos(x)^2) + (a*sin(x)^2)+(a*cos(x)^2)$ könnte entsprechend auch zusammengefasst werden.
+    \item Im Moment wird $cos(x)^2+sin(x)^2 = 1$ nur in einfachen Fällen zusammengefasst. Der Term $(z*sin(x)^2)+(z*cos(x)^2) + (a*sin(x)^2)+(a*cos(x)^2)$ könnte entsprechend auch zusammengefasst werden.
 \end{itemize}
 
 Bei der Substituierung von Symbolen wären ebenfalls Erweitungen vorstellbar.
 \begin{itemize}
-    \item Übergabe eines Vektors von Werten, Rückgabewert ist ebenfalls Vektor mit den entsprechenden Substituierungen. Diese könnten sogar Nebenläufig umgesetzt werden.
+    \item Übergabe eines Vektors von Werten, Rückgabewert ist ebenfalls Vektor mit den entsprechenden Substituierungen. Diese könnten sogar nebenläufig umgesetzt werden.
     \item Mehrere Variablen gleichzeitig ersetzen.
     \item Substitution von ganzen Termen erlauben, nicht nur einzelnen Variablen.
     \item Mischformen der Verbesserungen.
