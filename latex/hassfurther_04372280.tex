@@ -1308,6 +1308,13 @@ Als erstes Beispiel dient der Term $sqrt(2)$. Der Parser erkennt hierbei nur die
 Als zweites Beispiel dient der Term $sqrt(2)*sqrt(2)$. Durch die gewährleistete Ausführungsreihenfolge der Terme ist das Ergebnis mit \codeword{simple_eval} $2$. Dies kommt durch die Termzusammenfassung zustande, wie sie für die Addition erläutert ist. Bei der Ausführung mit \codeword{hard_eval} wird dagegen entsprechend das Ergebnis $2.0000000000000004$ zurückgegeben. Dies hat den Grund, da ja erst die Potenzen ausgeführt werden und danach erst die Multiplikation durchgeführt wird. Andere Nummerntypen, die hier eine höhere Genauigkeit erlauben bzw. solche Sonderfälle abfangen, können hierbei natürlich auch immer noch ein genaueres Ergebnis liefern.
 
 \subsection{Implementierung der limit-Funktion}
+Ursprünglich war geplant, dass die ``limit''-Funktion als Beispiel implementiert wird, wie dynamisch Funktionen dem CAS hinzugefügt werden können. Da dies aber tatsächlich bereits z.B. mit der Wurzelfunktion geschehen ist, kann sich auf die eigentliche Implementierung konzentriert werden. In dieser Arbeit werden nur einige heuristiken der ``limit''-Funktion implementiert \cite{ListLimitHeuristic}.
+
+Die Arbeit von Dominik Gruntz ``On Computing Limits in a Symbolic Manipulation System'' \cite{GruntzPdf} stellt darüberhinaus noch weitere Methoden vor, wie Limits berechnet werden können und besitzt einen eigenen Algorithmus, der neben Heuristiken in SymPy verwendet wird \cite{SympyLimitNote}. Die Implementierung dieser Verfahren soll nicht nicht Teil dieser Arbeit sein.
+
+Bei der Implemeniterung dieser Methode treten keine neuen Probleme mit dem Ownership und Borrowing von Rust auf. Stellen, an denen Werte geklont werden müssen sind nachvollziehbar erkennbar. So müssen z.B. bei der Übergabe der Parameter bei einem rekursiven Funktionsaufruf diese geklont werden, da ansonsten entsprechend das Ownership abgegeben wird. Die bisherigen Implemeniterungen von \codeword{traits} zur Prüfung auf Gleichheit mit Ganzzahlen von \codeword{Ast} und \codeword{NumberType} sind auch hier ausreichend.
+
+
 
 \begin{itemize}
     \item \begin{verbatim}src/evaluator/function_eval.rs\end{verbatim}
@@ -1340,6 +1347,7 @@ Im Rahmen dieser Arbeit wurde nicht für alle Implementierungen die bestmöglich
     \item Bei der Zusammenfassung der Terme ist zu überlegen, den Nummerntyp nicht zusammenzufassen. Rationale Zahlen und Fließkommazahlen könnten nebeneinander existieren. In der momentanen Implementierung wird diese Addition zu einer Fließkommazahl vereinfacht. Der Vorteil dabei ist, dass sicher nur ein Zahlenwert vorhanden ist. Allerdings wird der Nachteil der Ungenauigkeit in Kauf genommen.
     \item Bei der Zusammenfassung von Termen in der HashMap kann es zu Konflikten kommen. Eine andere Idee wäre hier als Key den Term als String zu verwenden. Hierzu müsste aber der Term auf jeden Fall vorher sortiert sein. Permutationen eines Terms ($x*y$ und $y*x$) können sonst nicht abgefangen werden. Hier hat das Hashing den Vorteil, das die Reihenfolge egal ist, da beide Symbole zusammen denselben Hashwert errechnen.
     \item Im Moment wird $cos(x)^2+sin(x)^2 = 1$ nur in einfachen Fällen zusammengefasst. Der Term $(z*sin(x)^2)+(z*cos(x)^2) + (a*sin(x)^2)+(a*cos(x)^2)$ könnte entsprechend auch zusammengefasst werden.
+    \item Erweiterung des heuristischen Verfahrens der ``limit''-Funktion und implementierung des Gruntz-Algorithmus \cite{GruntzPdf}.
 \end{itemize}
 
 Bei der Substituierung von Symbolen wären ebenfalls Erweitungen vorstellbar.
