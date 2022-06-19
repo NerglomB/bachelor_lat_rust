@@ -152,6 +152,13 @@ where
                     ret_val = Some(Ast::Num(N::try_create_rational(N::from(1), n.clone())));
                 }
             }
+            Ast::Pow(base, exp) if **base == args[1] && **exp == args[1] => {
+                if let Ast::Num(n) = &args[2] {
+                    if *n == 0 && args[3] == Ast::Symbol("pos".to_owned()) {
+                        ret_val = Some(Ast::Num(N::one()));
+                    }
+                }
+            }
             Ast::Symbol(sym) if Ast::Symbol(sym.clone()) == args[1] => {
                 ret_val = Some(args[2].clone());
             }

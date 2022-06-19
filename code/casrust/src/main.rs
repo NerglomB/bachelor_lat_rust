@@ -6,7 +6,7 @@ use casrust::types::prim_num::PrimNum;
 use std::str::FromStr;
 
 fn main() {
-    match Ast::from_str("limit(1/x + 3, x, 0, neg)") {
+    match Ast::from_str("limit(x^x, x, 0, pos)") {
         Ok(ast) => {
             println!("{:?}", ast);
         }
