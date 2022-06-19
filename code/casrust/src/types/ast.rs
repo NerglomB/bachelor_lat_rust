@@ -48,13 +48,13 @@ where
     pub fn shorten(&mut self) -> &mut Self {
         match self {
             Ast::Add(v) => {
-                if v.contains(&Ast::Symbol("oo".to_owned())) {
-                    *self = Ast::Symbol("oo".to_owned())
+                if v.contains(&Ast::Const("∞".to_owned())) {
+                    *self = Ast::Const("∞".to_owned())
                 } else if v.contains(&Ast::Mul(vec![
                     Ast::Num(N::from(-1)),
-                    Ast::Symbol("oo".to_owned()),
+                    Ast::Const("∞".to_owned()),
                 ])) {
-                    *self = Ast::Mul(vec![Ast::Symbol("oo".to_owned()), Ast::Num(N::from(-1))]);
+                    *self = Ast::Mul(vec![Ast::Const("∞".to_owned()), Ast::Num(N::from(-1))]);
                 } else {
                     v.retain(|element| {
                         if let Ast::Num(v) = element {
@@ -71,7 +71,7 @@ where
                 }
             }
             Ast::Mul(v) => {
-                if v.contains(&Ast::Symbol("oo".to_owned())) {
+                if v.contains(&Ast::Const("∞".to_owned())) {
                     let mut has_zero = false;
                     let mut below_zero = false;
 
@@ -88,9 +88,9 @@ where
                     if has_zero {
                         *self = Ast::Num(N::from(0))
                     } else if below_zero {
-                        *self = Ast::Mul(vec![Ast::Symbol("oo".to_owned()), Ast::Num(N::from(-1))])
+                        *self = Ast::Mul(vec![Ast::Const("∞".to_owned()), Ast::Num(N::from(-1))])
                     } else {
-                        *self = Ast::Symbol("oo".to_owned())
+                        *self = Ast::Const("∞".to_owned())
                     }
                 } else if v.len() == 1 {
                     // Falls nur neutrales Element vorhanden wird ansonsten 0 zurückgegeben

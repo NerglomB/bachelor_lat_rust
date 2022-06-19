@@ -6,3 +6,7 @@ where
 {
     Ast::Num(N::from(std::f64::consts::PI))
 }
+
+pub fn infinity_const<N>() -> Ast<N> {
+    Ast::Const("∞".to_owned())
+}

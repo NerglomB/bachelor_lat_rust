@@ -32,6 +32,7 @@ where
 
     let mut consts: HashMap<String, fn() -> Ast<N>> = HashMap::new();
     consts.insert("π".to_string(), pi_const);
+    consts.insert("∞".to_string(), infinity_const);
 
     let mut expand_funcs: HashMap<String, fn(&Vec<Ast<N>>) -> Option<Ast<N>>> = HashMap::new();
     expand_funcs.insert("log".to_string(), expand_log);

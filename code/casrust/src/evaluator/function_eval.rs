@@ -134,18 +134,17 @@ where
             Ast::Pow(base, exp) if **base == args[1] && **exp == Ast::Num(N::from(-1)) => {
                 if args[2] == Ast::Num(N::from(1)) {
                     ret_val = Some(Ast::Num(N::from(1)));
-                } else if args[2] == Ast::Symbol("oo".to_owned())
-                    || args[2]
-                        == Ast::Mul(vec![Ast::Symbol("oo".to_owned()), Ast::Num(N::from(-1))])
+                } else if args[2] == Ast::Const("∞".to_owned())
+                    || args[2] == Ast::Mul(vec![Ast::Const("∞".to_owned()), Ast::Num(N::from(-1))])
                 {
                     ret_val = Some(Ast::Num(N::from(0)));
                 } else if args[2] == Ast::Num(N::from(0)) {
                     if args[3] == Ast::Symbol("pos".to_owned()) {
-                        ret_val = Some(Ast::Symbol("oo".to_owned()));
+                        ret_val = Some(Ast::Const("∞".to_owned()));
                     } else if args[3] == Ast::Symbol("neg".to_owned()) {
                         ret_val = Some(Ast::Mul(vec![
                             Ast::Num(N::from(-1)),
-                            Ast::Symbol("oo".to_owned()),
+                            Ast::Const("∞".to_owned()),
                         ]));
                     }
                 } else if let Ast::Num(n) = &args[2] {

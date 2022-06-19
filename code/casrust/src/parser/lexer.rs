@@ -104,7 +104,7 @@ impl Lexer {
 
     fn get_var_func(&mut self) -> Option<Token> {
         let next_char = self.peek()?;
-        if !next_char.is_alphabetic() {
+        if !next_char.is_alphabetic() && next_char != '∞' {
             return None;
         }
 
