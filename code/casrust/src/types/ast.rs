@@ -48,21 +48,51 @@ where
     pub fn shorten(&mut self) -> &mut Self {
         match self {
             Ast::Add(v) => {
-                v.retain(|element| {
-                    if let Ast::Num(v) = element {
-                        *v != 0
-                    } else {
-                        true
+                if v.contains(&Ast::Symbol("oo".to_owned())) {
+                    *self = Ast::Symbol("oo".to_owned())
+                } else if v.contains(&Ast::Mul(vec![
+                    Ast::Num(N::from(-1)),
+                    Ast::Symbol("oo".to_owned()),
+                ])) {
+                    *self = Ast::Mul(vec![Ast::Symbol("oo".to_owned()), Ast::Num(N::from(-1))]);
+                } else {
+                    v.retain(|element| {
+                        if let Ast::Num(v) = element {
+                            *v != 0
+                        } else {
+                            true
+                        }
+                    });
+                    if v.len() == 0 {
+                        *self = Ast::Num(N::zero())
+                    } else if v.len() == 1 {
+                        *self = v.pop().unwrap()
                     }
-                });
-                if v.len() == 0 {
-                    *self = Ast::Num(N::zero())
-                } else if v.len() == 1 {
-                    *self = v.pop().unwrap()
                 }
             }
             Ast::Mul(v) => {
-                if v.len() == 1 {
+                if v.contains(&Ast::Symbol("oo".to_owned())) {
+                    let mut has_zero = false;
+                    let mut below_zero = false;
+
+                    for node in v {
+                        if let Ast::Num(n) = node {
+                            if *n == 0 {
+                                has_zero = true;
+                            } else if *n < 0 {
+                                below_zero = true;
+                            }
+                        }
+                    }
+
+                    if has_zero {
+                        *self = Ast::Num(N::from(0))
+                    } else if below_zero {
+                        *self = Ast::Mul(vec![Ast::Symbol("oo".to_owned()), Ast::Num(N::from(-1))])
+                    } else {
+                        *self = Ast::Symbol("oo".to_owned())
+                    }
+                } else if v.len() == 1 {
                     // Falls nur neutrales Element vorhanden wird ansonsten 0 zurückgegeben
                     *self = v.pop().unwrap()
                 } else {

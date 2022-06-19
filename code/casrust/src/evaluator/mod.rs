@@ -28,6 +28,7 @@ where
     funcs.insert("cos".to_string(), func_cos);
     funcs.insert("sqrt".to_string(), func_sqrt);
     funcs.insert("nthroot".to_string(), func_nthroot);
+    funcs.insert("limit".to_string(), func_limit);
 
     let mut consts: HashMap<String, fn() -> Ast<N>> = HashMap::new();
     consts.insert("π".to_string(), pi_const);

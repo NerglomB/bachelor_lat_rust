@@ -1,3 +1,4 @@
+use crate::evaluator::base_evaluator;
 use crate::types::{ast::Ast, prim_num::PrimNum, NumberType};
 
 pub fn func_sin<N>(args: &Vec<Ast<N>>, hard_eval: &bool) -> Option<Ast<N>>
@@ -121,4 +122,80 @@ impl SinCos for PrimNum {
             PrimNum::Rational(num, den) => PrimNum::Float((*num as f64 / *den as f64).cos()),
         }
     }
+}
+
+pub fn func_limit<N>(args: &Vec<Ast<N>>, hard_eval: &bool) -> Option<Ast<N>>
+where
+    N: NumberType + SinCos,
+{
+    let mut ret_val: Option<Ast<N>> = None;
+    if args.len() == 4 {
+        match &args[0] {
+            Ast::Pow(base, exp) if **base == args[1] && **exp == Ast::Num(N::from(-1)) => {
+                if args[2] == Ast::Num(N::from(1)) {
+                    ret_val = Some(Ast::Num(N::from(1)));
+                } else if args[2] == Ast::Symbol("oo".to_owned())
+                    || args[2]
+                        == Ast::Mul(vec![Ast::Symbol("oo".to_owned()), Ast::Num(N::from(-1))])
+                {
+                    ret_val = Some(Ast::Num(N::from(0)));
+                } else if args[2] == Ast::Num(N::from(0)) {
+                    if args[3] == Ast::Symbol("pos".to_owned()) {
+                        ret_val = Some(Ast::Symbol("oo".to_owned()));
+                    } else if args[3] == Ast::Symbol("neg".to_owned()) {
+                        ret_val = Some(Ast::Mul(vec![
+                            Ast::Num(N::from(-1)),
+                            Ast::Symbol("oo".to_owned()),
+                        ]));
+                    }
+                } else if let Ast::Num(n) = &args[2] {
+                    ret_val = Some(Ast::Num(N::try_create_rational(N::from(1), n.clone())));
+                }
+            }
+            Ast::Symbol(sym) if Ast::Symbol(sym.clone()) == args[1] => {
+                ret_val = Some(args[2].clone());
+            }
+            Ast::Mul(vec) => {
+                let mut result = Ast::Mul(
+                    vec.iter()
+                        .map(|t| {
+                            if let Some(l) = func_limit(
+                                &vec![t.clone(), args[1].clone(), args[2].clone(), args[3].clone()],
+                                hard_eval,
+                            ) {
+                                l
+                            } else {
+                                t.clone()
+                            }
+                        })
+                        .collect(),
+                )
+                .eval(&base_evaluator(), hard_eval);
+                result.shorten();
+                ret_val = Some(result);
+            }
+            Ast::Add(vec) => {
+                let mut result = Ast::Add(
+                    vec.iter()
+                        .map(|t| {
+                            if let Some(l) = func_limit(
+                                &vec![t.clone(), args[1].clone(), args[2].clone(), args[3].clone()],
+                                hard_eval,
+                            ) {
+                                l
+                            } else {
+                                t.clone()
+                            }
+                        })
+                        .collect(),
+                )
+                .eval(&base_evaluator(), hard_eval);
+                result.shorten();
+                ret_val = Some(result);
+            }
+            _ => {}
+        }
+    }
+
+    ret_val
 }
