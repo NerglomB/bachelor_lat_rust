@@ -1295,7 +1295,7 @@ Die bisherige Implementierung des CAS ist noch rudimentär. Es wurden lediglich 
 Die weiteren Implementierungen sollen nun einen Ausblick darauf geben, wie erweiterte Funktionalitäten implementitert werden können aufgrund der geschaffenen Basis. 
 
 \label{sec:ungenauigkeitenKapitel}
-\subsection{Terme mit Fließkommazahlen berechnen oder auch Ungenauigkeit in Kauf nehmen} Um ein einzelnes numerisches Ergebnis zu erhalten, sofern alle Variablen im Term substitutiert sind, erhält das \codeword{Ast}-Enum zusätzlich die Methode \codeword{hard_eval}. Diese ruft die bereits vorgestellte Methode \codeword{eval_sub} auf und übergibt als Parameter, dass eine explizite Berechnung stattfinden soll. Dies kann mit einer gewissen Ungenaugkeit verbunden sein.
+\subsection{Terme mit Fließkommazahlen berechnen und Ungenauigkeit in Kauf nehmen} Um ein einzelnes numerisches Ergebnis zu erhalten, sofern alle Variablen im Term substitutiert sind, erhält das \codeword{Ast}-Enum zusätzlich die Methode \codeword{hard_eval}. Diese ruft die bereits vorgestellte Methode \codeword{eval_sub} auf und übergibt als Parameter, dass eine explizite Berechnung stattfinden soll. Dies kann mit einer gewissen Ungenaugkeit verbunden sein.
 
 Dem Parameter \codeword{hard_eval} sollen dabei alle berechnenden Funktionen - insbesondere auch später hinzugefügte Funktionen - weitergegeben werden. Dies kann durch die Typdefinition von EvalFn sichergestellt werden.
 
@@ -1314,7 +1314,7 @@ Die Arbeit von Dominik Gruntz ``On Computing Limits in a Symbolic Manipulation S
 
 Bei der Implemeniterung dieser Methode treten keine neuen Probleme mit dem Ownership und Borrowing von Rust auf. Stellen, an denen Werte geklont werden müssen sind nachvollziehbar erkennbar. So müssen z.B. bei der Übergabe der Parameter bei einem rekursiven Funktionsaufruf diese geklont werden, da ansonsten entsprechend das Ownership abgegeben wird. Die bisherigen Implemeniterungen von \codeword{traits} zur Prüfung auf Gleichheit mit Ganzzahlen von \codeword{Ast} und \codeword{NumberType} sind auch hier ausreichend.
 
-
+Als Ergänzung wurde die $\infty$-Konstante hinzugefügt, die nun auch während des Parsens erkannt wird. Darüberhinaus wurde die \codeword{shorten}-Methode erweitert, um \codeword{Add}- und \codeword{Mul}-Vektoren entsprechend zu behandeln, sofern die $\infty$-Konstante vorhanden ist. So wird z.B. $2*\infty$ zu $\infty$ vereinfacht.
 
 \begin{itemize}
     \item \begin{verbatim}src/evaluator/function_eval.rs\end{verbatim}
@@ -1334,6 +1334,140 @@ Sobald dieser implementiert ist, kann die Ausgabe auch mit \codeword{println!("{
 
 \section{Vergleich zu SymPy}
 \subsection{Korrektheit und Unterschiede gegenüber SymPy}
+Um beurteilen zu können, ob unser entwickeltes System richtig rechnet, soll mit verschiedenen Termen geprüft, ob SymPy diesselben Ergebnisse berechnet. Eventuelle Unterschiede werden erläutert. Bisherige Implementierungsfehler sollen dokumentiert und berichtigt werden. Mathematische Fuktionen sollen hierbei nicht beachtet werden, da der implementierte Umfang im CAS hierzu zu sehr begrenzt ist. Der Schwerpunkt wird auf die grundlegende Funktionsweise gelegt.
+
+\begin{table}[h!]
+    \caption{Numerische Berechnungen}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Term} & \textbf{Ergebnis CAS} & \textbf{Ergebnis SymPy} \\
+        \hline
+        $1+2+3+4-5$ & $5$ & $5$ \\
+        \hline
+        $1*2*3*4$ & $24$ & $24$ \\
+        \hline
+        $1*2*3*4*0$ & $0$ & $0$ \\
+        \hline
+        $1*2*3*4*(-1)$ & $-24$ & $-24$ \\
+        \hline
+        $2+3*4+5$ & $19$ & $19$ \\
+        \hline
+        $(2+3)*(4+5)$ & $45$ & $45$ \\
+        \hline
+        $2^{3^4}$ & $2417851639229258349412352$ & $2417851639229258349412352$ \\
+        \hline
+        $0.1+0.2$ & $0.30000000000000004$ & $0.300000000000000$ \\
+        \hline
+        $3^{-1} + 3^{-1}$ & $\frac{2}{3}$ & $\frac{2}{3}$ \\
+        \hline
+        $3^{-1} * 3^{-1}$ & $\frac{1}{9}$ & $\frac{1}{9}$ \\
+        \hline
+        $\sqrt{2}$ & $2^\frac{1}{2}$ & $\sqrt{2}$ \\
+        \hline
+        $\sqrt{2}+\sqrt{2}$ & $2*2^\frac{1}{2}$ &  $2*\sqrt{2}$ \\
+        \hline
+        $\sqrt{2}*\sqrt{2}$ & $2$ & $2$ \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Unterschied 0.1+0.2 nochmal mit precision num erwähnen und implementieren! sqrt unterschied erklären
+
+\begin{table}[h!]
+    \caption{Terme mit Variablen zusammenfassen}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Term} & \textbf{Ergebnis CAS} & \textbf{Ergebnis SymPy} \\
+        \hline
+        $x+x+2*x$ & r1 & r2 \\
+        \hline
+        $2*x-x-x+y$ & r1 & r2 \\
+        \hline
+        $x+x+a*x$ & r1 & r2 \\
+        \hline
+        $a*x-x-x+y$ & r1 & r2 \\
+        \hline
+        $x*0$ & r1 & r2 \\
+        \hline
+        $x*x$ & r1 & r2 \\
+        \hline
+        $x^2*x$ & r1 & r2 \\
+        \hline
+        $x^a*x$ & r1 & r2 \\
+        \hline
+        $x/x$ & r1 & r2 \\
+        \hline
+        $x^2/x$ & r1 & r2 \\
+        \hline
+        $x^a/x$ & r1 & r2 \\
+        \hline
+        $a*xb*x$ & r1 & r2 \\
+        \hline
+        $a^x*b^x$ & r1 & r2 \\
+        \hline
+        $x^a*x^b$ & r1 & r2 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}[h!]
+    \caption{Terme mit Variablen substituieren}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Term} & \textbf{Ergebnis CAS} & \textbf{Ergebnis SymPy} \\
+        \hline
+        $2+x$, $x=3$ & r1 & r2 \\
+        \hline
+        $2+x$, $x=-3$ & r1 & r2 \\
+        \hline
+        $2-x$, $x=-3$ & r1 & r2 \\
+        \hline
+        $2+x$, $x=0.5$ & r1 & r2 \\
+        \hline
+        $2+x$, $x=3$ & r1 & r2 \\
+        \hline
+        $2^{x} + 2^{x}$, $x=2$ & r1 & r2 \\
+        \hline
+        $2^{x} + 2^{x}$, $x=-1$ & r1 & r2 \\
+        \hline
+        $\sqrt{x}$, $x=3$ & r1 & r2 \\
+        \hline
+        $\sqrt{x}$, $x=4$ & r1 & r2 \\
+        \hline
+        $\sqrt{x}$, $x=16$ & r1 & r2 \\
+        \hline
+        $\sqrt{x}$, $x=17$ & r1 & r2 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}[h!]
+    \caption{Nutzung der Methode ``expand''}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Term} & \textbf{Ergebnis CAS} & \textbf{Ergebnis SymPy} \\
+        \hline
+        $x+x+2*x$ & r1 & r2 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}[h!]
+    \caption{Nutzung der Methode ``simplify''}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Term} & \textbf{Ergebnis CAS} & \textbf{Ergebnis SymPy} \\
+        \hline
+        $x+x+2*x$ & r1 & r2 \\
+        \hline
+    \end{tabular}
+\end{table}
+
 \subsection{Performancevergleich}
 
 \newpage
