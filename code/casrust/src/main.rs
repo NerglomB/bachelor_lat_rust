@@ -6,9 +6,12 @@ use casrust::types::prim_num::PrimNum;
 use std::str::FromStr;
 
 fn main() {
-    match Ast::from_str("sqrt(2)*sqrt(2)") {
+    match Ast::from_str("2^x") {
         Ok(ast) => {
-            println!("{}", ast);
+            println!(
+                "{}",
+                ast.simple_eval_sub(&base_evaluator(), "x", &Ast::Num(PrimNum::from(0)))
+            );
         }
         Err(_) => {
             println!("error in term")

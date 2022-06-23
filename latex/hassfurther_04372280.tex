@@ -1381,36 +1381,38 @@ Unterschied 0.1+0.2 nochmal mit precision num erwähnen und implementieren! sqrt
         \hline
         \textbf{Term} & \textbf{Ergebnis CAS} & \textbf{Ergebnis SymPy} \\
         \hline
-        $x+x+2*x$ & r1 & r2 \\
+        $x+x+2*x$ & $4*x$ & $4*x$ \\
         \hline
-        $2*x-x-x+y$ & r1 & r2 \\
+        $2*x-x-x+y$ & $y$ & $y$ \\
         \hline
-        $x+x+a*x$ & r1 & r2 \\
+        $x+x+a*x$ & $a*x+2*x$ & $a*x + 2*x$ \\
         \hline
-        $a*x-x-x+y$ & r1 & r2 \\
+        $a*x-x-x+y$ & $a*x-2*x+y$ & $a*x - 2*x + y$ \\
         \hline
-        $x*0$ & r1 & r2 \\
+        $x*0$ & $0$ & $0$ \\
         \hline
-        $x*x$ & r1 & r2 \\
+        $x*x$ & $x^2$ & $x^2$ \\
         \hline
-        $x^2*x$ & r1 & r2 \\
+        $x^2*x$ & $x^3$ & $x^3$ \\
         \hline
-        $x^a*x$ & r1 & r2 \\
+        $x^a*x$ & $x^{a+1}$ & $x*x^a$ \\
         \hline
-        $x/x$ & r1 & r2 \\
+        $x/x$ & $1$ & $1$ \\
         \hline
-        $x^2/x$ & r1 & r2 \\
+        $x^2/x$ & $x$ & $x$ \\
         \hline
-        $x^a/x$ & r1 & r2 \\
+        $x^a/x$ & $x^{a-1}$ & $x^a/x$ \\
         \hline
-        $a*xb*x$ & r1 & r2 \\
+        $a*x+b*x$ & $a*x+b*x$ & $a*x+b*x$ \\
         \hline
-        $a^x*b^x$ & r1 & r2 \\
+        $a^x*b^x$ & $a^x*b^x$ & $a^x*b^x$ \\
         \hline
-        $x^a*x^b$ & r1 & r2 \\
+        $x^a*x^b$ & $x^{a+b}$ & $x^a*x^b$ \\
         \hline
     \end{tabular}
 \end{table}
+
+Minimale Unterschiede in der Zusammenfassung. Wobei normaler Output von Sympy nicht mit Datenstruktur in Speicher übereinstimmt. Mit sympy.srepr ist z.B. der Term $x^a/x$ als ``Mul(Pow(Symbol('x'), Integer(-1)), Pow(Symbol('x'), Symbol('a')))'' gespeichert.
 
 \begin{table}[h!]
     \caption{Terme mit Variablen substituieren}
@@ -1419,30 +1421,30 @@ Unterschied 0.1+0.2 nochmal mit precision num erwähnen und implementieren! sqrt
         \hline
         \textbf{Term} & \textbf{Ergebnis CAS} & \textbf{Ergebnis SymPy} \\
         \hline
-        $2+x$, $x=3$ & r1 & r2 \\
+        $2+x$, $x=3$ & $5$ & $5$ \\
         \hline
-        $2+x$, $x=-3$ & r1 & r2 \\
+        $2+x$, $x=-3$ & $-1$ & $-1$ \\
         \hline
-        $2-x$, $x=-3$ & r1 & r2 \\
+        $2-x$, $x=-3$ & $5$ & $5$ \\
         \hline
-        $2+x$, $x=0.5$ & r1 & r2 \\
+        $2+x$, $x=0.5$ & $2.5$ & $2.50000000000000$ \\
         \hline
-        $2+x$, $x=3$ & r1 & r2 \\
+        $2^{x} + 2^{x}$, $x=2$ & $8$ & $8$ \\
         \hline
-        $2^{x} + 2^{x}$, $x=2$ & r1 & r2 \\
+        $2^{x} + 2^{x}$, $x=-1$ & $1$ & $1$ \\
         \hline
-        $2^{x} + 2^{x}$, $x=-1$ & r1 & r2 \\
+        $\sqrt{x}$, $x=3$ & $3^{\frac{1}{2}}$ & $sqrt(3)$ \\
         \hline
-        $\sqrt{x}$, $x=3$ & r1 & r2 \\
+        $\sqrt{x}$, $x=4$ & $2$ & $2$ \\
         \hline
-        $\sqrt{x}$, $x=4$ & r1 & r2 \\
+        $\sqrt{x}$, $x=16$ & $4$ & $4$ \\
         \hline
-        $\sqrt{x}$, $x=16$ & r1 & r2 \\
-        \hline
-        $\sqrt{x}$, $x=17$ & r1 & r2 \\
+        $\sqrt{x}$, $x=17$ & $17^{\frac{1}{2}}$ & $sqrt(17)$ \\
         \hline
     \end{tabular}
 \end{table}
+
+Unterschied auch wieder nur visuell. $sqrt(17)$ ist mit sympy.srepr als ``Pow(Integer(17), Rational(1, 2))'' intern abrufbar.
 
 \begin{table}[h!]
     \caption{Nutzung der Methode ``expand''}
