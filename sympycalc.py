@@ -116,3 +116,31 @@ print(expr.subs("x", 16))
 
 expr = parse_expr("sqrt(x)")
 print(expr.subs("x", 17))
+
+# expand
+expr = parse_expr("(x + 1)*(x - 2) - (x - 1)*x")
+print(sympy.expand(expr))
+
+expr = parse_expr("(a+b)*(c+d)*e")
+print(sympy.expand(expr))
+
+expr = parse_expr("(a+b)**3")
+print(sympy.expand(expr))
+
+expr = parse_expr("x**(a+b)")
+print(sympy.expand(expr))
+
+expr = parse_expr("x**(a*b)")
+print(sympy.expand(expr))
+
+expr = parse_expr("(x+y)**a")
+print(sympy.expand(expr, power_base=True, force=True))
+
+expr = parse_expr("(x*y)**a")
+print(sympy.expand(expr, power_base=True, force=True))
+
+expr = parse_expr("log(x**2*y)")
+print(sympy.expand(expr, log=True, force=True))
+
+expr = parse_expr("log(x**a*y)")
+print(sympy.expand(expr, log=True, force=True))

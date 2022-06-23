@@ -9,7 +9,9 @@ where
 {
     pub fn expand(&self, evaler: &EvalFn<N>) -> Ast<N> {
         match self {
-            Ast::Add(vec) => Ast::Add(vec.iter().map(|e| e.expand(evaler)).collect()),
+            Ast::Add(vec) => {
+                Ast::Add(vec.iter().map(|e| e.expand(evaler)).collect()).simple_eval(evaler)
+            }
             Ast::Mul(vec) => {
                 let mut result: Vec<Ast<N>> = vec![];
 
@@ -51,7 +53,7 @@ where
                     let mut result = Ast::Add(result);
                     result.shorten().sort();
 
-                    result
+                    result.simple_eval(evaler)
                 }
             }
             Ast::Func(name, args) => {

@@ -16,6 +16,7 @@
 \usepackage{enumitem}
 \usepackage{amsfonts}
 \usepackage{qtree}
+\usepackage{makecell}
 \definecolor{GrayCodeBlock}{RGB}{245,245,245}
 \definecolor{BlackText}{RGB}{10,10,10}
 \definecolor{RedTypename}{RGB}{135,58,3}
@@ -1453,7 +1454,23 @@ Unterschied auch wieder nur visuell. $sqrt(17)$ ist mit sympy.srepr als ``Pow(In
         \hline
         \textbf{Term} & \textbf{Ergebnis CAS} & \textbf{Ergebnis SymPy} \\
         \hline
-        $x+x+2*x$ & r1 & r2 \\
+        $(x + 1)*(x - 2) - (x - 1)*x$ & $-2$ & $-2$ \\
+        \hline
+        $(a+b)*(c+d)*e$ & \makecell{$a*c*e+a*d*e$ \\ $+b*c*e+b*d*e$} & \makecell{$a*c*e + a*d*e$ \\ $ + b*c*e + b*d*e$} \\
+        \hline
+        $(a+b)^3$ & \makecell{$a^3+b^3+3*a^2*b$ \\ $+3*b^2*a$} & \makecell{$a^3 + 3*a^2*b + 3*a*b^2$ \\ $+ b^3$} \\
+        \hline
+        $x^{a+b}$ & $x^a*x^b$ & $x^a*x^b$ \\
+        \hline
+        $x^{a*b}$ & $x^{a*b}$ & $x^{a*b}$ \\
+        \hline
+        $(x+y)^a$ & $(x+y)^a$ & $(x + y)^a$ \\
+        \hline
+        $(x*y)^a$ & $x^a*y^a$ & $x^a*y^a$ \\
+        \hline
+        $log(x^2*y)$ & $2*log(x)+log(y)$ & $2*log(x) + log(y)$ \\
+        \hline
+        $log(x^a*y)$ & $a*log(x)+log(y)$ & $a*log(x) + log(y)$ \\
         \hline
     \end{tabular}
 \end{table}
