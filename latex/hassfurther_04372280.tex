@@ -1482,10 +1482,18 @@ Unterschied auch wieder nur visuell. $sqrt(17)$ ist mit sympy.srepr als ``Pow(In
         \hline
         \textbf{Term} & \textbf{Ergebnis CAS} & \textbf{Ergebnis SymPy} \\
         \hline
-        $x+x+2*x$ & r1 & r2 \\
+        $(x^2 + x)/x$ & $x + 1$ & $x + 1$ \\
+        \hline
+        $(x^2 + x)*(y^2 + y)/x/y$ & $(y + 1)*(x + 1)$ & $(x + 1)*(y + 1)$ \\
+        \hline
+        $(x^2 + x)*(y^2 + y)/x/a$ & $a^-1*(x+1)*(y^2+y)$ & $y*(x + 1)*(y + 1)/a$ \\
+        \hline
+        $(x^3 + x^2 + x)*(x^2 + x)/x$ & $(x^2+x)*(x^2+x+1)$ & $x*(x + 1)*(x^2 + x + 1)$ \\
         \hline
     \end{tabular}
 \end{table}
+
+Im großen und ganzen wieder ähnliche Ergebnisse. Bei SymPy wird in Termen, mit Klammern und selber Variable bei den Summanden diese zusätlich ausgeklammert.
 
 \subsection{Performancevergleich}
 

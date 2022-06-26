@@ -144,3 +144,15 @@ print(sympy.expand(expr, log=True, force=True))
 
 expr = parse_expr("log(x**a*y)")
 print(sympy.expand(expr, log=True, force=True))
+
+expr = parse_expr("(x**2 + x)/x")
+print(sympy.simplify(expr))
+
+expr = parse_expr("(x**2 + x)*(y**2 + y)/x/y")
+print(sympy.simplify(expr))
+
+expr = parse_expr("(x**2 + x)*(y**2 + y)/x/a")
+print(sympy.simplify(expr))
+
+expr = parse_expr("(x**3 + x**2 + x)*(x**2 + x)/x")
+print(sympy.simplify(expr))
