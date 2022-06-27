@@ -1,7 +1,7 @@
 import sympy
 from sympy.parsing.sympy_parser import parse_expr
 
-sympy.core.cache.clear_cache()
+# sympy.core.cache.clear_cache()
 
 # Numerische Berechnungen
 expr = parse_expr("1+2+3+4-5")
