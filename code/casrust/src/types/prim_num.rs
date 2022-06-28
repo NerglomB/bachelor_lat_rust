@@ -20,7 +20,6 @@ impl NumberType for PrimNum {
         PrimNum::Int(1)
     }
 
-    // Vll ummodeln in Error-Typ? verbesserung
     fn try_create_rational(num: Self, den: Self) -> Self {
         match (num, den) {
             (PrimNum::Int(v1), PrimNum::Int(v2)) => PrimNum::Rational(v1, v2),

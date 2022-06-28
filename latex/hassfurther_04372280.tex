@@ -1373,7 +1373,23 @@ Um beurteilen zu können, ob unser entwickeltes System richtig rechnet, soll mit
     \end{tabular}
 \end{table}
 
-Unterschied 0.1+0.2 nochmal mit precision num erwähnen und implementieren! sqrt unterschied erklären
+Bei dieser Gegenüberstellung fallen zwei Unterschiede auf. Zum einen tritt das Anfangs beschriebene Problem der Ungenauigkeit auf. Eine Lösung hierfür ist die Benutzung von \codeword{PrecisionNum}.
+
+\begin{lstlisting}[language=rust, caption={PrimNum vs. PrecisionNum}]
+    let a1 = Ast::Num(PrimNum::Float(0.1));
+    let a2 = Ast::Num(PrimNum::Float(0.2));
+    println!("{}", a1 + a2);
+    // 0.30000000000000004
+
+    let a1 = Ast::Num(PrecisionNum::Float(
+            BigDecimal::from_str("0.1").unwrap()));
+    let a2 = Ast::Num(PrecisionNum::Float(
+            BigDecimal::from_str("0.2").unwrap()));
+    println!("{}", a1 + a2);
+    // 0.3
+\end{lstlisting}
+
+Der zweite Unterschied ist die Ausgabe von $\sqrt(2)$. In unserem System wird diese als Potenz ausgegeben, in SymPy als Funktion. Diese Darstellung ist aber nur kosmetisch. Wird der Term in SymPy mit \codeword{sympy.srepr(expr)} ausgegeben, ist die Struktur des Terms zu sehen. SymPy wandelt die $sqrt$-Funktion ebenfalls in eine Potenz um, und gibt diese in diesem speziellen Fall formatiert aus.
 
 \begin{table}[h!]
     \caption{Terme mit Variablen zusammenfassen}
@@ -1413,7 +1429,7 @@ Unterschied 0.1+0.2 nochmal mit precision num erwähnen und implementieren! sqrt
     \end{tabular}
 \end{table}
 
-Minimale Unterschiede in der Zusammenfassung. Wobei normaler Output von Sympy nicht mit Datenstruktur in Speicher übereinstimmt. Mit sympy.srepr ist z.B. der Term $x^a/x$ als ``Mul(Pow(Symbol('x'), Integer(-1)), Pow(Symbol('x'), Symbol('a')))'' gespeichert.
+Bei der Zusammenfassung von Variablen tritt ein Unterschied bei den Termen $x^a*x$, $x^a/x$ und $x^a*x^b$. In unserem System werden durch die implementierte Logik vermehrt die Potenzen zusammengefasst, was in SymPy standardmäßig nicht der Fall ist.
 
 \begin{table}[h!]
     \caption{Terme mit Variablen substituieren}
@@ -1445,7 +1461,7 @@ Minimale Unterschiede in der Zusammenfassung. Wobei normaler Output von Sympy ni
     \end{tabular}
 \end{table}
 
-Unterschied auch wieder nur visuell. $sqrt(17)$ ist mit sympy.srepr als ``Pow(Integer(17), Rational(1, 2))'' intern abrufbar.
+Die Substituierung wird ebenfalls identisch umgesetzt. Einzig die Ausgabe bei Termen mit Wurzeln ist wie bereits erwähnt unterschiedlich.
 
 \begin{table}[h!]
     \caption{Nutzung der Methode ``expand''}
@@ -1475,6 +1491,8 @@ Unterschied auch wieder nur visuell. $sqrt(17)$ ist mit sympy.srepr als ``Pow(In
     \end{tabular}
 \end{table}
 
+Terme, die mit ``expand'' in beiden Systemen verarbeitet werden, liefern das jeweils das gleiche Ergebnis. Dies ist natürlich nur der Fall, für die in diesem System implementierten Fälle. Andere mathematische Funktionen, die von SymPy korrekt verarbeitet werden, müssten erst nachimplementiert werden. 
+
 \begin{table}[h!]
     \caption{Nutzung der Methode ``simplify''}
     \centering
@@ -1493,7 +1511,7 @@ Unterschied auch wieder nur visuell. $sqrt(17)$ ist mit sympy.srepr als ``Pow(In
     \end{tabular}
 \end{table}
 
-Im großen und ganzen wieder ähnliche Ergebnisse. Bei SymPy wird in Termen, mit Klammern und selber Variable bei den Summanden diese zusätlich ausgeklammert.
+Auch bei der Nutzung von ``simplify'' erhalten wir gleichwertige Ergebnisse. SymPy klammert zusätzlich aber noch gemeinsame Teiler aus, was unser System nicht beherrscht. Dies sieht man vor allem am dritten Beispiel.
 
 \subsection{Performancevergleich}
 
