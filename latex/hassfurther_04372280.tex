@@ -600,10 +600,6 @@ In ``Modern Computer Algebra'' \cite[S. 29 ff.]{Gathen2013} und ``Computer Algeb
 
 Folgend soll die Performance zwischen den primitiven Typen auf dem Stack, den primitiven Typen auf dem Heap und den Crates verglichen werden. Wie zu erwarten ist die Speicherung auf dem Stack am effizientesten, der Zugriff auf dem Heap kostet Zeit. Der zusätzliche Zeitverlust bei den Crates lässt sich zum einen dadurch erklären, dass immer ein Überlauf geprüft werden muss um den Wert richtig zu verarbeiten, andererseits verwendet der Typ \codeword{BigInt} einen Vektor. Wie in \hyperref[sec:kap2d2]{Kapitel 2.2} bereits erwähnt, wird bei einem Zugriff zusätzlich geprüft, ob der Index gültig ist, was ebenfalls Zeit kostet.
 
-\begin{itemize}
-    \item \begin{verbatim}benches/bench-num-types.rs\end{verbatim}
-\end{itemize}
-
 \begin{verbatim}
     running 6 tests
     test loop_decimal    ... bench:   7,447,000 ns/iter (+/- 474,681)
@@ -722,30 +718,18 @@ Eine ähnliche Struktur findet sich ebenfalls in ``SymbolicC++'' \cite[S. 284 ff
 In diesem Kapitel soll definiert werden, welche \codeword{structs}, \codeword{traits} oder \codeword{enums} benötigt werden, um das CAS zu erstellen. Darüberhinaus soll grob umrissen werden, welche Implementierungen im weiteren Verlauf sinnvoll sein können und welchen Zweck diese erfüllen.
 Es ist noch zu erwähnen, dass hier nicht definiert werden soll, mit welche \codeword{Derive macros} diese Typen erhalten. In Rust ist es üblich \codeword{structs} und \codeword{enums} mit diesen Makros zu erweitern, um z.B. anzugeben, dass der Typ kopiert oder sortiert werden kann. Die Implementierung dieser Funktionalität wird dann teilweise zur Compilezeit vom Makro übernommen.
 
+\label{sec:NumTypes}
 \paragraph{enum PrimNum und enum PrecisionNum} Diese beiden \codeword{enums} sollen als Implementierung für den Generic-Parameter im CAS dienen. Ebenso bieten diese den Vorteil, dass später ein allgemeiner Nummern-Typ existiert mit dem gerechnet werden kann, und nicht ständig manuell Type Castings durchgeführt werden müssen. So ist es in Rust nicht möglich eine Addition oder Multiplikation von i32 und f64 durchzuführen. Hierzu muss einer der beiden Werte erst in den anderen manuell überführt werden.
 
 Ein weiterer Vorteil ist, dass direkt eine rationale Ausprägung des \codeword{enum} implementiert werden kann. Auch hier kann der Typ direkt die Rechnung übernehmen. Hierzu werden die Operatoren \codeword{std::ops::Add} und \codeword{std::ops::Mul} für das Enum selbst überladen. Im Hinblick auf die Bedingung, dass eine Subtraktion eine Addition ist, wird ebenso \codeword{std::ops::Mul} für einen Ganzzahlwert mit den Enums überladen. Ebenso kann es von Interesse sein, ob es sich um das neutrale Element der Addition oder Multiplikation handelt um einen Term zu vereinfachen. Für diesen Fall wird der Trait \codeword{PartialEq} für Ganzzahlen überladen, um hier nach Bedarf auch andere Werte zu überprüfen. Eine Alternative wären Methoden, die einen \codeword{bool}-Wert zurückgeben, ob es sich um einen solchen Wert handelt.
 
 In unserer Implementierung wird \codeword{PrimNum} solange wie möglich mit Ganzzahlen und Rationalen Werten arbeiten. Sobald ein Fließkommawert addiert wird, werden die beiden anderen Werte zu einer Fließkommazahl umgewandelt. Dies geht zulasten der Genauigkeit und könnte bei Bedarf so angepasst werden, dass eine rationale Zahl erzeugt wird. Es wäre auch denkbar, Fließkommazahlen und andere numerische Typen nicht standardmäßig zusammenzufassen.
 
-\begin{itemize}
-    \item \begin{verbatim}src/types/prim_num.rs\end{verbatim}
-    \item \begin{verbatim}src/types/precision_num.rs\end{verbatim}
-\end{itemize}
-
 \paragraph{trait NumberType} Dieser Trait soll hauptsächlich als Typparameter oder als Einschränkung für Generics zum Einsatz kommen. Wie bereits erwähnt soll ein Teil des CAS mit verschiedenen Typen durchführbar sein und alle Typen, die diesen Trait implementieren können dann für das CAS genutzt werden. Im konkreten Fall werden dies die beiden \codeword{enums} sein, die gerade erwähnt worden sind. Zudem werden Funktionen als Bedingung definiert um die neutralen Elemente der Addition und der Multiplikation zurückzugeben als auch eine Möglichkeit einen Bruch zu kürzen. Diese müssen dann von den \codeword{enums} implementiert werden.
 
 Außerdem kann dieser Trait bereits weitere Bedingungen aufnehmen wie z.B. dass der implementierende Enum gewisse Operatorenüberladungen haben muss oder auch, dass die Werte vergleichbar und sortierbar sind.
 
-\begin{itemize}
-    \item \begin{verbatim}src/types/mod.rs\end{verbatim}
-\end{itemize}
-
 \paragraph{struct Parser} Auch wenn angedacht ist, eine bestehende Bibliothek zur lexikalischen Analyse von Strings einzusetzen, benötigen wir einen Parser, der die generierten Tokens oder die entstehende Datenstruktur in die Struktur des Systems überführt.
-
-\begin{itemize}
-    \item \begin{verbatim}src/parser/parser.rs\end{verbatim}
-\end{itemize}
 
 \subsection{Datenstruktur in Rust}
 Mit dem Wissen über Generics und und den theoretischen Überlegungen zur Datenstruktur, kann diese in Rust folgendermaßen umgesetzt werden:
@@ -760,10 +744,6 @@ Mit dem Wissen über Generics und und den theoretischen Überlegungen zur Datens
         Num(N),
     }
 \end{lstlisting}
-
-\begin{itemize}
-    \item \begin{verbatim}src/types/ast.rs\end{verbatim}
-\end{itemize}
 
 \paragraph{Add und Mul} Diese beiden Ausprägungen besitzen als Wert einen Vektor, der weitere Elemente enthält. So sind diese einfach abrufbar und der Vektor kann gezielt geändert werden, z.B. zum sortieren der Werte oder das Entfernen von unnötigen Elementen (neutrale Elemente der Addition oder Multiplikation).
 
@@ -903,10 +883,6 @@ Die Abhängigkeit ``rug'' soll die beliebige Genauigkeit ermöglichen. Dabei han
 
 \paragraph{meval Rust} \cite{CrateMeval} Diese Bibliothek erscheint recht unkompliziert und einfach zu nutzen. Die geparsten Tokens werden als UPN (umgekehrte polnische Notation) ausgewertet. Dies könnte man prinzipiell dazu nutzen unseren modifizierten Ast zu erzeugen. Ein kleiner Nachteil ist, dass nur Fließkommazahlen ausgewertet werden. Sollte man den Lexer irgendwann erweitern wollen, sodass eine beliebige Genauigkeit erreicht werden soll, müsste man diesen Part neu schreiben. Zudem habe ich diese Bibliothek leider nicht bei meiner initialen Recherche in Betracht gezogen und nicht weiter überprüft. Erst während der Entwicklung habe ich Interessehalber weiter reingesehen und die Enums \codeword{Operator} und \codeword{Token} größtenteils übernommen. Hätte ich den Lexer nicht bereits zu einem großen Teil implementiert, hätte ich die Möglichkeit genutzt, die Tokens aus dieser Bibliothek zu erzeugen.
 
-\begin{itemize}
-    \item \begin{verbatim}src/types/mods.rs\end{verbatim}
-\end{itemize}
-
 \paragraph{evalexpr Rust} \cite{CrateEvalexpr} Diese Bibliothek erscheint sehr umfangreich. Allerdings lässt sich eigentlich nur die \codeword{eval}-Funktion nutzen, da fast alle anderen Strukturen nicht mit dem Schlüsselwort \codeword{pub} versehen sind. Es war mir daher nicht möglich, den Tokenizer bzw. den Baum direkt zu nutzen, in dem sich ein bereits geparster String befindet. Daher schied diese Bibliothek ebenfalls aus.
 
 \paragraph{tinyexpr C} \cite{CTinyexpr} Da es in Rust auch möglich ist, bereits bestehenden C-Code zu nutzen, wurde ebenfalls geprüft eine einfache C-Bibliothek zu nutzen, sodass auch das die notwendige Schnittstelle des Parsers nicht allzu kompliziert wird. Hier habe ich mir tinyexpr näher angesehen. Leider müssen Variablen bereits vor der lexikalischen Analyse zumindest bekannt sein \cite{CTinyexprReadme}. Da ich mich generell gegen diesen Schritt entschieden habe, wurde auch diese Bibliothek nicht verwendet.
@@ -940,11 +916,6 @@ pub enum Token {
 
 \paragraph{Num} Eine Zahl, eine Fließkommazahl wird daran erkannt, dass das erste Zeichen ein ``.'' ist oder die gesamte geparste Zeichenkette einen ``.'' enthält. Es sind nur Zahlen erlaubt. Die E-Schreibweise $1.2E10$ wird nicht unterstützt.
 
-\begin{itemize}
-    \item \begin{verbatim}src/types/mod.rs\end{verbatim}
-    \item \begin{verbatim}src/types/lexer.rs\end{verbatim}
-\end{itemize}
-
 \subsection{Implementierung Parser}
 Als Parser kommt eine einfache Implementierung der Operator-Vorranganalyse in Frage, wie sie in Kurs 1810  Kurseinheit 3 Kapitel 3.3.2 beschrieben ist \cite[S. 83 ff.]{K1810}. Es handelt sich also um eine Bottom-Up-Analyse. Dabei wird der Algorithmus so implementiert, dass der momentan gültige Operator in einer \codeword{while}-Schleife läuft, um einen Vektor befüllen zu können. Das erste Element des Vektors wird dabei jeweils vor der Schleife geparst, die restlichen Elemente in der Schleife. Dazu werden auch gleich Operatorenüberladungen des \codeword{Ast}-Enum verwendet.
 
@@ -971,10 +942,6 @@ Es entsteht vielmehr gleich der Baum:
         [.c ]
         [.d ]
     ]
-
-\begin{itemize}
-    \item \begin{verbatim}src/parser/parser.rs\end{verbatim}
-\end{itemize}
 
 \newpage
 
@@ -1083,14 +1050,6 @@ Zum Schluss können die Ergebnisse wieder in die Ausprägung \codeword{Ast::Add}
 
 Um dieses Verfahren zu implementieren, müssen für das \codeword{Ast}-Enum noch die Traits \codeword{Eq}, \codeword{PartialEq} und \codeword{Hash} implementiert werden. Erst dann kann der Typ \codeword{Ast} als Key in der Map verwendet werden. Im einfachsten Fall, kann dies per Makro geschehen. In unserem Fall geht dies aber nur für \codeword{PartialEq}. Da z.B. Vektoren die Traits \codeword{Eq} und \codeword{Hash} nicht implementieren, müssen wir dies selbst erledigen. Der \codeword{Eq} ist dabei aber nur deklarativ, es muss keine Funktion ausgefüllt werden, dies übernimmt der Compiler \cite{RustEqTrait}. Der \codeword{Hash}-Trait kann ebenfalls recht einfach implementiert werden, hier können wir alle vorhandenen Werte als Hash zusammenfassen.
 
-\begin{itemize}
-    \item \begin{verbatim}src/evaluator/common_eval.rs\end{verbatim}
-    \item \begin{verbatim}src/evaluator/mod.rs\end{verbatim}
-    \item \begin{verbatim}src/evaluator/add_eval.rs\end{verbatim}
-    \item \begin{verbatim}src/evaluator/mul_eval.rs\end{verbatim}
-    \item \begin{verbatim}src/types/ast.rs\end{verbatim}
-\end{itemize}
-
 \subsection{Umgang mit Brüchen, Potenzen und Wurzeln}
 Um auch genauere Werte zu erlauben, sollen rationale Zahlen in Form von Brüchen implementiert werden. So können mithilfe der Operatorenüberladungen diese dann zusammengefasst und gekürzt werden. Für rationale Zahlen sind im Enum \codeword{PrimNum} für Zähler und Nenner nur ganze Zahlen erlaubt, sowohl jeweils postiv und negativ. Der Term $1/3+1/3$ wird also zu \codeword{Num(Rational(2, 3))} ausgewertet. Der Term $1/3+1/3+1/3$ soll zu \codeword{Num(Int(1))} ausgewertet werden können.
 
@@ -1099,13 +1058,6 @@ Terme wie $1/x$ werden durch das CAS in die Form \codeword{Pow(Symbol("x"), Num(
 Glücklicherweise können Wurzeln ebenfalls als Potenzen dargestellt werden, so ist z.B. $\sqrt{2} = 2^{1/2}$ oder $\sqrt[3]{8} = 8^{1/3}$. So können alle bisherigen Regeln hierrauf einfach angewendet werden. Zudem sollen die Funktionen \codeword{sqrt} und \codeword{nthroot} im Term verwendet werden können, die dann entsprechende \codeword{Ast}-Elemente erzeugen.
 
 Darüberhinaus wird derselbe Algorithmus wie in SymPy implementiert um zu prüfen, ob eine Wurzel eine perfektes Ergebnis liefert \cite{SymPyNewton}. In diesem Fall kann das entsprechende Element vereinfacht werden.
-
-\begin{itemize}
-    \item \begin{verbatim}src/evaluator/common_eval.rs\end{verbatim}
-    \item \begin{verbatim}src/evaluator/mod.rs\end{verbatim}
-    \item \begin{verbatim}src/evaluator/pow_eval.rs\end{verbatim}
-    \item \begin{verbatim}src/types/prim_num.rs\end{verbatim}
-\end{itemize}
 
 \label{sec:kapErRustUndBei}
 \subsection{Erweiterbarkeit in Rust und Beispiele}
@@ -1121,10 +1073,6 @@ Um die Erweiterbarkeit des Systems zu gewährleisten wird das Struct \codeword{E
         pub consts: HashMap<String, fn() -> Ast<N>>,
     }
 \end{lstlisting}
-
-\begin{itemize}
-    \item \begin{verbatim}src/evaluator/mod.rs\end{verbatim}
-\end{itemize}
 
 \paragraph{Allgemeines} Da das Enum \codeword{Ast} bereits einen Generic-Parameter enthält, muss dieser ebenfalls bei EvalFn angegeben werden. Die Felder sind teils Vektoren, teils HashMaps, die entsprechende Funktionen zur Vereinfachung vorhalten. Der Parameter mit dem Typ \codeword{&mut HashMap<Ast<N>} wurde bereits genauer vorgestellt.
 
@@ -1198,10 +1146,6 @@ Die Erweiterung der Methode besitzt zwei weitere Parameter, den optionalen Varia
 
 Zu überlegen ist noch, ob der übergebene Term vor der Substituierung ebenfalls evaluiert wird, oder ob darauf vertraut wird, dass immer ein bereits evaluierter Term übergeben wird.
 
-\begin{itemize}
-    \item \begin{verbatim}src/types/ast.rs\end{verbatim}
-\end{itemize}
-
 \subsection{Implementierung von expand}
 Unter Umständen ist es interessant einen Term vereinfacht vorliegen zu haben. Auch wenn der Name ``expand'' nicht danach klingt, einen Term zu vereinfachen, so kann dies durchaus der Fall sein, wie der folgende Term zeigt $(x + 1)*(x - 2) - (x - 1)*x$ \cite{SymPyExpand}. Wird der Term ausmultipliziert kann dieser anschließend auf $-2$ vereinfacht werden. Im folgenden sollen die folgende Terme auf dieser Art vereinfacht werden können.
 
@@ -1228,12 +1172,6 @@ Handelt es sich jedoch um die Ausprägung \codeword{Ast::Add} wird prinzipiell m
 \end{lstlisting}
 
 Das neue Feld ``expand\_funcs'' enthält Funktionen um mathematische Funktionen zu expandieren. So soll z.B. aus $log(x^z*y)$ zu $z*log(x)+log(y)$ werden. Zuordnungen zu Funktionen finden wieder über eine HashMap statt.
-
-\begin{itemize}
-    \item \begin{verbatim}src/evaluator/mod.rs\end{verbatim}
-    \item \begin{verbatim}src/extensions/ast.rs\end{verbatim}
-    \item \begin{verbatim}src/extensions/function_expand.rs\end{verbatim}
-\end{itemize}
 
 \paragraph{Besonderheiten mit Rust} Bei der Implementierung dieser Methode sind das strenge Typensystem von Rust als auch das Ownership und Borrowing in Erscheinung getreten. Explementarisch soll dies an zwei Beispielen erläutert werden, da sich dieses Verhalten ähnlich in anderen Fällen wiederholt.
 
@@ -1283,12 +1221,6 @@ Um meine bisher gesammelten Erfahrungen in diese Arbeit zu bringen, habe ich mic
 
 Die Lösung wird dabei folgendermaßen implementiert. Durch ein zweites Array wird gespeichert, ob es noch ein Element gibt, das überprüft werden muss. Dies geschieht durch einen ``bool''-Wert am entsprechenden Index. Nach der Iteration muss der entsprechende Index im Hilfsarray auf ``true'' gesetzt werden. Im Falle, dass der Divisor wechselt, muss der entsprechende Index auf ``false'' gesetzt werden. Die Schleife läuft dann solange wie ein ``false''-Wert im Hilfsarray vorhanden ist.
 
-\begin{itemize}
-    \item \begin{verbatim}src/evaluator/mod.rs\end{verbatim}
-    \item \begin{verbatim}src/types/ast.rs\end{verbatim}
-    \item \begin{verbatim}src/extensions/ast.rs\end{verbatim}
-\end{itemize}
-
 \newpage
 
 \section{Erweiterte Funktionalitäten (Beispiele)}
@@ -1317,11 +1249,6 @@ Bei der Implemeniterung dieser Methode treten keine neuen Probleme mit dem Owner
 
 Als Ergänzung wurde die $\infty$-Konstante hinzugefügt, die nun auch während des Parsens erkannt wird. Darüberhinaus wurde die \codeword{shorten}-Methode erweitert, um \codeword{Add}- und \codeword{Mul}-Vektoren entsprechend zu behandeln, sofern die $\infty$-Konstante vorhanden ist. So wird z.B. $2*\infty$ zu $\infty$ vereinfacht.
 
-\begin{itemize}
-    \item \begin{verbatim}src/evaluator/function_eval.rs\end{verbatim}
-    \item \begin{verbatim}src/types/ast.rs\end{verbatim}
-\end{itemize}
-
 \subsection{Terme leserlich darstellen}
 Bisher wurde zur Ausgabe des Terms im \codeword{println!}-Makro der Platzhalter ``\{:?\}'' verwendet. Dieser erlaubt es \codeword{structs} und \codeword{enums} ohne weitere Formatierung auszugeben. In unserem Fall wird z.B. für den Term $-1+y+x*2+x^2$ die Ausgabe
 \begin{quote}
@@ -1335,7 +1262,7 @@ Sobald dieser implementiert ist, kann die Ausgabe auch mit \codeword{println!("{
 
 \section{Vergleich zu SymPy}
 \subsection{Korrektheit und Unterschiede gegenüber SymPy}
-Um beurteilen zu können, ob unser entwickeltes System richtig rechnet, soll mit verschiedenen Termen geprüft, ob SymPy diesselben Ergebnisse berechnet. Eventuelle Unterschiede werden erläutert. Bisherige Implementierungsfehler sollen dokumentiert und berichtigt werden. Mathematische Fuktionen sollen hierbei nicht beachtet werden, da der implementierte Umfang im CAS hierzu zu sehr begrenzt ist. Der Schwerpunkt wird auf die grundlegende Funktionsweise gelegt.
+Um beurteilen zu können, ob das entwickeltes System richtig rechnet, soll mit verschiedenen Termen geprüft werden, ob SymPy diesselben Ergebnisse berechnet. Unterschiede zwischen Ergebnissen werden näher betrachtet.
 
 \begin{table}[h!]
     \caption{Numerische Berechnungen}
@@ -1373,7 +1300,7 @@ Um beurteilen zu können, ob unser entwickeltes System richtig rechnet, soll mit
     \end{tabular}
 \end{table}
 
-Bei dieser Gegenüberstellung fallen zwei Unterschiede auf. Zum einen tritt das Anfangs beschriebene Problem der Ungenauigkeit auf. Eine Lösung hierfür ist die Benutzung von \codeword{PrecisionNum}.
+Bei dieser Gegenüberstellung fallen zwei Unterschiede auf. Zum einen tritt das Anfangs beschriebene Problem der Ungenauigkeit auf. Eine Lösung hierfür ist die Benutzung von \hyperref[sec:NumTypes]{PrecisionNum}.
 
 \begin{lstlisting}[language=rust, caption={PrimNum vs. PrecisionNum}]
     let a1 = Ast::Num(PrimNum::Float(0.1));
@@ -1389,7 +1316,7 @@ Bei dieser Gegenüberstellung fallen zwei Unterschiede auf. Zum einen tritt das 
     // 0.3
 \end{lstlisting}
 
-Der zweite Unterschied ist die Ausgabe von $\sqrt(2)$. In unserem System wird diese als Potenz ausgegeben, in SymPy als Funktion. Diese Darstellung ist aber nur kosmetisch. Wird der Term in SymPy mit \codeword{sympy.srepr(expr)} ausgegeben, ist die Struktur des Terms zu sehen. SymPy wandelt die $sqrt$-Funktion ebenfalls in eine Potenz um, und gibt diese in diesem speziellen Fall formatiert aus.
+Der zweite Unterschied ist die Ausgabe von $\sqrt{2}$. In unserem System wird diese als Potenz ausgegeben, in SymPy als Funktion. Diese Darstellung ist aber nur kosmetisch. Wird der Term in SymPy mit \codeword{sympy.srepr(expr)} ausgegeben, ist die Struktur des Terms zu sehen. SymPy wandelt die $sqrt$-Funktion ebenfalls in eine Potenz um, und gibt diese in diesem speziellen Fall formatiert aus.
 
 \begin{table}[h!]
     \caption{Terme mit Variablen zusammenfassen}
@@ -1491,7 +1418,7 @@ Die Substituierung wird ebenfalls identisch umgesetzt. Einzig die Ausgabe bei Te
     \end{tabular}
 \end{table}
 
-Terme, die mit ``expand'' in beiden Systemen verarbeitet werden, liefern das jeweils das gleiche Ergebnis. Dies ist natürlich nur der Fall, für die in diesem System implementierten Fälle. Andere mathematische Funktionen, die von SymPy korrekt verarbeitet werden, müssten erst nachimplementiert werden. 
+Terme, die mit ``expand'' in beiden Systemen verarbeitet werden, liefern das jeweils das gleiche Ergebnis. Dies ist natürlich nur der Fall, für die in diesem System implementierten Fälle. Andere mathematische Funktionen, die von SymPy korrekt verarbeitet werden, müssten erst nachimplementiert werden. So werden in SymPy ebenfalls trigonomische Funktionen ausgewertet. So wird aus $sin(2*x)$ der Term $2*sin(x)*cos(x)$ \cite{SympyTrigExpand}.
 
 \begin{table}[h!]
     \caption{Nutzung der Methode ``simplify''}
@@ -1511,9 +1438,156 @@ Terme, die mit ``expand'' in beiden Systemen verarbeitet werden, liefern das jew
     \end{tabular}
 \end{table}
 
-Auch bei der Nutzung von ``simplify'' erhalten wir gleichwertige Ergebnisse. SymPy klammert zusätzlich aber noch gemeinsame Teiler aus, was unser System nicht beherrscht. Dies sieht man vor allem am dritten Beispiel.
+Auch bei der Nutzung von ``simplify'' erhalten wir gleichwertige Ergebnisse. SymPy klammert zusätzlich aber noch gemeinsame Teiler aus, was unser System nicht beherrscht. Dies sieht man vor allem am dritten Beispiel. Beide Terme sind aber in diesem Fall korrekt.
 
 \subsection{Performancevergleich}
+Bei diesem Vergleich soll die Laufzeit, der Speicherverbrauch und die CPU-Auslastung in verschiedenen Szenarien verglichen werden. Die verwendete Hardware besteht aus einem ``AMD Ryzen 5 3600X 6-Core Processor'' und 16 GB Arbeitsspeicher mit 3000 MHz (DDR 4). Als Messtool wird die Windows-Version des ``Benchmarks Game'' verwendet \cite{BenchmarkGameHome} \cite {BenchmarkGameSrc}.
+
+Python liegt hierbei aus den offiziellen Quellen in Version 3.9.7 vor \cite{PythonDownload}, der Rust-Compiler besitzt die Version ``rustc 1.60.0'' und wurde mithilfe von ``rustup'' installiert \cite{RustDownload}, die verwendeten ausführbaren Programme wurden als Release-Version kompiliert und so geschrieben, dass der Compiler die Berechnungen nicht wegoptimiert.
+
+Alle Szenarien werden zehn mal ausgeführt und danach zusammengefasst. Die Zeiten sind in Sekunden angegeben, der Speicherverbrauch in Kilobyte und die CPU-Auslastung in Prozent.
+
+\paragraph{1. Szenario} Hier werden alle Berechnungen des vorherigen Kapitels durchgeführt. Alle Terme werden dabei sowohl in SymPy als auch in Rust aus einer Zeichenkette geparst und entsprechend ausgeführt.
+
+\begin{table}[h!]
+    \caption{Performance Tests}
+    \centering
+    \begin{tabular}{|l|c|c|c|c|c|c|}
+        \hline
+        \textbf{Lauf} & \textbf{Python Zeit} & \textbf{Speicher} & \textbf{CPU} & \textbf{Rust Zeit} & \textbf{Speicher} & \textbf{CPU} \\
+        \hline
+        1 & 0.625 & 40560 & 6 & 0.000 & 756 & 0 \\
+        \hline
+        2 & 0.688 & 40488 & 6 & 0.000 & 764 & 0 \\
+        \hline
+        3 & 0.641 & 40548 & 6 & 0.016 & 768 & 0 \\
+        \hline
+        4 & 0.641 & 40692 & 6 & 0.000 & 752 & 0 \\
+        \hline
+        5 & 0.609 & 40576 & 6 & 0.000 & 756 & 0 \\
+        \hline
+        6 & 0.641 & 40324 & 6 & 0.000 & 756 & 0 \\
+        \hline
+        7 & 0.609 & 40636 & 5 & 0.000 & 752 & 0 \\
+        \hline
+        8 & 0.641 & 40648 & 7 & 0.000 & 752 & 0 \\
+        \hline
+        9 & 0.594 & 40808 & 6 & 0.016 & 772 & 0 \\
+        \hline
+        10 & 0.641 & 40712 & 6 & 0.000 & 756 & 0 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\paragraph{2. Szenario} Der Term $a+b+c$ wird einmalig erstellt. Hiernach werden drei geschachtelte for-Schleifen durchlaufen, jeweils von 0 bis 49 und jede Variable mit einem Schleifenzähler substituiert. Die erste Substitution ist somit $0+0+0$, die zweite $0+0+1$ und die letzte $49+49+49$.
+
+\begin{table}[h!]
+    \caption{Performance Addition}
+    \centering
+    \begin{tabular}{|l|c|c|c|c|c|c|}
+        \hline
+        \textbf{Lauf} & \textbf{Python Zeit} & \textbf{Speicher} & \textbf{CPU} & \textbf{Rust Zeit} & \textbf{Speicher} & \textbf{CPU} \\
+        \hline
+        1 & 9.781 & 37796 & 8 & 0.453 & 740 & 7 \\
+        \hline
+        2 & 9.656 & 37612 & 8 & 0.469 & 732 & 8 \\
+        \hline
+        3 & 9.859 & 37768 & 8 & 0.438 & 732 & 8 \\
+        \hline
+        4 & 9.688 & 37760 & 8 & 0.453 & 752 & 8 \\
+        \hline
+        5 & 9.734 & 37960 & 8 & 0.469 & 756 & 8 \\
+        \hline
+        6 & 9.766 & 37696 & 8 & 0.453 & 744 & 8 \\
+        \hline
+        7 & 9.875 & 37740 & 8 & 0.469 & 712 & 8 \\
+        \hline
+        8 & 9.594 & 37920 & 8 & 0.438 & 736 & 8 \\
+        \hline
+        9 & 9.609 & 37912 & 8 & 0.453 & 740 & 8 \\
+        \hline
+        10 & 9.688 & 37964 & 8 & 0.469 & 736 & 8 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\paragraph{3. Szenario} Der Term $a*b*c$ wird einmalig erstellt. Hiernach werden drei geschachtelte for-Schleifen durchlaufen, jeweils von 0 bis 49 und jede Variable mit einem Schleifenzähler substituiert. Die erste Substitution ist somit $0*0*0$, die zweite $0*0*1$ und die letzte $49*49*49$.
+
+\begin{table}[h!]
+    \caption{Performance Multiplikation}
+    \centering
+    \begin{tabular}{|l|c|c|c|c|c|c|}
+        \hline
+        \textbf{Lauf} & \textbf{Python Zeit} & \textbf{Speicher} & \textbf{CPU} & \textbf{Rust Zeit} & \textbf{Speicher} & \textbf{CPU} \\
+        \hline
+        1 & 12.594 & 37996 & 8 & 0.344 & 792 & 7 \\
+        \hline
+        2 & 12.812 & 37460 & 8 & 0.344 & 744 & 8 \\
+        \hline
+        3 & 12.906 & 37852 & 8 & 0.344 & 740 & 8 \\
+        \hline
+        4 & 12.797 & 37596 & 8 & 0.344 & 740 & 8 \\
+        \hline
+        5 & 12.719 & 37508 & 8 & 0.359 & 744 & 8 \\
+        \hline
+        6 & 12.812 & 37856 & 8 & 0.344 & 752 & 8 \\
+        \hline
+        7 & 12.922 & 37536 & 8 & 0.344 & 744 & 8 \\
+        \hline
+        8 & 12.547 & 37744 & 8 & 0.344 & 744 & 8 \\
+        \hline
+        9 & 12.672 & 37424 & 8 & 0.328 & 752 & 8 \\
+        \hline
+        10 & 12.922 & 37576 & 8 & 0.344 & 744 & 7 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\paragraph{4. Szenario} In diesem Szenario liegt der Fokus auf den Speicherverbrauch. Es wird wieder der Term $a+b+c$ einmalig erstellt. Hiernach werden drei geschachtelte for-Schleifen durchlaufen, jeweils von 0 bis 49. Einer am Anfang erstellten Liste bzw. Vektor wird dann sowohl der originale Term als auch die Substituierung wie im 2. Szenario hinzugefügt.
+
+\begin{table}[h!]
+    \caption{Speicherverbrauch}
+    \centering
+    \begin{tabular}{|l|c|c|c|c|c|c|}
+        \hline
+        \textbf{Lauf} & \textbf{Python Zeit} & \textbf{Speicher} & \textbf{CPU} & \textbf{Rust Zeit} & \textbf{Speicher} & \textbf{CPU} \\
+        \hline
+        1 & 9.703 & 42608 & 8 & 0.578 & 43792 & 7 \\
+        \hline
+        2 & 9.891 & 41680 & 8 & 0.484 & 43748 & 7 \\
+        \hline
+        3 & 9.797 & 42496 & 8 & 0.500 & 43784 & 7 \\
+        \hline
+        4 & 9.578 & 41668 & 8 & 0.516 & 43788 & 7 \\
+        \hline
+        5 & 9.750 & 42444 & 8 & 0.500 & 43752 & 8 \\
+        \hline
+        6 & 9.719 & 42280 & 8 & 0.500 & 43796 & 8 \\
+        \hline
+        7 & 9.781 & 42448 & 8 & 0.516 & 43792 & 7 \\
+        \hline
+        8 & 9.734 & 41792 & 8 & 0.500 & 43744 & 7 \\
+        \hline
+        9 & 9.750 & 42360 & 8 & 0.516 & 43736 & 7 \\
+        \hline
+        10 & 9.656 & 42552 & 8 & 0.516 & 43792 & 7 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\paragraph{Beobachtungen} Bei einem Vergleich der Szenarien 1 bis 3 ist wie zu erwarten das kompilierte Programm sowohl schneller als auch Speichereffizienter. Der geringe Speicherverbrauch in Rust lässt sich einerseits auf automatische deallokieren von Variablen zurückführen, wenn diese den Gültigkeitsbereich verlassen. Andererseits gibt es keine Laufzeitumgebung wie in Python. Bei den SymPy-Tests dagegen ist der große Sprung zum Speicherplatzverbrauch auf die SymPy-Bibliothek zurückzuführen.
+
+Wird ein einfaches ``Hello World!'' ausgegeben beträgt der Speicherverbrauch ca. 5000 Kilobyte. Wird im selben Python-Skript zusätzlich SymPy importiert beträgt der Speicherverbrauch bereits ca. 35000 Kilobyte. Da zudem unklar ist, wann genau der Garbage Collector von Python läuft, kann es auch vorkommen, dass noch ungenutzte Variablen den Speicher belegen.
+
+Im ausführbaren Programm von Rust, sind dagegen nur Codeabschnitte, die tatsächlich benögit werden. Nicht benötigte Funktionen aus Abhängigkeiten und dem eigenen Code sind nicht vorzufinden \cite{RustDeadCode1}. Dies kann man sich auch anschaulich mit ``cargo-bloat'' anzeigen lassen \cite{RustDeadCode2}.
+
+Bei Szenario 4 zeigt die Laufzeit wieder ein ähnliches Verhältnis, Rust ist wieder schneller als Sympy. Auf den ersten Blick skaliert aber SymPy wesentlich besser, was den Speicherplatzverbrauch betrifft. Dies ist aber stark Implementierungsabhängig. Da wie anfänglich beschrieben immer der originale Term und das Ergebnis der Liste hinzugefügt wird, muss aufgrund des Ownerships in Rust der originale Vektor immer kopiert werden, da dieser nur einmalig erstellt wird. Bei dem Hinzufügen zur Liste wird dann das Ownership verschoben.
+
+Fügt man in der Python-Version anstelle des originalen Terms die Adresse der Variablen der Liste hinzu und lässt sich diese Ausgeben, fällt auf, dass immer nur eine Referenz hinzugefügt wird, da alle Adressen identisch sind. Lediglich die Ergebnisse unterscheiden sich. Wird der originale Term nicht der Liste hinzugefügt, beträgt der Speicherplatzverbrauch von Rust nur noch ca. 13000 Kilobyte, die Python-Version belegt immer noch ca. 40000 Kilobyte.
+
+Anstelle einer kopierten Version des Terms könnte auch eine Referenz der Liste hinzugefügt werden, dann muss aber wiederrum sichergestellt werden, dass dieser eine größere Lifetime als der Vektor besitzt.
+
+Aus den Ergebnissen kann geschlossen werden, dass Rust im Vergleich zu SymPy eine wesentlich bessere Performance bietet. Dies betrifft zum einen die Laufzeit von Berechnungen, als auch den Speicherplatzverbrauch. Letzteres hängt aber natürlich von den implementierten und verwendeten Funktionen des Systems ab.
 
 \newpage
 
