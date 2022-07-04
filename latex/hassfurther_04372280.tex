@@ -1610,7 +1610,16 @@ Bei der Substituierung von Symbolen wären ebenfalls Erweitungen vorstellbar.
     \item Substitution von ganzen Termen erlauben, nicht nur einzelnen Variablen.
     \item Mischformen der Verbesserungen.
 \end{itemize}
+
 \subsection{Vor- und Nachteile Rust}
+Am Anfang dieser Arbeit waren die Konzepte Ownership, Borrowing und Lifetimes noch schwer greifbar. Diese wurden als Hürde von mir wahrgenommen, da hierdurch viele Sachen explizit angegeben werden müssen, wie z.B. das klonen von Übergabeparametern oder auch wie teilweise über Elemente iteriert werden muss. Im laufe der Entwicklung des CAS wurden diese Konstrukte aber immer augenscheinlicher und bereiteten schlussendlich keine Probleme mehr. Darüberhinaus kann immer leicht nachvollzogen werden, an welchen Stellen welche Werte verwendet werden mit der Sicherheit, dass diese nicht versehentlich an anderer Stelle überschrieben worden sind.
+
+Dieses strenge System in Rust hat sich von einem Nach- zu einem großen Vorteil entwickelt. Verbunden mit einer steilen Lernkurve in Rust, sind dies die einzigen Nachteile, die während der Arbeit mit Rust aufgefallen sind.
+
+Ein weiterer Vorteil von Rust ist die bessere Performance im Gegensatz zu SymPy. Dieser Vorteil dürfte im Vergleich zu anderen Systemen, die in C oder C++, wie z.B. Xcas \cite{XcasLink} geschrieben sind geringer ausfallen. Dies hängt im konkreten Fall vom verwendeten Compiler ab, der die ausführbaren Programme erzeugt. Da Rust wie bereits angesprochen LLVM verwendet würde ein C/C++ Programm kompiliert mit Clang eine ähnliche Performance aufweisen.
+
+Ebenfalls ein Vorteil ist das breite Ökosystem, welches mit ``cargo'' bereitsteht. Das Programm kann einfach mit verschiedenen Profilen kompiliert werden, z.B. als Debug- oder Releaseversion. Abhängigkeiten können einfach installiert werden und Tests und Bechnmarks einfach ausgeführt werden.
+
 \subsection{Ausblick}
 
 
