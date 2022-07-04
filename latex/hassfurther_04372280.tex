@@ -131,9 +131,15 @@ In der vorliegenden Arbeit soll ein solches CAS in Ansätzen mit der Programmier
 
 Einen besonderen Stellenwert nimmt SymPy ein, da dieses System einerseits als Open-Source-Projekt verfügbar ist, als auch der Code in Python geschrieben ist und leicht verständlich und erweiterbar ist \cite[S. 1]{SympyPeerJ}. Die Verwendung dieser Bibliothek und die Vorstellung der Programmiersprache Rust während meines Studiums haben mir die Idee gegeben diese Arbeit zu schreiben. Einige Lösungen werden also von SymPy inspiriert sein. Der Code soll dabei natürlich nicht 1-zu-1 in Rust neu geschrieben werden, sondern mit den Möglichkeiten und Einschränkungen von Rust erweitert werden, auch wenn natürlich nur ein Teil des Umfangs von SymPy in dieser Arbeit abgebildet werden kann.
 
+Die Entwicklung von und mit Rust wird immer relevanter. So wird Beispielsweise die Entwicklung für den Linux immer weiter vorangetrieben \cite{RustLinux}. Auch für die Entwicklung unter Android \cite{GoogleExample} und Windows \cite{WindowsRust} stehen erste Bestrebungen bereit. Erst letztes Jahr erschienen mit der ``Edition 2021'' \cite{RustEditon2021} neue Features. Für die nächste Version ``Edition 2024'' gibt es ebenfalls bereits eine Roadmap \cite{RustEditon2024}.
+
+Größere Projekte des wissenschaftlichen Bereichs, in denen Rust explizit verwendet wird, lassen sich leider nicht finden. Dafür gibt es unabhängige Pakete, die einzelne Gebiete der wissenschaftlichen Programmierung abdecken \cite{RustEx1} \cite{RustEx2} \cite{RustEx3}. Vereinzelt können Beiträge gefunden werden, die das Thema aufgreifen, aber auch zumeist auf den schweren Einstieg hinweisen \cite{RustUse1} \cite{RustUse2} \cite{RustUse3}. Dies soll in der nächsten Version von Rust verbessert werden \cite{RustEditon2024Specific}.
+
 \newpage
 
 \section{Vorstellung der Programmiersprache Rust}
+In diesem Kapitel sollen die Grundlagen von Rust erläutert werden. Dabei sollen sowohl die Syntax als auch die grundlegenden Konzepte der Sprache und deren Vorteile vermittelt werden.
+
 \subsection{Einführendes Beispiel: Ownership und Borrowing}
 Bevor Rust vorgestellt wird und die genauen Regeln des Ownership und Borrowing erläutert werden, soll das Prinzip anhand eines Beispiels verdeutlicht werden. Hierzu wird ein \codeword{struct} - vergleichbar mit Klassen - angelegt, welches z.B. eine große Matrix beinhaltet, die verarbeitet werden soll.
 
@@ -214,7 +220,7 @@ Die Verlässlichkeit beruht ebenfalls auf dem Ownership- und Borrowing-System. H
 
 Um die Produktivität zu unterstützen bieten die beiden Tools \codeword{rustup} und \codeword{cargo} alles Notwendige um den kompletten Entwicklungsprozess eines Rust-Programms zu erfüllen. Dies betrifft z.B. konkret eine Abhängigkeitsverwaltung, die Erstellung von Dokumentationen und das Ausführen von Tests und Benchmarks.
 
-Wo nötig setzt Rust auf etablierte Lösungen, so wird LLVM genutzt um ausführbare Programme zu erzeugen (vgl. \cite{RustcCodegen2} und \cite{RustcCodegen}). Rust wird mittlerweile in verschiedenen Projekten genutzt (z.B. Android OS \cite{GoogleExample}, Linux Kernel \cite{LinuxExample}, Windows-API \cite{WindowsRust}). Alles zusammen rechtfertigt zumindest die Überlegung ein komplexes System - wie eben ein CAS - in Rust zu implementieren.
+Wo nötig setzt Rust auf etablierte Lösungen, so wird LLVM genutzt um ausführbare Programme zu erzeugen (vgl. \cite{RustcCodegen2} und \cite{RustcCodegen}).
 
 \subsection{Grundlegendes}
 \paragraph{Expression und Statements} Rust unterscheided bei Code-Anweisungen zwischen Statements und Expressions. Statements führen lediglich einen Codeblock aus, während Expressions stets einen Rückgabewert besitzen. Nahezu alle Sprachelemente in Rust sind als Expression implementiert (vgl. \cite[S. 122 ff.]{BO18}).
@@ -467,11 +473,11 @@ Um nun nicht ständig den Owner der Daten ändern zu müssen z.B. bei einem Funk
     println!("{}", s1); // Ausgabe: FernUni
 \end{lstlisting}
 
-Schlussendlich verhindern lifetimes, dass die Referenzen für das Borrowing ungültig werden, und die Variable - und somit der Wert - vor den Referenzen freigegeben wird. Die Illustrierung der Lifetimes enstpricht dabei den Codeblöcken, in denen die Referenzen definiert sind. Die inneren Lifetimes im Beispiel könnten dabei aber auch Funktionsaufrufe sein. Das erste Beispiel ist ungültig, da die Lifetime des Wertes kleiner ist, als die Referenz, die darauf zeigen soll.
+Schlussendlich verhindern Lifetimes, dass die Referenzen für das Borrowing ungültig werden, und die Variable - und somit der Wert - vor den Referenzen freigegeben wird. Die Illustrierung der Lifetimes enstpricht dabei den Codeblöcken, in denen die Referenzen definiert sind. Die inneren Lifetimes im Beispiel könnten dabei aber auch Funktionsaufrufe sein. Das erste Beispiel ist ungültig, da die Lifetime des Wertes kleiner ist, als die Referenz, die darauf zeigen soll.
 
 Das zweite Beispiel ist dagegen gültig, da der eigentliche Wert erst nach der Referenz freigegeben wird.
 
-\begin{lstlisting}[language=rust, caption={lifetime Veranschaulichung \cite{LifetimeEx}}]
+\begin{lstlisting}[language=rust, caption={Lifetime Veranschaulichung \cite{LifetimeEx}}]
     {
         let r;                // ---------+-- 'a
                               //          |
@@ -493,11 +499,11 @@ Das zweite Beispiel ist dagegen gültig, da der eigentliche Wert erst nach der R
     }                         // ----------+
 \end{lstlisting}
 
-In den meisten Fällen kann der Compiler die lifetimes von Variablen und Referenzen selbst bestimmen. Eine explizite Deklarierung der Lifetimes ist nötig, wenn beispielsweise eine Funktion mehr als eine Referenz entgegennimmt und auch wieder zurückgibt. Dies soll an einem Beispiel verdeutlicht werden. Die Lifetimedeklarierung \codeword{'a} gibt an, dass sowohl die beiden Auswahlmöglichkeiten als auch der Rückgabewert diesselbe Lifetime besitzen müssen. Während dies bei der ersten Zuweisung erfüllt ist, wird eine Auswahlmöglichkeit bei der zweiten Zuweisung erst in einer inneren Lifetime deklariert, dies stimmt dann aber entsprechend nicht mit dem Rückgabewert überein.
+In den meisten Fällen kann der Compiler die Lifetimes von Variablen und Referenzen selbst bestimmen. Eine explizite Deklarierung der Lifetimes ist nötig, wenn beispielsweise eine Funktion mehr als eine Referenz entgegennimmt und auch wieder zurückgibt. Dies soll an einem Beispiel verdeutlicht werden. Die Lifetimedeklarierung \codeword{'a} gibt an, dass sowohl die beiden Auswahlmöglichkeiten als auch der Rückgabewert diesselbe Lifetime besitzen müssen. Während dies bei der ersten Zuweisung erfüllt ist, wird eine Auswahlmöglichkeit bei der zweiten Zuweisung erst in einer inneren Lifetime deklariert, dies stimmt dann aber entsprechend nicht mit dem Rückgabewert überein.
 
-\begin{lstlisting}[language=rust, caption={lifetime Beispiele \cite{RustLifetimeEx}}]
+\begin{lstlisting}[language=rust, caption={Lifetime Beispiele \cite{RustLifetimeEx}}]
     fn main() {
-        // Funktioniert, da Werte dieselbe lifetime wie Rückgabewert haben
+        // Funktioniert, da Werte dieselbe Lifetime wie Rückgabewert haben
         let mult1 = 1;
         let mult2 = 2;
         let multiplikator = {
@@ -530,6 +536,8 @@ In den meisten Fällen kann der Compiler die lifetimes von Variablen und Referen
 \newpage
 
 \section{Implementierung des CAS}
+Das folgende Kapitel definiert den Funktionumfangs des entwickelten CAS. Anschließend werden theoretische Überlegungen zur Implementierung aufgzeigt und diese dann in Rust umgesetzt.
+
 \subsection{Grundregeln und Annahmen}
 Bevor überlegt wird, wie der Aufbau des CAS aussieht und welche Typen benötigt werden, müssen noch ein paar Vorüberlegungen gemacht werden, welche Grundregeln und Annahmen im System gelten sollen. Ein Teil dieser Regeln stammt aus ``SymbolicC++'' \cite[S. 2]{Tan2000} und ``Algorithms for Computer Algebra'' \cite[S. 23 ff.]{Geddes2007}, andere wiederum sind als Einschränkung oder zur besseren Verständlichkeit im Rahmen dieser Arbeit hinzugefügt worden. Es sollen folgende Zahlenräume betrachtet werden:
 \begin{itemize}
@@ -1611,17 +1619,18 @@ Bei der Substituierung von Symbolen wären ebenfalls Erweitungen vorstellbar.
     \item Mischformen der Verbesserungen.
 \end{itemize}
 
-\subsection{Vor- und Nachteile Rust}
-Am Anfang dieser Arbeit waren die Konzepte Ownership, Borrowing und Lifetimes noch schwer greifbar. Diese wurden als Hürde von mir wahrgenommen, da hierdurch viele Sachen explizit angegeben werden müssen, wie z.B. das klonen von Übergabeparametern oder auch wie teilweise über Elemente iteriert werden muss. Im laufe der Entwicklung des CAS wurden diese Konstrukte aber immer augenscheinlicher und bereiteten schlussendlich keine Probleme mehr. Darüberhinaus kann immer leicht nachvollzogen werden, an welchen Stellen welche Werte verwendet werden mit der Sicherheit, dass diese nicht versehentlich an anderer Stelle überschrieben worden sind.
+\subsection{Ausblick}
+Am Anfang dieser Arbeit waren die Konzepte Ownership, Borrowing und Lifetimes noch schwer greifbar. Diese wurden als Hürde von mir wahrgenommen, da hierdurch viele Sachen explizit angegeben werden müssen, wie z.B. das klonen von Übergabeparametern oder auch wie teilweise über Elemente iteriert werden muss. Im laufe der Entwicklung des CAS wurden diese Konstrukte aber immer augenscheinlicher und bereiteten schlussendlich keine Probleme mehr. Darüberhinaus kann immer leicht nachvollzogen werden, an welchen Stellen welche Werte verwendet werden mit der Sicherheit, dass diese nicht versehentlich an anderer Stelle überschrieben worden sind. Die Fehleranfälligkeit sinkt dadurch wie in \hyperref[sec:kap2d2]{Kapitel 2.2} gezeigt.
 
 Dieses strenge System in Rust hat sich von einem Nach- zu einem großen Vorteil entwickelt. Verbunden mit einer steilen Lernkurve in Rust, sind dies die einzigen Nachteile, die während der Arbeit mit Rust aufgefallen sind.
 
 Ein weiterer Vorteil von Rust ist die bessere Performance im Gegensatz zu SymPy. Dieser Vorteil dürfte im Vergleich zu anderen Systemen, die in C oder C++, wie z.B. Xcas \cite{XcasLink} geschrieben sind geringer ausfallen. Dies hängt im konkreten Fall vom verwendeten Compiler ab, der die ausführbaren Programme erzeugt. Da Rust wie bereits angesprochen LLVM verwendet würde ein C/C++ Programm kompiliert mit Clang eine ähnliche Performance aufweisen.
 
-Ebenfalls ein Vorteil ist das breite Ökosystem, welches mit ``cargo'' bereitsteht. Das Programm kann einfach mit verschiedenen Profilen kompiliert werden, z.B. als Debug- oder Releaseversion. Abhängigkeiten können einfach installiert werden und Tests und Bechnmarks einfach ausgeführt werden.
+Ebenfalls ein Vorteil ist das breite Ökosystem, welches mit ``cargo'' bereitsteht. Das Programm kann einfach mit verschiedenen Profilen kompiliert werden, z.B. als Debug- oder Releaseversion. Abhängigkeiten können installiert und Tests und Bechnmarks einfach ausgeführt werden.
 
-\subsection{Ausblick}
+Auch wenn, wie Eingangs erwähnt, Rust derzeit keine große Relevanz im Bereich des wisschenschaftlichen Arbeitens besitzt, so sprechen die genannten Punkte dafür, Rust auch dort zu verwenden.
 
+Gerne veröffentliche nach Absprache mit Frau Prof. Dr. Oden die entstandene Arbeit und stelle diese der Rust-Community zur Verfügung. Eine zukünftige Weiterentwicklung soll nicht ausgeschlossen werden.
 
 \newpage
 \bibliographystyle{babplain-fl}
