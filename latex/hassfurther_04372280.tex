@@ -131,9 +131,54 @@ In der vorliegenden Arbeit soll ein solches CAS in Ansätzen mit der Programmier
 
 Einen besonderen Stellenwert nimmt SymPy ein, da dieses System einerseits als Open-Source-Projekt verfügbar ist, als auch der Code in Python geschrieben ist und leicht verständlich und erweiterbar ist \cite[S. 1]{SympyPeerJ}. Die Verwendung dieser Bibliothek und die Vorstellung der Programmiersprache Rust während meines Studiums haben mir die Idee gegeben diese Arbeit zu schreiben. Einige Lösungen werden also von SymPy inspiriert sein. Der Code soll dabei natürlich nicht 1-zu-1 in Rust neu geschrieben werden, sondern mit den Möglichkeiten und Einschränkungen von Rust erweitert werden, auch wenn natürlich nur ein Teil des Umfangs von SymPy in dieser Arbeit abgebildet werden kann.
 
-Die Entwicklung von und mit Rust wird immer relevanter. So wird Beispielsweise die Entwicklung für den Linux immer weiter vorangetrieben \cite{RustLinux}. Auch für die Entwicklung unter Android \cite{GoogleExample} und Windows \cite{WindowsRust} stehen erste Bestrebungen bereit. Erst letztes Jahr erschienen mit der ``Edition 2021'' \cite{RustEditon2021} neue Features. Für die nächste Version ``Edition 2024'' gibt es ebenfalls bereits eine Roadmap \cite{RustEditon2024}.
+Die Entwicklung von und mit Rust wird immer relevanter. So wird Beispielsweise die Entwicklung für den Linux-Kernel immer weiter vorangetrieben \cite{RustLinux}. Auch für die Entwicklung unter Android \cite{GoogleExample} und Windows \cite{WindowsRust} stehen erste Bestrebungen bereit. Erst letztes Jahr erschienen mit der ``Edition 2021'' \cite{RustEditon2021} neue Features. Für die nächste Version ``Edition 2024'' gibt es ebenfalls bereits eine Roadmap \cite{RustEditon2024}.
 
 Größere Projekte des wissenschaftlichen Bereichs, in denen Rust explizit verwendet wird, lassen sich leider nicht finden. Dafür gibt es unabhängige Pakete, die einzelne Gebiete der wissenschaftlichen Programmierung abdecken \cite{RustEx1} \cite{RustEx2} \cite{RustEx3}. Vereinzelt können Beiträge gefunden werden, die das Thema aufgreifen, aber auch zumeist auf den schweren Einstieg hinweisen \cite{RustUse1} \cite{RustUse2} \cite{RustUse3}. Dies soll in der nächsten Version von Rust verbessert werden \cite{RustEditon2024Specific}.
+
+\newpage
+
+\section{Grundlagen CAS}
+Das folgende Kapitel definiert den Funktionumfangs des entwickelten CAS. Um einen Überblick der Größe der Arbeit zu geben, soll näher auf SymPy eingegangen werden und aufgezeigt werden, welche weiteren Implementierungen möglich wären.
+
+\subsection{Grundregeln und Annahmen}
+Bevor überlegt wird, wie der Aufbau des CAS aussieht und welche Typen benötigt werden, müssen noch ein paar Vorüberlegungen gemacht werden, welche Grundregeln und Annahmen im System gelten sollen. Ein Teil dieser Regeln stammt aus ``SymbolicC++'' \cite[S. 2]{Tan2000} und ``Algorithms for Computer Algebra'' \cite[S. 23 ff.]{Geddes2007}, andere wiederum sind als Einschränkung oder zur besseren Verständlichkeit im Rahmen dieser Arbeit hinzugefügt worden. Es sollen folgende Zahlenräume betrachtet werden:
+\begin{itemize}
+    \item $\mathbb{N}$ die Menge der natürlichen Zahlen mit 0, $\{0, 1, 2, 3...\}$
+    \item $\mathbb{Z}$ die Menge der ganzen Zahlen, $\{...-3, -2, -1, 0, 1, 2, 3...\}$
+    \item $\mathbb{Q}$ die Menge der rationalen Zahlen, $\{...-\frac{2}{1}, -\frac{1}{2}, -\frac{1}{1} 0, \frac{1}{1}, \frac{1}{2}, \frac{2}{1}...\}$
+    \item $\mathbb{R}$ die Menge der reellen Zahlen, z.B. $\sqrt{2}$ oder $\pi$
+\end{itemize}
+
+Der komplexe Zahlenbereich  $\mathbb{C}$ wird im Rahmen dieser Arbeit nicht betrachtet.
+
+Um insgesamt weniger Bedingungen für mathematische Operationen zu haben, ist geplant folgende Vereinfachungen und Bedingungen anzunehmen. so müssen alle Implementierungen nur die Operationen Addieren und Multiplizieren berücksichtigen.
+\begin{itemize}
+    \item Jede Substraktion ist im Grunde eine Addition. Für Zahlen bedeudet dies $5-3 = 5+(-3)$ und für Symbole bzw. Terme anderer Art $a-b = a+(-1 * b)$. Eine Besonderheit sollen Terme der Art $1-(a+b+1)$ darstellen, diese sollen zu $1+(-1*a)+(-1*b)+(-1)$ umgeformt werden und nicht zu $1+(-1*(a+b+1))$
+    \item Bei Divisionen werden Zahlen zu rationalen Zahlen, also $2/3 = \frac{2}{3}$ und $-(2/3) = \frac{-2}{3}$. Symbole und Terme werden zu einer Multiplikation vereinfacht, also $a/b = b^{(-1)} * a$ und $(a*b*c)/(d+1) = (d+1)^{-1} * (a*b*c)$
+    \item Das Kommutativgesetz soll beachtet werden: $x+y = y+x$ also auch $2*(x+y) + (y+x)*2 = 4*(x+y)$
+    \item Das Assoziativgesetz soll beachtet werden: $a+(b+c) = (a+b)+c = a+b+c$
+    \item Das Distributivgesetz soll beachtet werden: $a*(x+y) = a*x + a*y$
+\end{itemize}
+
+\subsection{Funktionsumfang}
+Da wie bereits in der Einleitung gezeigt ein CAS sowohl einen sehr breiten Umfang als auch spezialisiert sein kann, muss noch definiert werden, welche Möglichkeiten das in dieser Arbeit entwickelte System besitzt. Konkret soll veranschaulicht werden, welche Operationen erlaubt sein sollen und welche Art von Termen verarbeitet werden können:
+\begin{itemize}
+    \item Addition von Zahlen (Ganzzahlen, Fließkommazahlen, rationalen Zahlen), z.B. $1+2.1 = 3.1$ oder $\frac{1}{3} + \frac{1}{3} = \frac{2}{3}$
+    \item Addition von Symbolen und Termen, z.B. $x+y = x+y$ oder $x+(2*y)+2+(2*y)+x = 2*x+4*y+2$
+    \item Multiplikation von Zahlen (Ganzzahlen, Fließkommazahlen, rationalen Zahlen), z.B. $1*2.1 = 2.1$
+    \item Multiplikation von Symbolen und Termen, z.B. $x*y*x = x^2*y$
+    \item Auswertung von Potenzen die Zahlen, Symbolen und Terme in Basis oder Exponent haben. Dabei sollen Potenzregeln in Hinblick auf Genauigkeit des Ergebnisses ausgeführt werden, z.B. $x^a*x^b=x^{(a+b)}$ oder $x^a*y^a = (x*y)^a$
+    \item Auswertung von Funktionen, die dynamisch hinzugefügt werden können. Funktionen die dem CAS nicht bekannt sind, tauchen weiterhin in Termen auf, werden aber nicht ausgewertet, z.B. $sin(x)$ oder $sqrt(x)$
+    \item Auswertung von Konstanten falls bekannt und gewollt
+    \item Die Ausführungsreihenfolge in Termen lautet: Konstanten und Variablen $\rightarrow$ Funktion $\rightarrow$ Potenz $\rightarrow$ Multiplikation $\rightarrow$ Addition
+\end{itemize}
+
+Darüberhinaus sollen Terme soweit wie möglich mit bereits bestehenden Sprachmitteln erweitert und verglichen werden können. Hierzu werden einige Operatorüberladungen implementiert. Bei der Auswertung der Terme soll die Möglichkeit bestehen eventuell ungenaue numerische Ergebnisse zu berechnen. Funktionen und Konstanten sollen später einfach hinzugefügt werden können.
+
+\subsection{Überblick SymPy}
+Das SymPy Projekt beschreibt sich selbst als eine Python-Bibliothek für symbolische Mathematik, die das Ziel hat, ein CAS mit ``vollen Funktionsumfang'' zu werden \cite{SymPyAbout}. Im Gegensatz zu dem hier begrenzten System beherrscht SymPy z.B. das Handling von Matrizen \cite[S. 11]{SympyPeerJ} oder auch physikalische Berechnungen \cite[S. 14 ff.]{SympyPeerJ}. Darüberhinaus können auch 2D- und 3D-Grafiken erstellt werden \cite{SymPyPlot} uvm. \cite[S. 4 ff.]{SympyPeerJ}. Das Projekt existiert seit mindestens 2007 \cite{SymPyFirstCommit} und wird seither stetig weiterentwickelt.
+
+Verwendung findet SymPy dabei in anderen Projekten die Teils wiederum spezifisch sind, z.B. ``ChemPy'' \cite{ChemPy} oder mehrere Abhängigkeiten vereinen, z.B. ``sagemath'' \cite {Sagemath}.
 
 \newpage
 
@@ -536,42 +581,7 @@ In den meisten Fällen kann der Compiler die Lifetimes von Variablen und Referen
 \newpage
 
 \section{Implementierung des CAS}
-Das folgende Kapitel definiert den Funktionumfangs des entwickelten CAS. Anschließend werden theoretische Überlegungen zur Implementierung aufgzeigt und diese dann in Rust umgesetzt.
-
-\subsection{Grundregeln und Annahmen}
-Bevor überlegt wird, wie der Aufbau des CAS aussieht und welche Typen benötigt werden, müssen noch ein paar Vorüberlegungen gemacht werden, welche Grundregeln und Annahmen im System gelten sollen. Ein Teil dieser Regeln stammt aus ``SymbolicC++'' \cite[S. 2]{Tan2000} und ``Algorithms for Computer Algebra'' \cite[S. 23 ff.]{Geddes2007}, andere wiederum sind als Einschränkung oder zur besseren Verständlichkeit im Rahmen dieser Arbeit hinzugefügt worden. Es sollen folgende Zahlenräume betrachtet werden:
-\begin{itemize}
-    \item $\mathbb{N}$ die Menge der natürlichen Zahlen mit 0, $\{0, 1, 2, 3...\}$
-    \item $\mathbb{Z}$ die Menge der ganzen Zahlen, $\{...-3, -2, -1, 0, 1, 2, 3...\}$
-    \item $\mathbb{Q}$ die Menge der rationalen Zahlen, $\{...-\frac{2}{1}, -\frac{1}{2}, -\frac{1}{1} 0, \frac{1}{1}, \frac{1}{2}, \frac{2}{1}...\}$
-    \item $\mathbb{R}$ die Menge der reellen Zahlen, z.B. $\sqrt{2}$ oder $\pi$
-\end{itemize}
-
-Der komplexe Zahlenbereich  $\mathbb{C}$ wird im Rahmen dieser Arbeit nicht betrachtet.
-
-Um insgesamt weniger Bedingungen für mathematische Operationen zu haben, ist geplant folgende Vereinfachungen und Bedingungen anzunehmen. so müssen alle Implementierungen nur die Operationen Addieren und Multiplizieren berücksichtigen.
-\begin{itemize}
-    \item Jede Substraktion ist im Grunde eine Addition. Für Zahlen bedeudet dies $5-3 = 5+(-3)$ und für Symbole bzw. Terme anderer Art $a-b = a+(-1 * b)$. Eine Besonderheit sollen Terme der Art $1-(a+b+1)$ darstellen, diese sollen zu $1+(-1*a)+(-1*b)+(-1)$ umgeformt werden und nicht zu $1+(-1*(a+b+1))$
-    \item Bei Divisionen werden Zahlen zu rationalen Zahlen, also $2/3 = \frac{2}{3}$ und $-(2/3) = \frac{-2}{3}$. Symbole und Terme werden zu einer Multiplikation vereinfacht, also $a/b = b^{(-1)} * a$ und $(a*b*c)/(d+1) = (d+1)^{-1} * (a*b*c)$
-    \item Das Kommutativgesetz soll beachtet werden: $x+y = y+x$ also auch $2*(x+y) + (y+x)*2 = 4*(x+y)$
-    \item Das Assoziativgesetz soll beachtet werden: $a+(b+c) = (a+b)+c = a+b+c$
-    \item Das Distributivgesetz soll beachtet werden: $a*(x+y) = a*x + a*y$
-\end{itemize}
-
-\subsection{Funktionsumfang}
-Da wie bereits in der Einleitung gezeigt ein CAS sowohl einen sehr breiten Umfang als auch spezialisiert sein kann, muss noch definiert werden, welche Möglichkeiten das in dieser Arbeit entwickelte System besitzt. Konkret soll veranschaulicht werden, welche Operationen erlaubt sein sollen und welche Art von Termen verarbeitet werden können:
-\begin{itemize}
-    \item Addition von Zahlen (Ganzzahlen, Fließkommazahlen, rationalen Zahlen), z.B. $1+2.1 = 3.1$ oder $\frac{1}{3} + \frac{1}{3} = \frac{2}{3}$
-    \item Addition von Symbolen und Termen, z.B. $x+y = x+y$ oder $x+(2*y)+2+(2*y)+x = 2*x+4*y+2$
-    \item Multiplikation von Zahlen (Ganzzahlen, Fließkommazahlen, rationalen Zahlen), z.B. $1*2.1 = 2.1$
-    \item Multiplikation von Symbolen und Termen, z.B. $x*y*x = x^2*y$
-    \item Auswertung von Potenzen die Zahlen, Symbolen und Terme in Basis oder Exponent haben. Dabei sollen Potenzregeln in Hinblick auf Genauigkeit des Ergebnisses ausgeführt werden, z.B. $x^a*x^b=x^{(a+b)}$ oder $x^a*y^a = (x*y)^a$
-    \item Auswertung von Funktionen, die dynamisch hinzugefügt werden können. Funktionen die dem CAS nicht bekannt sind, tauchen weiterhin in Termen auf, werden aber nicht ausgewertet, z.B. $sin(x)$ oder $sqrt(x)$
-    \item Auswertung von Konstanten falls bekannt und gewollt
-    \item Die Ausführungsreihenfolge in Termen lautet: Konstanten und Variablen $\rightarrow$ Funktion $\rightarrow$ Potenz $\rightarrow$ Multiplikation $\rightarrow$ Addition
-\end{itemize}
-
-Darüberhinaus sollen Terme soweit wie möglich mit bereits bestehenden Sprachmitteln erweitert und verglichen werden können. Hierzu werden einige Operatorüberladungen implementiert. Bei der Auswertung der Terme soll die Möglichkeit bestehen eventuell ungenaue numerische Ergebnisse zu berechnen. Funktionen und Konstanten sollen später einfach hinzugefügt werden können.
+Das folgende Kapitel stellt die Implementierung des CAS in den Vordergrund. Dabei sollen auch Überlegungen zu früh auftretenden Problemen aufgezeigt werden.
 
 \subsection{Überlauf und Ungenauigkeit}
 Ein bereits zu Beginn auftretendes Problem für das CAS ist der Umang von Ganzzahlüberläufen und die Ungenaugikeiten der Rechnung mit Fließkommazahlen \cite{IEEE754}. So gibt das folgende Programm in Rust einen falschen Wert für die Addition aus und bricht anschließend ab.
@@ -608,15 +618,38 @@ In ``Modern Computer Algebra'' \cite[S. 29 ff.]{Gathen2013} und ``Computer Algeb
 
 Folgend soll die Performance zwischen den primitiven Typen auf dem Stack, den primitiven Typen auf dem Heap und den Crates verglichen werden. Wie zu erwarten ist die Speicherung auf dem Stack am effizientesten, der Zugriff auf dem Heap kostet Zeit. Der zusätzliche Zeitverlust bei den Crates lässt sich zum einen dadurch erklären, dass immer ein Überlauf geprüft werden muss um den Wert richtig zu verarbeiten, andererseits verwendet der Typ \codeword{BigInt} einen Vektor. Wie in \hyperref[sec:kap2d2]{Kapitel 2.2} bereits erwähnt, wird bei einem Zugriff zusätzlich geprüft, ob der Index gültig ist, was ebenfalls Zeit kostet.
 
-\begin{verbatim}
-    running 6 tests
-    test loop_decimal    ... bench:   7,447,000 ns/iter (+/- 474,681)
-    test loop_float      ... bench:      36,975 ns/iter (+/- 809)
-    test loop_float_heap ... bench:      74,324 ns/iter (+/- 920)
-    test loop_int        ... bench:      18,505 ns/iter (+/- 396)
-    test loop_int_heap   ... bench:      50,293 ns/iter (+/- 1,683)
-    test loop_num        ... bench:     548,640 ns/iter (+/- 42,989)
-\end{verbatim}
+Im Benchmark werden Zahlen von 10 bis 9999 durchlaufen und in jedem Durchlauf auf das vorherige Ergebnis addiert und danach durch drei geteilt.
+
+\begin{lstlisting}[language=rust, caption={Benchmark Primitive Typen Stack Ganzzahl}]
+    let mut x: i64 = 0;
+    for i in 10..10000 {
+        x += i;
+        x /= 3;
+    }
+    assert_eq!(x, 4999);
+\end{lstlisting}
+
+\begin{table}[h!]
+    \caption{Ergebnisse Benchmark Rust-Typen}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Test} & \textbf{Zeit Median in ns} & \textbf{\makecell{Unterschied min. und max. Laufzeit \\ in ns}} \\
+        \hline
+        Primitiv int & 18.505 & 396 \\
+        \hline
+        Primitiv int Heap & 50.293 & 1.683 \\
+        \hline
+        Primitiv float & 36.975 & 809 \\
+        \hline
+        Primitiv float Heap & 74.324 & 920 \\
+        \hline
+        num Crate & 548.640 & 42.989 \\
+        \hline
+        bigdecimal Crate & 7.447.000 & 474.681 \\
+        \hline
+    \end{tabular}
+\end{table}
 
 Leider ist es mit Rust-Benchmarks noch nicht möglich den Speicherverbrauch zu messen. Allerdings können wir diesen für unsere Beispiele auch selbst gut bestimmen. Hierbei geht es nur um die eigentlichen Werte, mit denen Berechnungen durchgeführt werden.
 
