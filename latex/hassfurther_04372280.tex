@@ -385,6 +385,7 @@ Im Zusammenspiel mit \codeword{traits} kann ein entsprechender Typparameter begr
 
 Im folgenden Beispiel dazu werden ein \codeword{trait} und zwei \codeword{structs} definiert, die ein \codeword{trait} implementieren. Das \codeword{ScreenTraitObject} kann im Vektor \codeword{components} beide Structs unabhängig voneinander vorhalten, da \codeword{trait objects} verwendet werden. \codeword{ScreenGeneric} benutzt allerdings nur einen einfachen Generic-Parameter für den Vektor, sodass tatsächlich nur eine konkrete Implementierung von \codeword{Draw} hinzugefügt werden kann.
 
+\label{sec:BoxType}
 Durch den \codeword{Box}-Typ werden die Werte auf dem Heap abgelegt, da nicht von vornherein klar ist, wie viel Speicher auf dem Stack benötigt wird.
 
 \begin{lstlisting}[language=rust, caption={Trait Boundaries \cite{TraitBoundariesEx}}]
@@ -578,6 +579,16 @@ In den meisten Fällen kann der Compiler die Lifetimes von Variablen und Referen
     }
 \end{lstlisting}
 
+\subsection{Stack und Heap}
+Beide Speicherbereiche müssen in Rust seperat betrachtet werden. Datentypen, die eine bekannte Größe haben, wie z.B. eine Ganzzahl werden in Rust auf dem Stack nach dem Prinzip ``last in, first out'' abgelegt. Hierdurch hat der Stack eine Bekannte Größe. Durch diese Einschränkung kann der Zugriff auf den Stack zügig erfolgen. Typen deren Größe zur Compilezeit nicht bekannt sind, z.B. ein Vektor, müssen in Rust auf dem Heap abgelegt werden. Da für diese Daten erst ein passender Bereich in der benötigten Größe gesucht werden muss, ist der schreibende Zugriff langsamer auf dem Stack. Auch der lesende Zugriff erfolgt über eine Referenz, sodass dieser mehr Zeit in Anspruch nimmt \cite{StackHeap} \cite[S. 233 ff.]{SK19}. 
+
+Wichtig ist dieser Unterschied, wenn eine Variable freigegeben wird. Liegt der Wert auf dem Stack, muss nur dieser freigegeben werden, liegt der Wert hingegen auf dem Heap muss sowohl der Heap, als auch die Referenz auf dem Stack freigegeben werden.
+
+\subsection{Copy und Clone}
+Rust bietet zwei Möglichkeiten Werte zu duplizieren. \codeword{Copy} ist dabei möglich, wenn der Wert nur auf dem Stack liegt. Die Zuweisung ``a = b;'' kopiert den Wert b und sowohl ``a'' als auch ``b'' haben ein eigenes Ownership. Die Funktionsweise ähnelt \codeword{memcpy} in C \cite[S. 259 ff.]{SK19}.
+
+Liegen die Werte hingegen auf dem Heap, muss die ``clone''-Methode für den Typen implementiert werden. Hierdurch ist die Kopie explizit und kopiert standardmäßig ebenfalls die Daten auf dem Heap. Durch das Anpassen der Methode können aber z.B. auch nur die Stackwerte kopiert werden und ein Referenzzähler implementiert werden. Die ``clone''-Methode erlaubt somit flexible Strukturen \cite[S. 260 ff.]{SK19}. Bei einer Zuweisung wird wie bereits gezeigt das Ownership abgegeben, wenn nicht die ``clone''-Methode aufgerufen wird.
+
 \newpage
 
 \section{Implementierung des CAS}
@@ -661,12 +672,12 @@ Leider ist es mit Rust-Benchmarks noch nicht möglich den Speicherverbrauch zu m
 
 Der Typ bigdecimal verwendet laut Beschreibung den Typ BigInt und zusätzlich einen 64-Bit-Integer um die Position der Dezimalstelle zu bestimmen \cite{CrateBigdecimalDocs}. Dadurch erhöht sich der Speicherverbrauch also nur unwesentlich.
 
-\paragraph{Entscheidung der verwendeten Typen} Im Rahmen dieser Arbeit ist zumindest eine eigene Implementierung der Typen für beliebige Präzision nicht das Ziel. Genausogut können auch die bereits bestehenden Crates verwendet werden. Da dadurch aber die Performance leidet, wenn auch wahrscheinlich nicht relevant für spätere Beispiele und Tests, ist wiederrum die Implementierung mit primitiven Typen von Vorteil.
+\paragraph{Entscheidung der verwendeten Typen} Im Rahmen dieser Arbeit ist eine eigene Implementierung der Typen für beliebige Präzision nicht das Ziel. Genausogut können auch die bereits bestehenden Crates verwendet werden. Da dadurch aber die Performance leidet, wenn auch wahrscheinlich nicht relevant für spätere Beispiele und Tests, ist wiederrum die Implementierung mit primitiven Typen von Vorteil.
 
 Da Rust Generics untersützt wurde die Entscheidung getroffen, das CAS in Teilen mit Generics umzusetzen, sodass beide Kombinationen verwendet werden können. Dabei sollen alle Funktionen des Systems mit den primitiven Typen funktionieren und einige Beispielimplementierungen mit den Crate-Typen gemacht werden. Dies erlaubt einerseits eine spätere Erweiterung der Crate-Typen als auch die Entwicklung der eigenen Typen.
 
 \subsection{Grundlegende Datenstruktur}
-Eine erste Idee, wie die Datenstruktur aussehen könnte, war ein einfacher binärer Baum, dessen Knoten die Operanden und die Blätter einzelne Werte sind. Dies entspricht dem abstrakten Syntaxbaum nach dem Parsen. Für den Term $x+1+2$ ergibt sich folgender Baum.
+Ein erster Ansatz die Datenstrukturen darzustellen war ein binärer Baum, dessen Knoten die Operanden und die Blätter einzelne Werte sind. Dies entspricht dem abstrakten Syntaxbaum nach dem Parsen. Für den Term $x+1+2$ ergibt sich folgender Baum.
 
 \Tree[.+
         [.+
@@ -676,7 +687,7 @@ Eine erste Idee, wie die Datenstruktur aussehen könnte, war ein einfacher binä
         [.2 ]
     ]
 
-In Rust sähe die Implementierung folgendermaßen aus. Die Ausprägung Add benötigt für die Werte immer den Wrapper \codeword{Box} der die Daten auf den Heap speichert. Zur Compilezeit lässt sich die Größe auf dem Stack nicht bestimmen, da nicht bestimmt ist, wie viele Ebenen Add beinhaltet \cite{RustRecursiveTypes}.
+In Rust sieht die Implementierung folgendermaßen aus. Die Ausprägung Add benötigt für die Werte immer den Wrapper \codeword{Box} der die Daten auf den Heap speichert. Zur Compilezeit lässt sich die Größe auf dem Stack nicht bestimmen, da nicht bestimmt ist, wie viele Ebenen Add beinhaltet \cite{RustRecursiveTypes}.
 
 \begin{lstlisting}[language=rust, caption={BTree Ast}]
     enum BTree {
@@ -766,7 +777,7 @@ Ein weiterer Vorteil ist, dass direkt eine rationale Ausprägung des \codeword{e
 
 In unserer Implementierung wird \codeword{PrimNum} solange wie möglich mit Ganzzahlen und Rationalen Werten arbeiten. Sobald ein Fließkommawert addiert wird, werden die beiden anderen Werte zu einer Fließkommazahl umgewandelt. Dies geht zulasten der Genauigkeit und könnte bei Bedarf so angepasst werden, dass eine rationale Zahl erzeugt wird. Es wäre auch denkbar, Fließkommazahlen und andere numerische Typen nicht standardmäßig zusammenzufassen.
 
-\paragraph{trait NumberType} Dieser Trait soll hauptsächlich als Typparameter oder als Einschränkung für Generics zum Einsatz kommen. Wie bereits erwähnt soll ein Teil des CAS mit verschiedenen Typen durchführbar sein und alle Typen, die diesen Trait implementieren können dann für das CAS genutzt werden. Im konkreten Fall werden dies die beiden \codeword{enums} sein, die gerade erwähnt worden sind. Zudem werden Funktionen als Bedingung definiert um die neutralen Elemente der Addition und der Multiplikation zurückzugeben als auch eine Möglichkeit einen Bruch zu kürzen. Diese müssen dann von den \codeword{enums} implementiert werden.
+\paragraph{trait NumberType} Dieser Trait soll hauptsächlich als Typparameter oder als Einschränkung für Generics zum Einsatz kommen. Wie bereits erwähnt soll ein Teil des CAS mit verschiedenen Typen durchführbar sein und alle Typen, die diesen Trait implementieren können dann für das CAS genutzt werden. In diesem Fall sind dies die beiden \codeword{enums}, die gerade erwähnt worden sind. Zudem werden Funktionen als Bedingung definiert um die neutralen Elemente der Addition und der Multiplikation zurückzugeben als auch eine Möglichkeit einen Bruch zu kürzen. Diese müssen dann von den \codeword{enums} implementiert werden.
 
 Außerdem kann dieser Trait bereits weitere Bedingungen aufnehmen wie z.B. dass der implementierende Enum gewisse Operatorenüberladungen haben muss oder auch, dass die Werte vergleichbar und sortierbar sind.
 
@@ -863,7 +874,7 @@ pub fn eval(
 
 \paragraph{Allgemeine Anmerkungen} Der Generic-Typparameter \codeword{N} soll den gewählten Nummerntyp darstellen. Dieser wird aber noch nicht eingeschränkt, da sonst diese Einschränkungen später für alle implementierenden Blöcke gelten muss. Dies kann z.B. nicht gewünscht sein, wenn eine grundlegend andere Art implementiert werden soll um Terme zu verarbeiten, bei der der Trait \codeword{NumberType} keine Verwendung finden soll. Mit diesem Ansatz kann auch die definierte Ausführungsreihenfolge der Ausprägungen bestimmt werden. Bevor also \codeword{Ast::Add} ausgewertet wird, werden zuerst alle Elemente des Vektors ausgewertet. Eventuelle Vereinfachungen sind dann bereits vorgenommen.
 
-\paragraph{Datenstruktur auf dem Speicher} Mit dieser Implementierung werden nahezu alle Daten auf dem Heap abgelegt. Einzig die Variante \codeword{Ast::Num<PrimNum>} kann komplett auf dem Stack abgelegt werden, da diese eine definierte Größe hat. String und Vec speichern die Daten auf dem Heap und halten nur einen Zeiger auf dem Stack, falls es das oberste Element ist. Box legt die Daten wie bereits besprochen aus Gründen der ungewissen Speicheranforderung auch auf dem Heap an, lediglich der Zeiger kann sich auf dem Stack befinden.
+\paragraph{Datenstruktur auf dem Speicher} Mit dieser Implementierung werden nahezu alle Daten auf dem Heap abgelegt. Einzig die Variante \codeword{Ast::Num<PrimNum>} kann komplett auf dem Stack abgelegt werden, da diese eine definierte Größe hat. String und Vec speichern die Daten auf dem Heap und halten nur einen Zeiger auf dem Stack, falls es das oberste Element ist. Box legt die Daten wie bereits im Kapitel zu \hyperref[sec:BoxType]{Trait Boundaries} gezeigt aus Gründen der ungewissen Speicheranforderung auch auf dem Heap an, lediglich der Zeiger kann sich auf dem Stack befinden.
 
 Zwei konkrete Beispiele sollen dies veranschaulichen. Der String bei \codeword{Symbol(x)} wird intern als Vektor mit dem Typ \codeword{u8} repräsentiert \cite{StringSrc}.
 \begin{lstlisting}[language=rust, caption={Term 1 Stack und Heap}]
@@ -990,7 +1001,7 @@ Es entsteht vielmehr gleich der Baum:
 In diesem Abschnitt sollen Grundlegende Funktionalitäten des CAS implementiert werden. Dies betrifft sowohl den Aufbau des Codes in Rust, um das CAS einfach erweiterbar zu machen, als auch das grundsätzliche Rechnen des Systems. So wird es beispielsweise keine Standardfunktionalität sein, dass $cos(x)^2+sin(x)^2 = 1$ erkannt wird. Dies soll über eine Erweiterung erkannt und verarbeitet werden. Das Zusammenfassen von $x+x=2*x$ ist hingegen aber eine Grundfunktionlität.
 
 \subsection{Änderung des Terms mihilfe von Operatorenüberladung}
-Der Trait \codeword{NumberType} soll bereits die meisten nötigen Operatorenüberladungen von den zu implementierenden Typen verlangen. Die wichtigsten Operationen werden ``Add'' und ``Mul'' sein, da diese vom CAS benutzt werden. Operatoren die ebenfalls interessant im weiteren Verlauf sein können sind der Modulo-Operator (z.B. Auswertung der sin- oder cos-Funktion), aber auch die Möglichkeit Werte vergleichen zu können. Deshalb soll noch \codeword{PartialEq} und \codeword{PartialOrd} implementiert werden um die Funktionen ``NumberType == 1'' und ``NumberType > 1'' zu ermöglichen. Daraus ergibt sich die Definition und die Implementierungen für \codeword{PrimNum}:
+Der Trait \codeword{NumberType} soll bereits die meisten nötigen Operatorenüberladungen von den zu implementierenden Typen verlangen. Die wichtigsten Operationen sind \codeword{Add} und \codeword{Mul}, da diese vom CAS benutzt werden. Operatoren die ebenfalls interessant im weiteren Verlauf sein können sind der Modulo-Operator \codeword{Rem} (z.B. Auswertung der sin- oder cos-Funktion), aber auch die Möglichkeit Werte vergleichen zu können. Deshalb soll noch \codeword{PartialEq} und \codeword{PartialOrd} implementiert werden um die Funktionen ``NumberType == 1'' und ``NumberType > 1'' zu ermöglichen. Daraus ergibt sich die Definition und die Implementierungen für \codeword{PrimNum}:
 
 \begin{lstlisting}[language=rust, caption={trait NumberType 1. Iteration}]
 pub trait NumberType:
