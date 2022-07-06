@@ -129,7 +129,7 @@ Anwendungsbeispiele für ein CAS finden sich in der Physik, Chemie, Sicherheitst
 
 In der vorliegenden Arbeit soll ein solches CAS in Ansätzen mit der Programmiersprache Rust entwickelt werden. Es soll untersucht werden, inwieweit das Ownership- und Borrowing-System von Rust bei einem solchen komplexen System bei der Entwicklung unterstützt und wie die Performance zur Laufzeit ausfällt. Das System soll dabei einfach erweiterbar sein. Nicht implementierte mathematische Funktionen sollen einfach integriert werden können und Terme weiter zusammengefasst werden können als die Standardimplentierung erlaubt.
 
-Einen besonderen Stellenwert nimmt SymPy ein, da dieses System einerseits als Open-Source-Projekt verfügbar ist, als auch der Code in Python geschrieben ist und leicht verständlich und erweiterbar ist \cite[S. 1]{SympyPeerJ}. Die Verwendung dieser Bibliothek und die Vorstellung der Programmiersprache Rust während meines Studiums haben mir die Idee gegeben diese Arbeit zu schreiben. Einige Lösungen werden also von SymPy inspiriert sein. Der Code soll dabei natürlich nicht 1-zu-1 in Rust neu geschrieben werden, sondern mit den Möglichkeiten und Einschränkungen von Rust erweitert werden, auch wenn natürlich nur ein Teil des Umfangs von SymPy in dieser Arbeit abgebildet werden kann.
+Einen besonderen Stellenwert im Bereich der Computeralgebrasysteme nimmt SymPy ein, da dieses System einerseits als Open-Source-Projekt verfügbar ist, als auch der Code in Python geschrieben ist und leicht verständlich und erweiterbar ist \cite[S. 1]{SympyPeerJ}. Die Verwendung dieser Bibliothek und die Vorstellung der Programmiersprache Rust während meines Studiums haben mir die Idee gegeben diese Arbeit zu schreiben. Einige Lösungen werden also von SymPy inspiriert sein. Der Code soll dabei natürlich nicht 1-zu-1 in Rust neu geschrieben werden, sondern mit den Möglichkeiten und Einschränkungen von Rust erweitert werden, auch wenn natürlich nur ein Teil des Umfangs von SymPy in dieser Arbeit abgebildet werden kann.
 
 Die Entwicklung von und mit Rust wird immer relevanter. So wird Beispielsweise die Entwicklung für den Linux-Kernel immer weiter vorangetrieben \cite{RustLinux}. Auch für die Entwicklung unter Android \cite{GoogleExample} und Windows \cite{WindowsRust} stehen erste Bestrebungen bereit. Erst letztes Jahr erschienen mit der ``Edition 2021'' \cite{RustEditon2021} neue Features. Für die nächste Version ``Edition 2024'' gibt es ebenfalls bereits eine Roadmap \cite{RustEditon2024}.
 
@@ -138,10 +138,10 @@ Größere Projekte des wissenschaftlichen Bereichs, in denen Rust explizit verwe
 \newpage
 
 \section{Grundlagen CAS}
-Das folgende Kapitel definiert den Funktionumfangs des entwickelten CAS. Um einen Überblick der Größe der Arbeit zu geben, soll näher auf SymPy eingegangen werden und aufgezeigt werden, welche weiteren Implementierungen möglich wären.
+Das folgende Kapitel definiert den Funktionumfangs des entwickelten CAS. Um einen Überblick der Größe der Arbeit zu geben, soll näher auf SymPy eingegangen werden und aufgezeigt werden, welche weiteren Implementierungen denkbar wären, wenn der Funktionsumfang mit SymPy verglichen wird.
 
 \subsection{Grundregeln und Annahmen}
-Bevor überlegt wird, wie der Aufbau des CAS aussieht und welche Typen benötigt werden, müssen noch ein paar Vorüberlegungen gemacht werden, welche Grundregeln und Annahmen im System gelten sollen. Ein Teil dieser Regeln stammt aus ``SymbolicC++'' \cite[S. 2]{Tan2000} und ``Algorithms for Computer Algebra'' \cite[S. 23 ff.]{Geddes2007}, andere wiederum sind als Einschränkung oder zur besseren Verständlichkeit im Rahmen dieser Arbeit hinzugefügt worden. Es sollen folgende Zahlenräume betrachtet werden:
+Bevor überlegt wird, wie der Aufbau des CAS aussieht und welche Typen benötigt werden, müssen ein paar Vorüberlegungen gemacht werden, welche Grundregeln und Annahmen im System gelten sollen. Ein Teil dieser Regeln stammt aus ``SymbolicC++'' \cite[S. 2]{Tan2000} und ``Algorithms for Computer Algebra'' \cite[S. 23 ff.]{Geddes2007}, andere wiederum sind als Einschränkung oder zur besseren Verständlichkeit im Rahmen dieser Arbeit hinzugefügt worden. Es sollen folgende Zahlenräume betrachtet werden:
 \begin{itemize}
     \item $\mathbb{N}$ die Menge der natürlichen Zahlen mit 0, $\{0, 1, 2, 3...\}$
     \item $\mathbb{Z}$ die Menge der ganzen Zahlen, $\{...-3, -2, -1, 0, 1, 2, 3...\}$
@@ -183,7 +183,7 @@ Verwendung findet SymPy dabei in anderen Projekten die Teils wiederum spezifisch
 \newpage
 
 \section{Vorstellung der Programmiersprache Rust}
-In diesem Kapitel sollen die Grundlagen von Rust erläutert werden. Dabei sollen sowohl die Syntax als auch die grundlegenden Konzepte der Sprache und deren Vorteile vermittelt werden.
+In diesem Kapitel sollen die Grundlagen von Rust erläutert werden. Dabei sollen sowohl die Syntax als auch die grundlegenden Konzepte der Sprache und deren Vorteile vermittelt werden. Einige Stellen zur Vorstellung der Sprache sind meiner Seminararbeit ``Die Programmiersprache Rust'' entommen \cite{Seminararbeit}. Wo nötig, wurden Texte erneuert und erweitert und Quellen aktualisiert.
 
 \subsection{Einführendes Beispiel: Ownership und Borrowing}
 Bevor Rust vorgestellt wird und die genauen Regeln des Ownership und Borrowing erläutert werden, soll das Prinzip anhand eines Beispiels verdeutlicht werden. Hierzu wird ein \codeword{struct} - vergleichbar mit Klassen - angelegt, welches z.B. eine große Matrix beinhaltet, die verarbeitet werden soll.
@@ -255,7 +255,7 @@ Im letzten Beispiel soll nun durch die Verwendung des \codeword{mut}-Schlüsselw
 
 Natürlich können die beiden letzten Funktionen auch einen Rückgabewert besitzen, der unabhängig von der übergebenen Matrix ist. Eine besondere Stärke sind die Regeln, die für das Borrowing gelten. So ist z.B. zu jeder Zeit nur eine veränderbare Referenz auf eine Variable erlaubt, es ist daher leicht nachvollziehbar welcher Programmabschnitt die Daten tatsächlich verändern kann. Race-Conditions in nebenläufigen Anwendungen sind somit ausgeschlossen. Rust bietet für solche Einsatzzwecke Messge Passing \cite{K1727} und threadsichere Referenzzähler \cite{ArcSrc} an. Die Regeln zu Ownership und Borrowing werden noch genauer vorgestellt.
 
-\label{sec:kap2d2}
+\label{sec:kap3d2}
 \subsection{Was ist Rust und warum sollte es verwendet werden}
 Rust ist eine statisch typisierte Programmiersprache, welche vor allem mit den Eigenschaften Performance, Verlässlichkeit und Produktivität eine Alternative zu anderen Sprachen anbieten soll \cite{RustPromises}. Version 1.0 wurde 2015 veröffentlich, seitdem gibt es mit der ``Rust 2018 Edition'' und ``Rust 2021 Edition'' eine stetige Weiterentwicklung \cite{RustEditions}.
 
@@ -474,6 +474,7 @@ Im folgenden sollen die Konzepte Ownership, Borrowing und Lifetimes vorgestellt 
     \item Referenzen müssen immer gültig (d.h. deklariert sein und der Owner muss mindestens denselben Gültigkeitsbereich wie die Referenz haben) sein
 \end{itemize}
 
+\label{sec:Ownership}
 Das Ownership-Prinzip deckt dabei bereits die ersten drei Regeln ab. Zu jedem Zeitpunkt kann jeder Wert nur durch eine Variable angesprochen werden. Liegt der Wert auf dem Stack oder wird das \codeword{Copy}-Trait implementiert, wird bei einer Zuweisung der Wert kopiert \cite{CopyTraitOwner}. Liegt der Wert hingegen auf dem Heap, wie z.B. bei einem \codeword{Vector} oder einem \codeword{String} wird das Ownership an die neue Variable übergeben.
 
 \begin{lstlisting}[language=rust, caption={ownership}]
@@ -587,12 +588,12 @@ Wichtig ist dieser Unterschied, wenn eine Variable freigegeben wird. Liegt der W
 \subsection{Copy und Clone}
 Rust bietet zwei Möglichkeiten Werte zu duplizieren. \codeword{Copy} ist dabei möglich, wenn der Wert nur auf dem Stack liegt. Die Zuweisung ``a = b;'' kopiert den Wert b und sowohl ``a'' als auch ``b'' haben ein eigenes Ownership. Die Funktionsweise ähnelt \codeword{memcpy} in C \cite[S. 259 ff.]{SK19}.
 
-Liegen die Werte hingegen auf dem Heap, muss die ``clone''-Methode für den Typen implementiert werden. Hierdurch ist die Kopie explizit und kopiert standardmäßig ebenfalls die Daten auf dem Heap. Durch das Anpassen der Methode können aber z.B. auch nur die Stackwerte kopiert werden und ein Referenzzähler implementiert werden. Die ``clone''-Methode erlaubt somit flexible Strukturen \cite[S. 260 ff.]{SK19}. Bei einer Zuweisung wird wie bereits gezeigt das Ownership abgegeben, wenn nicht die ``clone''-Methode aufgerufen wird.
+Liegen die Werte hingegen auf dem Heap, muss die \codeword{clone}-Methode für den Typen implementiert werden. Hierdurch ist die Kopie explizit und kopiert standardmäßig ebenfalls die Daten auf dem Heap. Durch das Anpassen der Methode können aber z.B. auch nur die Stackwerte kopiert werden und ein Referenzzähler implementiert werden. Die \codeword{clone}-Methode erlaubt somit flexible Strukturen \cite[S. 260 ff.]{SK19}. Bei einer Zuweisung wird ansonsten \hyperref[sec:Ownership]{wie bereits gezeigt} das Ownership abgegeben.
 
 \newpage
 
 \section{Implementierung des CAS}
-Das folgende Kapitel stellt die Implementierung des CAS in den Vordergrund. Dabei sollen auch Überlegungen zu früh auftretenden Problemen aufgezeigt werden.
+Das folgende Kapitel stellt die Implementierung des CAS in den Vordergrund. Dabei sollen auch Überlegungen zu früh auftretenden Problemen gemacht werden.
 
 \subsection{Überlauf und Ungenauigkeit}
 Ein bereits zu Beginn auftretendes Problem für das CAS ist der Umang von Ganzzahlüberläufen und die Ungenaugikeiten der Rechnung mit Fließkommazahlen \cite{IEEE754}. So gibt das folgende Programm in Rust einen falschen Wert für die Addition aus und bricht anschließend ab.
@@ -611,7 +612,7 @@ Ein bereits zu Beginn auftretendes Problem für das CAS ist der Umang von Ganzza
     thread main panicked...
 \end{lstlisting}
 
-Ein Blick zu SymPy zeigt, dass bereits hier Lösungen direkt aus Python verwendet werden können, die in Rust nicht existieren. So besitzen Ganzzahltypen bereits eine beliebige Präzision \cite{PythonDocuIntPrecision}. Für Fließkommazahlen ist die Klasse \codeword{Float} implementiert, die eine ungebrenzte Genauigkeit erlaubt. Dabei kann mit dem zweiten Parameter die eigentliche Präzision bestimmt werden. Es wird darüberhinaus angeraten den eigentlichen Wert als String zu übergeben, da der native float-Typ in Python bereits eine Ungenauigkeit hervorrufen kann \cite{SymPyFloat}.
+Ein Blick zu SymPy zeigt, dass bereits hier Lösungen direkt aus Python verwendet werden können, die in Rust nicht existieren. So besitzen Ganzzahltypen bereits eine beliebige Präzision \cite{PythonDocuIntPrecision}. Für Fließkommazahlen ist die Klasse \codeword{Float} implementiert, die eine ungebrenzte Genauigkeit erlaubt. Dabei kann mit dem zweiten Parameter die eigentliche Präzision bestimmt werden. Es wird darüberhinaus angeraten den eigentlichen Wert als String zu übergeben, da der native \codeword{float}-Typ in Python bereits eine Ungenauigkeit hervorrufen kann \cite{SymPyFloat}.
 
 \begin{lstlisting}[language=Python, caption={SymPy Präzision}]
     x = 12345678901234567890...
@@ -625,11 +626,11 @@ Ein Blick zu SymPy zeigt, dass bereits hier Lösungen direkt aus Python verwende
     // 0.30000000000000004
 \end{lstlisting}
 
-In ``Modern Computer Algebra'' \cite[S. 29 ff.]{Gathen2013} und ``Computer Algebra - Concepts and Techniques'' \cite[S. 81 ff.]{Lamagna2019} sind theoretische Implementierungen für Ganzzahlwerte angegeben. Hiervon könnten wir in dieser Arbeit natürlich gebrauch machen und diese Typen selbst implementieren und für Fließkommazahlen erweitern, da Rust diese Typen leider nicht selbst anbietet. Allerdings existieren bereits die beiden Crates (Abhängigkeiten im Rust-Ökosystem) ``num'' \cite{CrateNum} und ``bigdecimal'' \cite{CrateBigdecimal}, die Typen mit ungebrenzter Präszision anbieten.
+In ``Modern Computer Algebra'' \cite[S. 29 ff.]{Gathen2013} und ``Computer Algebra - Concepts and Techniques'' \cite[S. 81 ff.]{Lamagna2019} sind theoretische Implementierungen für Ganzzahlwerte angegeben. Hiervon könnten wir in dieser Arbeit gebrauch machen und diese Typen selbst implementieren und für Fließkommazahlen erweitern, da Rust diese Typen leider nicht selbst anbietet. Allerdings existieren bereits die beiden Crates (Abhängigkeiten im Rust-Ökosystem) ``num'' \cite{CrateNum} und ``bigdecimal'' \cite{CrateBigdecimal}, die Typen mit ungebrenzter Präszision anbieten.
 
-Folgend soll die Performance zwischen den primitiven Typen auf dem Stack, den primitiven Typen auf dem Heap und den Crates verglichen werden. Wie zu erwarten ist die Speicherung auf dem Stack am effizientesten, der Zugriff auf dem Heap kostet Zeit. Der zusätzliche Zeitverlust bei den Crates lässt sich zum einen dadurch erklären, dass immer ein Überlauf geprüft werden muss um den Wert richtig zu verarbeiten, andererseits verwendet der Typ \codeword{BigInt} einen Vektor. Wie in \hyperref[sec:kap2d2]{Kapitel 2.2} bereits erwähnt, wird bei einem Zugriff zusätzlich geprüft, ob der Index gültig ist, was ebenfalls Zeit kostet.
+Folgend soll die Performance zwischen den primitiven Typen auf dem Stack, den primitiven Typen auf dem Heap und den Crates verglichen werden. Wie zu erwarten ist die Speicherung auf dem Stack am effizientesten, der Zugriff auf dem Heap kostet Zeit. Der zusätzliche Zeitverlust bei den Crates lässt sich zum einen dadurch erklären, dass immer ein Überlauf geprüft werden muss um den Wert richtig zu verarbeiten, andererseits verwendet der Typ \codeword{BigInt} einen Vektor. Wie in \hyperref[sec:kap3d2]{Kapitel 3.2} bereits erwähnt, wird bei einem Zugriff zusätzlich geprüft, ob der Index gültig ist, was ebenfalls Zeit kostet.
 
-Im Benchmark werden Zahlen von 10 bis 9999 durchlaufen und in jedem Durchlauf auf das vorherige Ergebnis addiert und danach durch drei geteilt.
+Im Benchmark werden Zahlen von 10 bis 9999 durchlaufen und in jedem Durchlauf eine Berechnung mit dem vorher existierenden Wert durchgeführt.
 
 \begin{lstlisting}[language=rust, caption={Benchmark Primitive Typen Stack Ganzzahl}]
     let mut x: i64 = 0;
@@ -640,7 +641,7 @@ Im Benchmark werden Zahlen von 10 bis 9999 durchlaufen und in jedem Durchlauf au
     assert_eq!(x, 4999);
 \end{lstlisting}
 
-\begin{table}[h!]
+\begin{table}[ht!]
     \caption{Ergebnisse Benchmark Rust-Typen}
     \centering
     \begin{tabular}{|c|c|c|}
@@ -687,7 +688,7 @@ Ein erster Ansatz die Datenstrukturen darzustellen war ein binärer Baum, dessen
         [.2 ]
     ]
 
-In Rust sieht die Implementierung folgendermaßen aus. Die Ausprägung Add benötigt für die Werte immer den Wrapper \codeword{Box} der die Daten auf den Heap speichert. Zur Compilezeit lässt sich die Größe auf dem Stack nicht bestimmen, da nicht bestimmt ist, wie viele Ebenen Add beinhaltet \cite{RustRecursiveTypes}.
+In Rust sieht die Implementierung folgendermaßen aus. Die Ausprägung Add benötigt für die Werte immer die Struktur \codeword{Box}, die die Daten auf den Heap speichert. Zur Compilezeit lässt sich die Größe auf dem Stack nicht bestimmen, da nicht bestimmt ist, wie viele Ebenen Add beinhaltet \cite{RustRecursiveTypes}.
 
 \begin{lstlisting}[language=rust, caption={BTree Ast}]
     enum BTree {
@@ -707,7 +708,7 @@ In Rust sieht die Implementierung folgendermaßen aus. Die Ausprägung Add benö
 
 Bei der direkten Änderung bzw. Zusammenfassung des Baums ergibt sich nun durch das Ownership ein Problem. Man bräuchte auf jeden Knoten und Blatt eine veränderbare Referenz. In unserem Beispiel würden im einfachsten Fall das untere \codeword{BTree::Add} durch \codeword{BTree::Symbol} ersetzt werden und das rechte \codeword{BTree::Number} aktualisiert werden.
 
-Würde versucht werden die Referenzen in einem Vektor zu speichern, ist das zumindest bereits für \codeword{Add} nicht möglich. Da \codeword{Box} das Ownership des Wertes nimmt, kann dazu parallel keine veränderbare Referenz existieren. Dasselbe Problem tritt auf, wenn die Blätter bereits der entsprechende \codeword{Box}-Wert sind, dann würde das Ownership immer noch an \codeword{parent_1} übergeben werden.
+Würde versucht werden die Referenzen in einem Vektor zu speichern, ist das zumindest bereits für \codeword{Add} nicht möglich. Da \codeword{Box} das Ownership des Wertes in Anspruch nimmt, kann dazu parallel keine veränderbare Referenz existieren. Dasselbe Problem tritt auf, wenn die Blätter bereits der entsprechende \codeword{Box}-Wert sind, dann würde das Ownership immer noch an \codeword{parent_1} übergeben werden.
 
 \begin{lstlisting}[language=rust, caption={get refs}]
     let mut leave_1 = BTree::Number(1);
@@ -771,7 +772,7 @@ In diesem Kapitel soll definiert werden, welche \codeword{structs}, \codeword{tr
 Es ist noch zu erwähnen, dass hier nicht definiert werden soll, mit welche \codeword{Derive macros} diese Typen erhalten. In Rust ist es üblich \codeword{structs} und \codeword{enums} mit diesen Makros zu erweitern, um z.B. anzugeben, dass der Typ kopiert oder sortiert werden kann. Die Implementierung dieser Funktionalität wird dann teilweise zur Compilezeit vom Makro übernommen.
 
 \label{sec:NumTypes}
-\paragraph{enum PrimNum und enum PrecisionNum} Diese beiden \codeword{enums} sollen als Implementierung für den Generic-Parameter im CAS dienen. Ebenso bieten diese den Vorteil, dass später ein allgemeiner Nummern-Typ existiert mit dem gerechnet werden kann, und nicht ständig manuell Type Castings durchgeführt werden müssen. So ist es in Rust nicht möglich eine Addition oder Multiplikation von i32 und f64 durchzuführen. Hierzu muss einer der beiden Werte erst in den anderen manuell überführt werden.
+\paragraph{enum PrimNum und enum PrecisionNum} Diese beiden \codeword{enums} sollen als Implementierung für den Generic-Parameter im CAS dienen. Ebenso bieten diese den Vorteil, dass später ein allgemeiner Nummern-Typ existiert mit dem gerechnet werden kann, und nicht ständig manuell Type Castings durchgeführt werden müssen. So ist es in Rust nicht möglich eine Addition oder Multiplikation von \codeword{i32} und \codeword{f64} durchzuführen. Hierzu muss einer der beiden Werte erst in den anderen manuell überführt werden.
 
 Ein weiterer Vorteil ist, dass direkt eine rationale Ausprägung des \codeword{enum} implementiert werden kann. Auch hier kann der Typ direkt die Rechnung übernehmen. Hierzu werden die Operatoren \codeword{std::ops::Add} und \codeword{std::ops::Mul} für das Enum selbst überladen. Im Hinblick auf die Bedingung, dass eine Subtraktion eine Addition ist, wird ebenso \codeword{std::ops::Mul} für einen Ganzzahlwert mit den Enums überladen. Ebenso kann es von Interesse sein, ob es sich um das neutrale Element der Addition oder Multiplikation handelt um einen Term zu vereinfachen. Für diesen Fall wird der Trait \codeword{PartialEq} für Ganzzahlen überladen, um hier nach Bedarf auch andere Werte zu überprüfen. Eine Alternative wären Methoden, die einen \codeword{bool}-Wert zurückgeben, ob es sich um einen solchen Wert handelt.
 
@@ -823,10 +824,10 @@ Bei der Entscheidung, ob das Element direkt bearbeitet wird oder ein neuer \code
     SymPy expressions are immutable. No function will change them in-place.
 \end{quote}
 
-Auch ist hier ersichtlich, dass teilweise die \codeword{clone}-Methode aufgerufen werden muss, da ansonsten ja nur die Referenz \codeword{self} zurückgegeben werden würde. Der \codeword{Copy}-Trait kann für \codeword{Ast} nicht implementiert werden, da bereits Vektoren diesen Trait nicht implementieren.
+Mit den bereits genannten Einschränkungen, ist klar, dass die \codeword{clone}-Methode aufgerufen werden muss, da einige Daten auf dem Heap abgelegt werden. Bei einer Zuweisung oder einem Rückgabewert, würde ansonsten der originale \codeword{Ast} das Ownership abgeben. Der \codeword{Copy}-Trait kann für \codeword{Ast} nicht implementiert werden, da bereits Vektoren diesen Trait nicht implementieren.
 
 \begin{lstlisting}[language=rust, caption={eval-Methode 1. Implementierung}]
-pub fn eval(
+    pub fn eval(
         &self,
         evaler: &EvalFn<N>,
         hard_eval: &bool,
@@ -933,13 +934,13 @@ Ziel dieses Kapitels ist die Nutzung bzw. Implementierung der lexikalischen Anal
 
 Die Abhängigkeit ``rug'' soll die beliebige Genauigkeit ermöglichen. Dabei handelt sich um ein Interface zu den GNU-Bibliotheken GMP, MPFR, MPC. Für diese müssen aber unter GNU/Linux, macOs und Windows jeweils andere Abhängigkeiten installiert werden. Ein schnelles Testen auf anderen Rechnern ist somit ausgeschlossen. Aus diesem Grund wird diese Bibliothek nicht verwendet. Ebenso wird deshalb ``rug'' nicht als Bibliothek für die beliebige Genaugikeit verwendet, sondern num und bigdecimal.
 
-\paragraph{meval Rust} \cite{CrateMeval} Diese Bibliothek erscheint recht unkompliziert und einfach zu nutzen. Die geparsten Tokens werden als UPN (umgekehrte polnische Notation) ausgewertet. Dies könnte man prinzipiell dazu nutzen unseren modifizierten Ast zu erzeugen. Ein kleiner Nachteil ist, dass nur Fließkommazahlen ausgewertet werden. Sollte man den Lexer irgendwann erweitern wollen, sodass eine beliebige Genauigkeit erreicht werden soll, müsste man diesen Part neu schreiben. Zudem habe ich diese Bibliothek leider nicht bei meiner initialen Recherche in Betracht gezogen und nicht weiter überprüft. Erst während der Entwicklung habe ich Interessehalber weiter reingesehen und die Enums \codeword{Operator} und \codeword{Token} größtenteils übernommen. Hätte ich den Lexer nicht bereits zu einem großen Teil implementiert, hätte ich die Möglichkeit genutzt, die Tokens aus dieser Bibliothek zu erzeugen.
+\paragraph{meval Rust} \cite{CrateMeval} Diese Bibliothek erscheint recht unkompliziert und einfach zu nutzen. Die geparsten Tokens werden als UPN (umgekehrte polnische Notation) ausgewertet. Dies könnte man prinzipiell dazu nutzen unseren modifizierten Ast zu erzeugen. Ein kleiner Nachteil ist, dass nur Fließkommazahlen ausgewertet werden. Sollte man den Lexer irgendwann erweitern wollen, sodass eine beliebige Genauigkeit erreicht werden soll, müsste man diesen Part neu schreiben. Zudem wurde diese Bibliothek leider nicht bei der initialen Recherche in Betracht gezogen und nicht weiter überprüft. Erst während der Entwicklung wurde Interessehalber weiter reingesehen und die Enums \codeword{Operator} und \codeword{Token} größtenteils übernommen. Wäre der Lexer nicht bereits zu einem großen Teil implementiert, würde die Möglichkeit genutzt, die Tokens aus dieser Bibliothek zu erzeugen.
 
 \paragraph{evalexpr Rust} \cite{CrateEvalexpr} Diese Bibliothek erscheint sehr umfangreich. Allerdings lässt sich eigentlich nur die \codeword{eval}-Funktion nutzen, da fast alle anderen Strukturen nicht mit dem Schlüsselwort \codeword{pub} versehen sind. Es war mir daher nicht möglich, den Tokenizer bzw. den Baum direkt zu nutzen, in dem sich ein bereits geparster String befindet. Daher schied diese Bibliothek ebenfalls aus.
 
-\paragraph{tinyexpr C} \cite{CTinyexpr} Da es in Rust auch möglich ist, bereits bestehenden C-Code zu nutzen, wurde ebenfalls geprüft eine einfache C-Bibliothek zu nutzen, sodass auch das die notwendige Schnittstelle des Parsers nicht allzu kompliziert wird. Hier habe ich mir tinyexpr näher angesehen. Leider müssen Variablen bereits vor der lexikalischen Analyse zumindest bekannt sein \cite{CTinyexprReadme}. Da ich mich generell gegen diesen Schritt entschieden habe, wurde auch diese Bibliothek nicht verwendet.
+\paragraph{tinyexpr C} \cite{CTinyexpr} Da es in Rust auch möglich ist, bereits bestehenden C-Code zu nutzen, wurde ebenfalls geprüft eine einfache C-Bibliothek zu nutzen, sodass auch das die notwendige Schnittstelle des Parsers nicht allzu kompliziert wird. Hierbei wurde tinyexpr näher betrachtet. Leider müssen Variablen bereits vor der lexikalischen Analyse zumindest bekannt sein \cite{CTinyexprReadme}. Da sich generell gegen diesen Schritt entschieden wurde, wurde auch diese Bibliothek nicht verwendet.
 
-\paragraph{Fazit} Eine geeignete Bibliothek zu finden, die den Anwendungszweck erfüllt und dabei nicht allzu weit weg vom eigentlich Ziel ist, ist leider in meinen Augen nicht möglich gewesen. Daher wurde sowohl die lexikalische Analyse als auch das Parsing selbst implementiert. Die wichtigsten Eigenschaften hierzu habe ich aus dem Kurs 01810 Übersetzerbau herausgearbeitet, den ich im Wintersemester 17/18 belegt habe.
+\paragraph{Fazit} Eine geeignete Bibliothek zu finden, die den Anwendungszweck erfüllt und dabei nicht allzu weit weg vom eigentlich Ziel ist, ist leider nicht möglich gewesen. Daher wurde sowohl die lexikalische Analyse als auch das Parsing selbst implementiert. Die wichtigsten Eigenschaften hierzu wurden aus dem Kurs 01810 Übersetzerbau herausgearbeitet, den ich im Wintersemester 17/18 belegt habe.
 
 \subsection{Implementierung der lexikalischen Analyse bzw. Tokenizer} In diesem Schritt soll aus einer übergebenen Zeichenkette ein Vektor mit Tokens erstellt werden. Hierbei wird zeichenweise gearbeitet und nicht über reguläre Ausdrücke. Eine Besonderheit in Rust ist, dass ein Char in einem String nicht über einen Index referenziert werden kann. Da Strings als UTF-8 gespeichert werden, ist mit dem Index nicht eindeutig, ob das entsprechende Byte oder Zeichen angesprochen werden soll. Daher muss der String hier erst in einen Vektor des Typ \codeword{Char} umgewandelt werden.
 
@@ -973,7 +974,7 @@ Als Parser kommt eine einfache Implementierung der Operator-Vorranganalyse in Fr
 
 Es handelt sich um einen LR(1)-Parser, da der Parser ein Zeichen vorrausschauen kann, um die nächste Aktion zu bestimmen. Der Stack ist im weitesten Sinne bereits ein gültiges \codeword{Ast}-Element, das befüllt wird. Die \codeword{shift}-Funktion kann als Voranschreiten im Iterator angesehen werden. Die \codeword{reduce}-Funktion entpricht dem Anwenden der Operatorenüberladungen auf dem gültigen \codeword{Ast}-Element.
 
-Beim Parsing von Funktionsargumenten in mathematischen Ausdrücken, fangen die Parameter dabei wieder mit der Funktion zum Parsen von ``+'' und ``-'' an. Auch werden bereits Variablen und Konstanten unterschieden.
+Beim Parsing von Funktionsargumenten in mathematischen Ausdrücken, fangen die Parameter dabei wieder mit der Funktion zum Parsen von ``+'' und ``-'' an. Auch werden bereits Variablen und Konstanten unterschieden. So enthält der Ast für den $a+\pi$ sowohl ``Ast::Symbol(``a'')'' als auch ``Ast::Const(``$\pi$'')''.
 
 Darüberhinaus werden entsprechende Prüfungen eingebaut, sodass der Term $a+b+(c+d)$ nicht wie der folgende Baum geparst wird:
 
@@ -1109,7 +1110,7 @@ Terme wie $1/x$ werden durch das CAS in die Form \codeword{Pow(Symbol("x"), Num(
 
 Glücklicherweise können Wurzeln ebenfalls als Potenzen dargestellt werden, so ist z.B. $\sqrt{2} = 2^{1/2}$ oder $\sqrt[3]{8} = 8^{1/3}$. So können alle bisherigen Regeln hierrauf einfach angewendet werden. Zudem sollen die Funktionen \codeword{sqrt} und \codeword{nthroot} im Term verwendet werden können, die dann entsprechende \codeword{Ast}-Elemente erzeugen.
 
-Darüberhinaus wird derselbe Algorithmus wie in SymPy implementiert um zu prüfen, ob eine Wurzel eine perfektes Ergebnis liefert \cite{SymPyNewton}. In diesem Fall kann das entsprechende Element vereinfacht werden.
+Darüberhinaus wird derselbe Algorithmus wie in SymPy implementiert um zu prüfen, ob eine Wurzel eine perfektes Ergebnis liefert \cite{SymPyNewton}. Hierbei wird das ``Newtonverfahren'' genutzt, das Näherungswerte für die Nullstullen von nichtlinearen Gleichungssystemen findet \cite{NewtonDetail}. Bei der gemachten Implementierung wird der Wert näherungsweise bestimmt und danach danach überprüft, ob die Potenz aus dem Wert und der n-ten Wurzel den gesuchten Wert abbildet. In diesem Fall kann das entsprechende Element vereinfacht werden.
 
 \label{sec:kapErRustUndBei}
 \subsection{Erweiterbarkeit in Rust und Beispiele}
@@ -1130,7 +1131,7 @@ Um die Erweiterbarkeit des Systems zu gewährleisten wird das Struct \codeword{E
 
 \paragraph{adders} Funktionen, die den Typ \codeword{Ast::Add} weiter vereinfachen können. So ist es möglich entsprechend die Einträge der HashMap zu überprüfen und zu verändern. Der zweite Parameter vom Typ \codeword{bool} gibt an, ob es sich um eine explizite Berechnung handelt. Dies wird relevant, wenn auch ungenaue Werte berechnet werden sollen.
 
-\paragraph{muls} Funktionen, die den Typ \codeword{Ast::Mul} weiter vereinfachen können. Die Parameter sind identisch wie bereits bei \codeword{adders}. Dieses Feld ist der Vollständigkeit halber implementiert, da ich kein Beispielterm finden konnte, bei dem dies relevant ist.
+\paragraph{muls} Funktionen, die den Typ \codeword{Ast::Mul} weiter vereinfachen können. Die Parameter sind identisch wie bereits bei \codeword{adders}. Dieses Feld ist der Vollständigkeit halber implementiert, da kein Beispielterm gefunden werden konnte, bei dem dies relevant ist.
 
 \paragraph{pows} Funktionen, die die Basis und den Exponenten erhalten und Auswerten können. So kann z.B. der Term $(x*4)^{(1/2)}$ zu $x^{(1/2)}*2$ vereinfacht werden. Auch hier gibt es wieder die Möglichkeit eine explizite Berechnung zu erwzwingen. Diese Funktion besitzt darüberhinaus einen Rückgabewert, da der entsprechende \codeword{Ast} nicht direkt bearbeitet wird, da sich dieser auch in der Ausprägung verändern kann. In diesem Beispiel wird aus einem \codeword{Ast::Pow} ein \codeword{Ast::Mul}.
 
@@ -1225,7 +1226,8 @@ Handelt es sich jedoch um die Ausprägung \codeword{Ast::Add} wird prinzipiell m
 
 Das neue Feld ``expand\_funcs'' enthält Funktionen um mathematische Funktionen zu expandieren. So soll z.B. aus $log(x^z*y)$ zu $z*log(x)+log(y)$ werden. Zuordnungen zu Funktionen finden wieder über eine HashMap statt.
 
-\paragraph{Besonderheiten mit Rust} Bei der Implementierung dieser Methode sind das strenge Typensystem von Rust als auch das Ownership und Borrowing in Erscheinung getreten. Explementarisch soll dies an zwei Beispielen erläutert werden, da sich dieses Verhalten ähnlich in anderen Fällen wiederholt.
+\subsection{expand Implementierungshinweise}
+Bei der Implementierung dieser Methode sind das strenge Typensystem von Rust als auch das Ownership und Borrowing in Erscheinung getreten. Explementarisch soll dies an zwei Beispielen erläutert werden, da sich dieses Verhalten ähnlich in anderen Fällen wiederholt.
 
 Für das Enum \codeword{Ast} wurden die Methoden \codeword{shorten} und \codeword{sort} implementiert um generell die Handhabung des Typen zu verbessern. Beide Methoden erhalten eine veränderbare Referenz auf das eigene Objekt und geben auch solch eine wieder zurück. Die Implementierung von \codeword{expand} gibt allerdings eine eigenständige Instanz von \codeword{Ast} zurück und gibt somit das Ownership in diesem Fall ab. Da \codeword{Ast} nicht den Copy-Trait implementieren kann, kann der entsprechende Rückgabewert von \codeword{shorten} und \codeword{sort} nicht einfach dereferenziert werden.
 
@@ -1261,15 +1263,17 @@ Da sich die ersten beiden Regeln zum Vereinfachen überschneiden können, soll d
 
 \paragraph{Regel 1} Die am einfachsten zu implementierende Möglichkeit der Vereinfachung ist die erste Regel. Hierzu werden in einem \codeword{Ast::Mul} alle Werte iteriert und wie bereits in der Standardauswertung eine HashMap befüllt. Diesmal ist der Key der HashMap allerdings der Exponent und der eigentliche Wert die Basis. Zum Schluss wird für jeden Eintrag entsprechend ein neues \codeword{Ast::Pow}-Element erzeugt und dem Ergebnis hinzugefügt.
 
-\paragraph{Regel 2} Bei der zweiten Regel ist die Zuordnung der Divisoren zu den Additionstermen eine Schwierigkeit, die gelöst werden muss. Schlussendlich habe ich mich für eine Lösung entschieden, die jedem Divisor einem Dividenden zuordnet, die die größte Einsparung erbringt, diese Kombination wird dann durchgeführt. Die Zuordnung läuft dabei so ab, dass alle möglichen Divisoren für alle möglichen Dividenden geprüft werden. Hierbei wird die Komplexität des Terms davor und nach Durchführung der Division gemessen und verglichen.
+\paragraph{Regel 2} Bei der zweiten Regel ist die Zuordnung der Divisoren zu den Additionstermen eine Schwierigkeit, die gelöst werden muss. Schlussendlich wurde eine Lösung gewählt, die jedem Divisor einem Dividenden zuordnet, die die größte Einsparung erbringt, diese Kombination wird dann durchgeführt. Die Zuordnung läuft dabei so ab, dass alle möglichen Divisoren für alle möglichen Dividenden geprüft werden. Hierbei wird die Komplexität des Terms davor und nach Durchführung der Division gemessen und verglichen.
 
 SymPy löst dies anders. Der Term $(x^3+x^2+x+1)/x*(x^2+x)$ wird hierbei ausmultipliziert und dann ein größter gemeinsamer Teiler gesucht (vgl. \cite{SymPySimplifySrc} Aufrufe \codeword{cancel}, \codeword{_mexpand}, \codeword{together}). Einerseits erscheint mir diese Möglichkeit sehr mächtig, aber auch recht komplex und fehleranfällig zu implementieren.
 
-Um meine bisher gesammelten Erfahrungen in diese Arbeit zu bringen, habe ich mich für eine eigene Implementierung entschieden. Bei einem späteren Vergleich zwischen SymPy und diesem System, können eventuelle Unterschiede aufgezeigt und verglichen werden.
+\label{sec:Regel2Simp}
+Um die bisher gesammelten Erfahrung mit Rust in diese Arbeit zu bringen, wurde eine eigene Implementierung gewählt. Bei einem späteren Vergleich zwischen SymPy und diesem System, können eventuelle Unterschiede aufgezeigt und verglichen werden.
 
 \paragraph{Regel 3} Die letzte Regel soll es erlauben, benutzerdefinierte Regeln zur Zusammenfassung hinzuzufügen. Hierzu wird wieder das Struct \codeword{EvalFn} erweitert, um Funktionen hinzufügen zu können, die nacheinander aufgerufen werden. Als Beispiel dient hierbei die \codeword{log}-Funktion, die nun das Gegenteil wie in ``expand'' macht. Eine Besonderheit hierbei ist, dass diese Funktion sowohl in Multiplikationstermen als auch in Additionstermen aufgerufen werden muss.
 
-\paragraph{Besonderheiten mit Rust} Gerade bei der Implementierung der zweiten Regel ist der Aspekt ``Borrowing'' hervorgetreten. Die ursprüngliche Idee ist, im Term alle Summen und alle anderen Terme zu trennen. Hiernach sollte über alle Summen iteriert werden und der richtige Divisor gefunden werden. Sollte sich bei einer späteren Summe herausstellen, dass der Divisor eine größere Einsparung bringt, soll die vorherige Summe noch einmal mit anderen Divisoren überprüft werden. Allerdings ist es durch das ``Borrowing'' nicht möglich einem Vektor ein Element hinzuzufügen, über den gerade iteriert wird.
+\subsection{simplify Implementierungshinweise}
+Gerade bei der Implementierung der zweiten Regel ist der Aspekt ``Borrowing'' hervorgetreten. Die ursprüngliche Idee ist, im Term alle Summen und alle anderen Terme zu trennen. Hiernach sollte über alle Summen iteriert werden und der richtige Divisor gefunden werden. Sollte sich bei einer späteren Summe herausstellen, dass der Divisor eine größere Einsparung bringt, soll die vorherige Summe noch einmal mit anderen Divisoren überprüft werden. Allerdings ist es durch das ``Borrowing'' nicht möglich einem Vektor ein Element hinzuzufügen, über den gerade iteriert wird.
 
 Die Lösung wird dabei folgendermaßen implementiert. Durch ein zweites Array wird gespeichert, ob es noch ein Element gibt, das überprüft werden muss. Dies geschieht durch einen ``bool''-Wert am entsprechenden Index. Nach der Iteration muss der entsprechende Index im Hilfsarray auf ``true'' gesetzt werden. Im Falle, dass der Divisor wechselt, muss der entsprechende Index auf ``false'' gesetzt werden. Die Schleife läuft dann solange wie ein ``false''-Wert im Hilfsarray vorhanden ist.
 
@@ -1316,7 +1320,7 @@ Sobald dieser implementiert ist, kann die Ausgabe auch mit \codeword{println!("{
 \subsection{Korrektheit und Unterschiede gegenüber SymPy}
 Um beurteilen zu können, ob das entwickeltes System richtig rechnet, soll mit verschiedenen Termen geprüft werden, ob SymPy diesselben Ergebnisse berechnet. Unterschiede zwischen Ergebnissen werden näher betrachtet.
 
-\begin{table}[h!]
+\begin{table}[ht!]
     \caption{Numerische Berechnungen}
     \centering
     \begin{tabular}{|c|c|c|}
@@ -1370,7 +1374,7 @@ Bei dieser Gegenüberstellung fallen zwei Unterschiede auf. Zum einen tritt das 
 
 Der zweite Unterschied ist die Ausgabe von $\sqrt{2}$. In unserem System wird diese als Potenz ausgegeben, in SymPy als Funktion. Diese Darstellung ist aber nur kosmetisch. Wird der Term in SymPy mit \codeword{sympy.srepr(expr)} ausgegeben, ist die Struktur des Terms zu sehen. SymPy wandelt die $sqrt$-Funktion ebenfalls in eine Potenz um, und gibt diese in diesem speziellen Fall formatiert aus.
 
-\begin{table}[h!]
+\begin{table}[ht!]
     \caption{Terme mit Variablen zusammenfassen}
     \centering
     \begin{tabular}{|c|c|c|}
@@ -1410,7 +1414,7 @@ Der zweite Unterschied ist die Ausgabe von $\sqrt{2}$. In unserem System wird di
 
 Bei der Zusammenfassung von Variablen tritt ein Unterschied bei den Termen $x^a*x$, $x^a/x$ und $x^a*x^b$. In unserem System werden durch die implementierte Logik vermehrt die Potenzen zusammengefasst, was in SymPy standardmäßig nicht der Fall ist.
 
-\begin{table}[h!]
+\begin{table}[ht!]
     \caption{Terme mit Variablen substituieren}
     \centering
     \begin{tabular}{|c|c|c|}
@@ -1442,7 +1446,7 @@ Bei der Zusammenfassung von Variablen tritt ein Unterschied bei den Termen $x^a*
 
 Die Substituierung wird ebenfalls identisch umgesetzt. Einzig die Ausgabe bei Termen mit Wurzeln ist wie bereits erwähnt unterschiedlich.
 
-\begin{table}[h!]
+\begin{table}[ht!]
     \caption{Nutzung der Methode ``expand''}
     \centering
     \begin{tabular}{|c|c|c|}
@@ -1472,7 +1476,7 @@ Die Substituierung wird ebenfalls identisch umgesetzt. Einzig die Ausgabe bei Te
 
 Terme, die mit ``expand'' in beiden Systemen verarbeitet werden, liefern das jeweils das gleiche Ergebnis. Dies ist natürlich nur der Fall, für die in diesem System implementierten Fälle. Andere mathematische Funktionen, die von SymPy korrekt verarbeitet werden, müssten erst nachimplementiert werden. So werden in SymPy ebenfalls trigonomische Funktionen ausgewertet. So wird aus $sin(2*x)$ der Term $2*sin(x)*cos(x)$ \cite{SympyTrigExpand}.
 
-\begin{table}[h!]
+\begin{table}[ht!]
     \caption{Nutzung der Methode ``simplify''}
     \centering
     \begin{tabular}{|c|c|c|}
@@ -1490,7 +1494,7 @@ Terme, die mit ``expand'' in beiden Systemen verarbeitet werden, liefern das jew
     \end{tabular}
 \end{table}
 
-Auch bei der Nutzung von ``simplify'' erhalten wir gleichwertige Ergebnisse. SymPy klammert zusätzlich aber noch gemeinsame Teiler aus, was unser System nicht beherrscht. Dies sieht man vor allem am dritten Beispiel. Beide Terme sind aber in diesem Fall korrekt.
+Auch bei der Nutzung von ``simplify'' erhalten wir gleichwertige Ergebnisse. SymPy klammert zusätzlich aber noch gemeinsame Teiler aus, was unser System nicht beherrscht. Dies sieht man vor allem am dritten Beispiel. Beide Terme sind aber in diesem Fall korrekt. Dieser Fall wurde bereits bei der \hyperref[sec:Regel2Simp]{Implementierung von ``simplify''} erwähnt.
 
 \subsection{Performancevergleich}
 Bei diesem Vergleich soll die Laufzeit, der Speicherverbrauch und die CPU-Auslastung in verschiedenen Szenarien verglichen werden. Die verwendete Hardware besteht aus einem ``AMD Ryzen 5 3600X 6-Core Processor'' und 16 GB Arbeitsspeicher mit 3000 MHz (DDR 4). Als Messtool wird die Windows-Version des ``Benchmarks Game'' verwendet \cite{BenchmarkGameHome} \cite {BenchmarkGameSrc}.
@@ -1501,7 +1505,7 @@ Alle Szenarien werden zehn mal ausgeführt und danach zusammengefasst. Die Zeite
 
 \paragraph{1. Szenario} Hier werden alle Berechnungen des vorherigen Kapitels durchgeführt. Alle Terme werden dabei sowohl in SymPy als auch in Rust aus einer Zeichenkette geparst und entsprechend ausgeführt.
 
-\begin{table}[h!]
+\begin{table}[ht!]
     \caption{Performance Tests}
     \centering
     \begin{tabular}{|l|c|c|c|c|c|c|}
@@ -1533,7 +1537,7 @@ Alle Szenarien werden zehn mal ausgeführt und danach zusammengefasst. Die Zeite
 
 \paragraph{2. Szenario} Der Term $a+b+c$ wird einmalig erstellt. Hiernach werden drei geschachtelte for-Schleifen durchlaufen, jeweils von 0 bis 49 und jede Variable mit einem Schleifenzähler substituiert. Die erste Substitution ist somit $0+0+0$, die zweite $0+0+1$ und die letzte $49+49+49$.
 
-\begin{table}[h!]
+\begin{table}[ht!]
     \caption{Performance Addition}
     \centering
     \begin{tabular}{|l|c|c|c|c|c|c|}
@@ -1565,7 +1569,7 @@ Alle Szenarien werden zehn mal ausgeführt und danach zusammengefasst. Die Zeite
 
 \paragraph{3. Szenario} Der Term $a*b*c$ wird einmalig erstellt. Hiernach werden drei geschachtelte for-Schleifen durchlaufen, jeweils von 0 bis 49 und jede Variable mit einem Schleifenzähler substituiert. Die erste Substitution ist somit $0*0*0$, die zweite $0*0*1$ und die letzte $49*49*49$.
 
-\begin{table}[h!]
+\begin{table}[ht!]
     \caption{Performance Multiplikation}
     \centering
     \begin{tabular}{|l|c|c|c|c|c|c|}
@@ -1597,7 +1601,7 @@ Alle Szenarien werden zehn mal ausgeführt und danach zusammengefasst. Die Zeite
 
 \paragraph{4. Szenario} In diesem Szenario liegt der Fokus auf den Speicherverbrauch. Es wird wieder der Term $a+b+c$ einmalig erstellt. Hiernach werden drei geschachtelte for-Schleifen durchlaufen, jeweils von 0 bis 49. Einer am Anfang erstellten Liste bzw. Vektor wird dann sowohl der originale Term als auch die Substituierung wie im 2. Szenario hinzugefügt.
 
-\begin{table}[h!]
+\begin{table}[ht!]
     \caption{Speicherverbrauch}
     \centering
     \begin{tabular}{|l|c|c|c|c|c|c|}
@@ -1664,7 +1668,7 @@ Bei der Substituierung von Symbolen wären ebenfalls Erweitungen vorstellbar.
 \end{itemize}
 
 \subsection{Ausblick}
-Am Anfang dieser Arbeit waren die Konzepte Ownership, Borrowing und Lifetimes noch schwer greifbar. Diese wurden als Hürde von mir wahrgenommen, da hierdurch viele Sachen explizit angegeben werden müssen, wie z.B. das klonen von Übergabeparametern oder auch wie teilweise über Elemente iteriert werden muss. Im laufe der Entwicklung des CAS wurden diese Konstrukte aber immer augenscheinlicher und bereiteten schlussendlich keine Probleme mehr. Darüberhinaus kann immer leicht nachvollzogen werden, an welchen Stellen welche Werte verwendet werden mit der Sicherheit, dass diese nicht versehentlich an anderer Stelle überschrieben worden sind. Die Fehleranfälligkeit sinkt dadurch wie in \hyperref[sec:kap2d2]{Kapitel 2.2} gezeigt.
+Am Anfang dieser Arbeit waren die Konzepte Ownership, Borrowing und Lifetimes noch schwer greifbar. Diese wurden als Hürde von mir wahrgenommen, da hierdurch viele Sachen explizit angegeben werden müssen, wie z.B. das klonen von Übergabeparametern oder auch wie teilweise über Elemente iteriert werden muss. Im laufe der Entwicklung des CAS wurden diese Konstrukte aber immer augenscheinlicher und bereiteten schlussendlich keine Probleme mehr. Darüberhinaus kann immer leicht nachvollzogen werden, an welchen Stellen welche Werte verwendet werden mit der Sicherheit, dass diese nicht versehentlich an anderer Stelle überschrieben worden sind. Die Fehleranfälligkeit sinkt dadurch wie in \hyperref[sec:kap3d2]{Kapitel 3.2} gezeigt.
 
 Dieses strenge System in Rust hat sich von einem Nach- zu einem großen Vorteil entwickelt. Verbunden mit einer steilen Lernkurve in Rust, sind dies die einzigen Nachteile, die während der Arbeit mit Rust aufgefallen sind.
 
