@@ -27,7 +27,7 @@
 \contentsline {lstlisting}{\numberline {27}Enum Token}{31}{lstlisting.27}%
 \contentsline {lstlisting}{\numberline {28}trait NumberType 1. Iteration}{33}{lstlisting.28}%
 \contentsline {lstlisting}{\numberline {29}Ast Operatorenüberladung}{33}{lstlisting.29}%
-\contentsline {lstlisting}{\numberline {30}smarte Operatenüberladung}{34}{lstlisting.30}%
+\contentsline {lstlisting}{\numberline {30}Operatenüberladung für Addition}{34}{lstlisting.30}%
 \contentsline {lstlisting}{\numberline {31}Defintion EvalFn}{36}{lstlisting.31}%
 \contentsline {lstlisting}{\numberline {32}Erweiterung pub fn eval}{37}{lstlisting.32}%
 \contentsline {lstlisting}{\numberline {33}EvalFn nach expand}{39}{lstlisting.33}%
