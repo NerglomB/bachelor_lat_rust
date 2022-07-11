@@ -32,7 +32,7 @@ impl NumberType for PrecisionNum {
 
     fn shorten(&mut self) {}
 
-    fn pow(&self, exp: Self) -> Self {
+    fn pow(&self, _exp: Self) -> Self {
         panic!("Implementierung notwendig");
     }
 
@@ -105,7 +105,7 @@ impl ops::Add<PrecisionNum> for PrecisionNum {
 impl ops::Mul<PrecisionNum> for PrecisionNum {
     type Output = PrecisionNum;
 
-    fn mul(self, rhs: PrecisionNum) -> PrecisionNum {
+    fn mul(self, _rhs: PrecisionNum) -> PrecisionNum {
         panic!("Implementierung notwendig");
     }
 }
@@ -113,7 +113,7 @@ impl ops::Mul<PrecisionNum> for PrecisionNum {
 impl ops::Rem<i128> for PrecisionNum {
     type Output = PrecisionNum;
 
-    fn rem(self, rhs: i128) -> PrecisionNum {
+    fn rem(self, _rhs: i128) -> PrecisionNum {
         panic!("Implementierung notwendig");
     }
 }
@@ -129,23 +129,23 @@ impl PartialEq<i128> for PrecisionNum {
 }
 
 impl PartialOrd<i128> for PrecisionNum {
-    fn partial_cmp(&self, other: &i128) -> Option<Ordering> {
+    fn partial_cmp(&self, _other: &i128) -> Option<Ordering> {
         panic!("Implementierung notwendig");
     }
 
-    fn lt(&self, other: &i128) -> bool {
+    fn lt(&self, _other: &i128) -> bool {
         panic!("Implementierung notwendig");
     }
 
-    fn le(&self, other: &i128) -> bool {
+    fn le(&self, _other: &i128) -> bool {
         panic!("Implementierung notwendig");
     }
 
-    fn gt(&self, other: &i128) -> bool {
+    fn gt(&self, _other: &i128) -> bool {
         panic!("Implementierung notwendig");
     }
 
-    fn ge(&self, other: &i128) -> bool {
+    fn ge(&self, _other: &i128) -> bool {
         panic!("Implementierung notwendig");
     }
 }

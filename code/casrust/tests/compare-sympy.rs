@@ -4,7 +4,6 @@
 mod comparesympy {
     use casrust::evaluator::base_evaluator;
     use casrust::extensions::ast::SimplifyType;
-    use casrust::parser::{lexer::Lexer, parser::Parser};
     use casrust::types::ast::Ast;
     use casrust::types::prim_num::PrimNum;
     use std::str::FromStr;
