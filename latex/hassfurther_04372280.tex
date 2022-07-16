@@ -941,25 +941,25 @@ Zwei konkrete Beispiele sollen dies veranschaulichen. Der String bei \codeword{S
 \newpage
 
 \section{Parser für mathematische Ausdrücke}
-Ziel dieses Kapitels ist die Nutzung bzw. Implementierung der lexikalischen Analyse bzw. eines Parsers um Terme in das Enum \codeword{Ast} zu überführen. Erst hier sollen Vereinfachungen und Zusammenfassungen gemacht werden. 
+Ziel dieses Kapitels ist die Nutzung bzw. Implementierung der lexikalischen Analyse bzw. eines Parsers, um Terme in das Enum \codeword{Ast} zu überführen. Erst hier sollen Vereinfachungen und Zusammenfassungen gemacht werden. 
 \subsection{Prüfung von bestehenden Bibliotheken zum Parsen}
-\paragraph{mexprp Rust} \cite{CrateMexprp} Diese Bibliothek wurde geprüft, da einerseits beim Parsen eine beliebige Genauigkeit möglich ist. Andererseits schien nach einem kurzen Blick in den Code es auch möglich den Term einfach in unsere gewünschte Form zu bringen, da das Enum \codeword{Term} anscheinend einen Abstract Syntax Tree implementiert wie am Anfang angedacht. Über diesen müsste nur einmal iteriert werden um zu unserer modifizierten Version zu gelangen.
+\paragraph{mexprp Rust} \cite{CrateMexprp} Diese Bibliothek wurde geprüft, da einerseits beim Parsen eine beliebige Genauigkeit möglich ist. Andererseits schien nach einem kurzen Blick in den Code es auch möglich den Term einfach in die gewünschte Form zu bringen, da das Enum \codeword{Term} einen Abstract Syntax Tree implementiert anfänglich angedacht. Über diesen müsste nur einmal iteriert werden, um zu unserer modifizierten Version zu gelangen.
 
 Die Abhängigkeit ``rug'' soll die beliebige Genauigkeit ermöglichen. Dabei handelt sich um ein Interface zu den GNU-Bibliotheken GMP, MPFR, MPC. Für diese müssen aber unter GNU/Linux, macOs und Windows jeweils andere Abhängigkeiten installiert werden. Ein schnelles Testen auf anderen Rechnern ist somit ausgeschlossen. Aus diesem Grund wird diese Bibliothek nicht verwendet. Ebenso wird deshalb ``rug'' nicht als Bibliothek für die beliebige Genaugikeit verwendet, sondern num und bigdecimal.
 
-\paragraph{meval Rust} \cite{CrateMeval} Diese Bibliothek erscheint recht unkompliziert und einfach zu nutzen. Die geparsten Tokens werden als UPN (umgekehrte polnische Notation) ausgewertet. Dies könnte man prinzipiell dazu nutzen den modifizierten Ast zu erzeugen. Ein kleiner Nachteil ist, dass nur Fließkommazahlen ausgewertet werden. Sollte man den Lexer irgendwann erweitern wollen, sodass eine beliebige Genauigkeit erreicht werden soll, müsste man diesen Part neu schreiben. Zudem wurde diese Bibliothek leider nicht bei der initialen Recherche in Betracht gezogen und nicht weiter überprüft. Erst während der Entwicklung wurde interessehalber weiter reingesehen und die Enums \codeword{Operator} und \codeword{Token} größtenteils übernommen. Wäre der Lexer nicht bereits zu einem großen Teil implementiert, würde die Möglichkeit genutzt, die Tokens aus dieser Bibliothek zu erzeugen.
+\paragraph{meval Rust} \cite{CrateMeval} Diese Bibliothek erscheint recht unkompliziert und einfach in der Nutzung. Die geparsten Tokens werden als UPN (umgekehrte polnische Notation) ausgewertet. Dies könnte man prinzipiell dazu nutzen, den modifizierten Ast zu erzeugen. Ein kleiner Nachteil ist, dass nur Fließkommazahlen ausgewertet werden. Sollte der Lexer erweitert werden, sodass eine beliebige Genauigkeit erreicht werden soll, müsste dieser Part neu geschrieben werden. Zudem wurde diese Bibliothek leider nicht bei der initialen Recherche in Betracht gezogen und nicht weiter überprüft. Während der Entwicklung des CAS wurde interessehalber vertiefend reingesehen und die Enums \codeword{Operator} und \codeword{Token} größtenteils übernommen. Wäre der Lexer nicht bereits zu einem großen Teil implementiert, würde die Möglichkeit genutzt, die Tokens aus dieser Bibliothek zu erzeugen.
 
-\paragraph{evalexpr Rust} \cite{CrateEvalexpr} Diese Bibliothek erscheint sehr umfangreich. Allerdings lässt sich eigentlich nur die \codeword{eval}-Funktion nutzen, da fast alle anderen Strukturen nicht mit dem Schlüsselwort \codeword{pub} versehen sind. Es war daher nicht möglich, den Tokenizer bzw. den Baum direkt zu nutzen, in dem sich ein bereits geparster String befindet. Daher schied diese Bibliothek ebenfalls aus.
+\paragraph{evalexpr Rust} \cite{CrateEvalexpr} Diese Bibliothek erscheint sehr umfangreich. Allerdings lässt sich fast nur die \codeword{eval}-Funktion nutzen, da fast alle anderen Strukturen nicht mit dem Schlüsselwort \codeword{pub} versehen sind. Es war daher nicht möglich, den Tokenizer bzw. den Baum direkt zu nutzen, in dem sich ein bereits geparster String befindet. Daher kam eine Nutzung dieser Bibliothek nicht in Betracht.
 
-\paragraph{tinyexpr C} \cite{CTinyexpr} Da es in Rust auch möglich ist, bereits bestehenden C-Code zu nutzen, wurde ebenfalls geprüft eine einfache C-Bibliothek zu nutzen, sodass auch das die notwendige Schnittstelle des Parsers nicht allzu kompliziert wird. Hierbei wurde tinyexpr näher betrachtet. Leider müssen Variablen bereits vor der lexikalischen Analyse zumindest bekannt sein \cite{CTinyexprReadme}. Da sich generell gegen diesen Schritt entschieden wurde, wurde auch diese Bibliothek nicht verwendet.
+\paragraph{tinyexpr C} \cite{CTinyexpr} Da es in Rust auch möglich ist, bereits bestehenden C-Code zu nutzen, wurde ebenfalls geprüft eine einfache C-Bibliothek zu nutzen, sodass auch das die notwendige Schnittstelle des Parsers nicht zu komplex wird. Hierbei wurde tinyexpr näher betrachtet. Allerdings müssen Variablen bereits vor der lexikalischen Analyse zumindest bekannt sein \cite{CTinyexprReadme}. Da sich generell gegen diesen Schritt entschieden wurde, wurde auch diese Bibliothek nicht verwendet.
 
-\paragraph{Fazit} Eine geeignete Bibliothek zu finden, die den Anwendungszweck erfüllt und dabei nicht allzu weit weg vom eigentlich Ziel ist, ist leider nicht möglich gewesen. Daher wurde sowohl die lexikalische Analyse als auch das Parsing selbst implementiert. Die wichtigsten Eigenschaften hierzu wurden aus dem Kurs 01810 Übersetzerbau herausgearbeitet, den ich im Wintersemester 17/18 belegt habe.
+\paragraph{Fazit} Eine geeignete Bibliothek zu finden, die den Anwendungszweck erfüllt und dabei nicht zu weit weg vom eigentlich Ziel ist, war nicht möglich. Daher wurde sowohl die lexikalische Analyse als auch das Parsing selbst implementiert. Die wichtigsten Eigenschaften hierzu wurden aus dem Kurs 01810 Übersetzerbau herausgearbeitet, den ich im Wintersemester 17/18 belegte.
 
-\subsection{Implementierung der lexikalischen Analyse bzw. Tokenizer} In diesem Schritt soll aus einer übergebenen Zeichenkette ein Vektor mit Tokens erstellt werden. Hierbei wird zeichenweise gearbeitet und nicht über reguläre Ausdrücke. Eine Besonderheit in Rust ist, dass ein Char in einem String nicht über einen Index referenziert werden kann. Da Strings als UTF-8 gespeichert werden, ist mit dem Index nicht eindeutig, ob das entsprechende Byte oder Zeichen angesprochen werden soll. Daher muss der String hier erst in einen Vektor des Typ \codeword{Char} umgewandelt werden.
+\subsection{Implementierung der lexikalischen Analyse bzw. Tokenizer} In diesem Schritt soll aus einer übergebenen Zeichenkette ein Vektor mit Tokens erstellt werden. Hierbei wird zeichenweise gearbeitet und nicht über reguläre Ausdrücke. Eine Besonderheit in Rust ist, dass ein Char in einem String nicht über einen Index referenziert werden kann. Da Strings als UTF-8 gespeichert werden, ist mit dem Index nicht eindeutig, ob das entsprechende Byte oder Zeichen angesprochen werden soll. Daher muss der String erst in einen Vektor des Typ \codeword{Char} umgewandelt werden.
 
-Die Tokens werden dabei wieder als Enum implementiert. In diesem Abschnitt verzichten wir auf Generics und implementieren den \codeword{struct} nur für den Typ \codeword{PrimNum}.
+Die Tokens werden dabei als Enum implementiert. In diesem Abschnitt wird auf die Implementierung von Generics verzichtet und nur der Typ \codeword{PrimNum} erlaubt.
 
-Im Enum benötigen wir folgende Werte:
+Im Enum werden folgende Werte benötigt:
 \begin{lstlisting}[language=rust, caption={Enum Token}]
 pub enum Token {
     LParen,
@@ -972,18 +972,18 @@ pub enum Token {
 }
 \end{lstlisting}
 
-\paragraph{LParen und RParen - linke und rechte Klammer} Diese dienen dazu um Terme zu gruppieren und die eigentliche Operatorenreihenfolge zu verändern, wie es üblich ist in der Mathematik. Es werden die Zeichen ``('' und ``)'' erkannt.
+\paragraph{LParen und RParen - linke und rechte Klammer} Diese dienen dazu, Terme zu gruppieren und die eigentliche Operatorenreihenfolge zu verändern, wie es in der Mathematik üblich ist. Es werden die Zeichen ``('' und ``)'' erkannt.
 
 \paragraph{Comma} Dient als Seperator von Funktionswerten.
 
-\paragraph{Var und Func} Eine alphanumerische Zeichenkette, die zwingend mit einem Buchstaben beginnt. Klein- und Großschreibung sind gleichermaßen erlaubt, die Namen beachten die Groß- und Kleinschreibung. Eine Funktion wird daran erkannt, dass nach der Zeichenkette eine öffnende Klammer ``('' anschließt, die zwingend wieder geschlossen werden muss.
+\paragraph{Var und Func} Eine alphanumerische Zeichenkette, die zwingend mit einem Buchstaben beginnt. Klein- und Großschreibung sind gleichermaßen erlaubt. Die Namen beachten die Groß- und Kleinschreibung. Eine Funktion wird daran erkannt, dass nach der Zeichenkette eine öffnende Klammer ``('' anschließt, die zwingend wieder geschlossen werden muss.
 
 \paragraph{Op} Mögliche Operatoren, es wird Beschränkt auf ``+, -, *, /, \^{}''. Der Typ Operator ist dabei wieder ein Enum, der diese Einträge enthält. Im Lexer werden noch keine Anpassungen des Terms vorgenommen.
 
-\paragraph{Num} Eine Zahl, eine Fließkommazahl wird daran erkannt, dass das erste Zeichen ein ``.'' ist oder die gesamte geparste Zeichenkette einen ``.'' enthält. Es sind nur Zahlen erlaubt. Die E-Schreibweise $1.2E10$ wird nicht unterstützt.
+\paragraph{Num} Eine Ganz- oder Fließkommazahl. Eine Fließkommazahl wird daran erkannt, dass das erste Zeichen ein ``.'' ist oder die gesamte geparste Zeichenkette einen ``.'' enthält. Es sind nur Zahlen erlaubt. Die E-Schreibweise $1.2E10$ wird nicht unterstützt.
 
 \subsection{Implementierung Parser}
-Als Parser kommt eine einfache Implementierung der Operator-Vorranganalyse in Frage, wie sie in Kurs 1810  Kurseinheit 3 Kapitel 3.3.2 beschrieben ist \cite[S. 83 ff.]{K1810}. Es handelt sich also um eine Bottom-Up-Analyse. Dabei wird der Algorithmus so implementiert, dass der momentan gültige Operator in einer \codeword{while}-Schleife läuft, um einen Vektor befüllen zu können. Das erste Element des Vektors wird dabei jeweils vor der Schleife geparst, die restlichen Elemente in der Schleife. Dazu werden auch gleich Operatorenüberladungen des \codeword{Ast}-Enum verwendet.
+Als Parser kommt eine einfache Implementierung der Operator-Vorranganalyse in Frage, wie sie in Kurs 1810  Kurseinheit 3 Kapitel 3.3.2 beschrieben ist \cite[S. 83 ff.]{K1810}. Es handelt sich somit um eine Bottom-Up-Analyse. Dabei wird der Algorithmus so implementiert, dass der momentan gültige Operator in einer \codeword{while}-Schleife läuft, um einen Vektor befüllen zu können. Das erste Element des Vektors wird hierbei jeweils vor der Schleife geparst. Die restlichen Elemente in der Schleife selbst. Darüber hinaus werden Operatorenüberladungen des \codeword{Ast}-Enum verwendet.
 
 Es handelt sich um einen LR(1)-Parser, da der Parser ein Zeichen vorrausschauen kann, um die nächste Aktion zu bestimmen. Der Stack ist im weitesten Sinne bereits ein gültiges \codeword{Ast}-Element, das befüllt wird. Die \codeword{shift}-Funktion kann als Voranschreiten im Iterator angesehen werden. Die \codeword{reduce}-Funktion entpricht dem Anwenden der Operatorenüberladungen auf dem gültigen \codeword{Ast}-Element.
 
@@ -1000,7 +1000,7 @@ Darüber hinaus werden entsprechende Prüfungen eingebaut, sodass der Term $a+b+
         ]
     ]
 
-Es entsteht vielmehr gleich der Baum:
+Es entsteht vielmehr sofort der Baum:
 
 \Tree[.+
         [.a ]
