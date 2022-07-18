@@ -19,7 +19,7 @@
 \contentsline {lstlisting}{\numberline {19}SymPy Präzision}{20}{lstlisting.19}%
 \contentsline {lstlisting}{\numberline {20}Benchmark Primitive Typen Stack Ganzzahl}{21}{lstlisting.20}%
 \contentsline {lstlisting}{\numberline {21}BTree Ast}{22}{lstlisting.21}%
-\contentsline {lstlisting}{\numberline {22}get refs}{23}{lstlisting.22}%
+\contentsline {lstlisting}{\numberline {22}BTree Referenzen}{23}{lstlisting.22}%
 \contentsline {lstlisting}{\numberline {23}Datenstruktur in Rust}{25}{lstlisting.23}%
 \contentsline {lstlisting}{\numberline {24}eval-Methode 1. Implementierung}{26}{lstlisting.24}%
 \contentsline {lstlisting}{\numberline {25}Term 1 Stack und Heap}{27}{lstlisting.25}%
