@@ -63,7 +63,6 @@ pub fn add_sin_cos<N>(terms: &mut HashMap<Ast<N>, Ast<N>>, _hard_eval: &bool)
 where
     N: NumberType,
 {
-    // easy case when sin and cos is a standalone or only addes with + or multiplied with single number
     let mut cos_key: Option<Ast<N>> = None;
     let mut sin_key: Option<Ast<N>> = None;
     let mut cos_value: Option<Ast<N>> = None;

@@ -15,7 +15,6 @@ where
     for node in extend_seq {
         match &node {
             Ast::Num(_) | Ast::Add(_) => {
-                // Soll wirklich immer hinzugefügt werden? Evtl. anpassung, sodass Rational und Float coexisiteren?
                 result = result + node;
             }
             Ast::Mul(vec) => {
@@ -63,7 +62,6 @@ where
     for node in extend_seq {
         match &node {
             Ast::Num(_) | Ast::Mul(_) => {
-                // Soll wirklich immer hinzugefügt werden? Evtl. anpassung, sodass Rational und Float coexisiteren?
                 result = result * node;
             }
             Ast::Pow(base, exp) => {
@@ -75,7 +73,6 @@ where
         }
     }
 
-    // Könnte von typ rational sein, also gemeinsamer nenner teilen
     result.shorten();
     if result == Ast::Num(N::zero()) {
         return Ast::Num(N::zero());
@@ -127,7 +124,6 @@ pub fn pow<N>(base: Ast<N>, exp: Ast<N>, evaler: &EvalFn<N>, hard_eval: &bool) -
 where
     N: NumberType,
 {
-    // a^2^3 zusammenfasse zu a^6
     let (base, exp) = if let Ast::Pow(b, pow_base_box) = base {
         (*b, exp * *pow_base_box)
     } else {
@@ -142,7 +138,6 @@ where
                 ret_val = Some(base.clone());
             } else if let Ast::Num(val) = base.clone() {
                 if val.is_integer() {
-                    // Nach num type abstrahieren?
                     if exp_v >= 0 {
                         ret_val = Some(Ast::Num(val.pow(exp_v)));
                     } else {

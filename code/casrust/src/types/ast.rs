@@ -44,7 +44,6 @@ where
         }
     }
 
-    // Hier das problem mit rückgabetyp, versuche diesen in extension/ast bei rückgabe in mul anzuwenden -> fehler, clone nötig
     pub fn shorten(&mut self) -> &mut Self {
         match self {
             Ast::Add(v) => {
@@ -93,7 +92,6 @@ where
                         *self = Ast::Const("∞".to_owned())
                     }
                 } else if v.len() == 1 {
-                    // Falls nur neutrales Element vorhanden wird ansonsten 0 zurückgegeben
                     *self = v.pop().unwrap()
                 } else {
                     v.retain(|element| {

@@ -195,7 +195,6 @@ impl ops::Mul<PrimNum> for PrimNum {
     }
 }
 
-// Für Parser
 impl ops::Mul<i128> for PrimNum {
     type Output = PrimNum;
 

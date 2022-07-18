@@ -4,37 +4,6 @@ pub fn perfect_nth_root<N>(base: &Ast<N>, exp: &Ast<N>, hard_eval: &bool) -> Opt
 where
     N: NumberType,
 {
-    // newtons method for nthroot reicht für meine zwecke von sympy übernommen in
-    // # Get initial estimate for Newton's method. Care must be taken to
-    // # avoid overflow
-    // try:
-    //     guess = int(y**(1./n) + 0.5)
-    // except OverflowError:
-    //     exp = _log(y, 2)/n
-    //     if exp > 53:
-    //         shift = int(exp - 53)
-    //         guess = int(2.0**(exp - shift) + 1) << shift
-    //     else:
-    //         guess = int(2.0**exp)
-    // if guess > 2**50:
-    //     # Newton iteration
-    //     xprev, x = -1, guess
-    //     while 1:
-    //         t = x**(n - 1)
-    //         xprev, x = x, ((n - 1)*x + y//t)//n
-    //         if abs(x - xprev) < 2:
-    //             break
-    // else:
-    //     x = guess
-    // # Compensate
-    // t = x**n
-    // while t < y:
-    //     x += 1
-    //     t = x**n
-    // while t > y:
-    //     x -= 1
-    //     t = x**n
-    // return int(x), t == y <- Wert und ist exakt?, siehe power.py
     let mut ret_val: Option<Ast<N>> = None;
 
     if *hard_eval {
@@ -93,7 +62,6 @@ where
 {
     let mut ret_val = None;
     if let Ast::Mul(vec) = base {
-        // We can assume that a number in a mul is on the last index
         let vec0 = &vec[vec.len() - 1];
         match vec0 {
             Ast::Num(_) => {
