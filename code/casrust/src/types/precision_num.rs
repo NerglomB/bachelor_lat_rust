@@ -5,6 +5,7 @@ use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::ops;
 
+/// An implementation for NumberType. Uses dependencies to allow more precision in calculations.
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
 pub enum PrecisionNum {
     Int(BigInt),

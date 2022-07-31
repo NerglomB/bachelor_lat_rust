@@ -4,6 +4,7 @@ use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::ops;
 
+/// An implementation for NumberType. Uses Rust native types for numbers.
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
 pub enum PrimNum {
     Int(i128),

@@ -9,14 +9,25 @@ use std::hash::{Hash, Hasher};
 use std::ops;
 use std::str::FromStr;
 
+/// A modified abstract syntax tree of a parsed mathematical expression.
+/// Allows operations to modify the expression and substitution of variables.
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
 pub enum Ast<N> {
+    /// Addition of multiple elements, 1 + x + y.
     Add(Vec<Ast<N>>),
+    /// Multiplication of multiple elements, 2 * x * y.
     Mul(Vec<Ast<N>>),
+    /// Power of base and exp, x^y
     Pow(Box<Ast<N>>, Box<Ast<N>>),
+    /// A variable in an expression, x.
     Symbol(String),
+    /// Constants in an expression, should be able to substitut if necessary.
     Const(String),
+    /// Wrapper for mathematical functions like sin or cos.
+    /// The first parameter is the name of the function.
+    /// The second parameter is a Vector of the parameters to the function.
     Func(String, Vec<Ast<N>>),
+    /// An abstract number type. Represents an actual number.
     Num(N),
 }
 
@@ -24,6 +35,8 @@ impl<N> Ast<N>
 where
     N: NumberType,
 {
+    /// Reduces the depth of an expression for Add and Mul.
+    /// x + (y + z) = x + y + z or x * (y * z) = x * y * z
     pub fn flatten(&self, op: &Operator) -> Vec<Ast<N>> {
         match self {
             Ast::Add(vec) => {
@@ -44,6 +57,9 @@ where
         }
     }
 
+    /// Removes unnecessary elements in an expression.
+    /// For Add 0 is removed and ∞ is combinded.
+    /// For Mul 1 is removed and ∞ is combined. If 0 is in expression then simply 0 is returned.
     pub fn shorten(&mut self) -> &mut Self {
         match self {
             Ast::Add(v) => {
@@ -117,6 +133,7 @@ where
         self
     }
 
+    /// Is sorting Add und Mul Vectors.
     pub fn sort(&mut self) -> &mut Self {
         match self {
             Ast::Add(vec) | Ast::Mul(vec) => {
@@ -128,26 +145,32 @@ where
         self
     }
 
+    /// Most simple version to evaluate an expression. Tries to keep high precision.
     pub fn simple_eval(&self, evaler: &EvalFn<N>) -> Ast<N> {
         self.eval(evaler, &false)
     }
 
+    /// Substitute a variable with a value. Tries to keep high precision.
     pub fn simple_eval_sub(&self, evaler: &EvalFn<N>, sub: &str, with: &Ast<N>) -> Ast<N> {
         self.eval_sub(evaler, &false, &Some(sub), &Some(with))
     }
 
+    /// Evaluates an expression. Precision could be lost.
     pub fn hard_eval(&self, evaler: &EvalFn<N>) -> Ast<N> {
         self.eval(evaler, &true)
     }
 
+    /// Substitute a variable with a value. Precision could be lost.
     pub fn hard_eval_sub(&self, evaler: &EvalFn<N>, sub: &str, with: &Ast<N>) -> Ast<N> {
         self.eval_sub(evaler, &true, &Some(sub), &Some(with))
     }
 
+    /// Evaluates an expression. Define if high precision or lost precision.
     pub fn eval(&self, evaler: &EvalFn<N>, hard_eval: &bool) -> Ast<N> {
         self.eval_sub(evaler, hard_eval, &None, &None)
     }
 
+    /// Substitute a variable with a value. Define if high precision or lost precision.
     pub fn eval_sub(
         &self,
         evaler: &EvalFn<N>,
@@ -196,6 +219,7 @@ where
         }
     }
 
+    /// Defines how heavy an expression is determined by the operation count.
     pub fn count_ops(&self) -> u32 {
         match self {
             Ast::Add(vec) | Ast::Mul(vec) => {
@@ -343,6 +367,7 @@ where
     }
 }
 
+/// Generic error type when the abstract syntax tree of an mathematical expression is invalid.
 #[derive(Debug)]
 pub struct AstError;
 
@@ -354,6 +379,7 @@ impl fmt::Display for AstError {
 
 impl Error for AstError {}
 
+/// Allows to create an Ast with primitive types from a string. Evaluation with high precision is applied.
 impl FromStr for Ast<PrimNum> {
     type Err = AstError;
 
@@ -366,6 +392,7 @@ impl FromStr for Ast<PrimNum> {
 }
 
 impl Ast<PrimNum> {
+    /// Allows to create an Ast with primitive types from a string. Evaluation with lost precision is applied.
     pub fn from_str_hard(s: &str) -> Result<Self, AstError> {
         let eval = base_evaluator();
         let tokens = Lexer::new(s).into_tokens();
@@ -373,6 +400,7 @@ impl Ast<PrimNum> {
         Ok(Parser { evaler: &eval }.parse(&tokens)?.hard_eval(&eval))
     }
 
+    /// Allows to create an Ast with primitive types from a string. No evaluation is applied.
     pub fn from_str_none(s: &str) -> Result<Self, AstError> {
         let eval = base_evaluator();
         let tokens = Lexer::new(s).into_tokens();

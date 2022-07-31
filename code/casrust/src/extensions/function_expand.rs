@@ -1,5 +1,6 @@
 use crate::types::{ast::Ast, NumberType};
 
+/// Can expand the log function in a mathematical expression. log(x^a*y) = a*log(x)+log(y)
 pub fn expand_log<N>(args: &Vec<Ast<N>>) -> Option<Ast<N>>
 where
     N: NumberType,

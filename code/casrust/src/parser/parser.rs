@@ -3,11 +3,14 @@ use crate::types::{ast::Ast, ast::AstError, prim_num::PrimNum, Operator, Token};
 use std::iter::Peekable;
 use std::slice::Iter;
 
+/// Tries to process tokens to return an modified abstract syntax tree.
 pub struct Parser<'a> {
+    /// The evaluations functions which are applied.
     pub evaler: &'a EvalFn<PrimNum>,
 }
 
 impl<'a> Parser<'a> {
+    /// Tries to process tokens to return an modified abstract syntax tree.
     pub fn parse(&self, tokens: &Vec<Token>) -> Result<Ast<PrimNum>, AstError> {
         let mut iter = tokens.iter().peekable();
         self.parse_add(&mut iter)

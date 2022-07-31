@@ -1,5 +1,6 @@
 use crate::types::{ast::Ast, NumberType};
 
+/// Can simplify the log function in a mathematical expression. a*log(x)+log(y) = log(x^a*y)
 pub fn simplify_log<N>(ast: &Ast<N>) -> Ast<N>
 where
     N: NumberType,

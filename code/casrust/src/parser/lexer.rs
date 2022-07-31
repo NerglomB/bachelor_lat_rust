@@ -1,5 +1,6 @@
 use crate::types::{prim_num::PrimNum, Operator, Token};
 
+/// Allows to parse a string into tokens.
 pub struct Lexer {
     term: Vec<char>,
     length: usize,
@@ -7,6 +8,7 @@ pub struct Lexer {
 }
 
 impl Lexer {
+    /// Creates object from string which can be processed.
     pub fn new(term: &str) -> Lexer {
         let mut t = String::from(term);
         t.retain(|c| !c.is_whitespace());
@@ -17,6 +19,7 @@ impl Lexer {
         }
     }
 
+    /// Returns Vector of Token. Can only be called once.
     pub fn into_tokens(&mut self) -> Vec<Token> {
         let mut tokens = Vec::new();
         while let Some(token) = self.next_token() {
