@@ -180,7 +180,7 @@ Da wie bereits in der Einleitung gezeigt, ein CAS sowohl einen sehr breiten Umfa
 Darüber hinaus sollen Terme soweit wie möglich mit bereits bestehenden Sprachmitteln erweitert und verglichen werden können. Hierfür werden einige Operatorüberladungen implementiert. Bei der Auswertung der Terme soll die Möglichkeit bestehen eventuell ungenaue numerische Ergebnisse zu berechnen. Funktionen und Konstanten sollen später einfach hinzugefügt werden können.
 
 \subsection{Überblick SymPy}
-Das SymPy Projekt beschreibt sich selbst als eine Python-Bibliothek für symbolische Mathematik, die das Ziel hat, ein CAS mit ``vollen Funktionsumfang'' zu werden \cite{SymPyAbout}. Im Gegensatz zu dem hier begrenzten System beherrscht SymPy z.B. das Handling von Matrizen \cite[S. 11]{SympyPeerJ} oder auch physikalische Berechnungen \cite[S. 14 ff.]{SympyPeerJ}. Darüber hinaus können auch 2D- und 3D-Grafiken erstellt werden \cite{SymPyPlot} uvm. \cite[S. 4 ff.]{SympyPeerJ}. Das Projekt existiert seit mindestens 2007 \cite{SymPyFirstCommit} und wird seither stetig weiterentwickelt.
+Das SymPy Projekt beschreibt sich selbst als eine Python-Bibliothek für symbolische Mathematik, die das Ziel hat, ein CAS mit ``vollen Funktionsumfang'' zu werden \cite{SymPyAbout}. Im Gegensatz zu dem hier begrenzten System beherrscht SymPy z.B. das Handling von Matrizen \cite[S. 11]{SympyPeerJ} oder auch physikalische Berechnungen \cite[S. 14 ff.]{SympyPeerJ}. Darüber hinaus können auch 2D- und 3D-Grafiken erstellt werden uvm. \cite[S. 4 ff.]{SympyPeerJ}. Das Projekt existiert seit mindestens 2007 \cite{SymPyFirstCommit} und wird seither stetig weiterentwickelt.
 
 Verwendung findet SymPy in anderen Projekten, die teils wiederum spezifisch sind, z.B. ``ChemPy'' \cite{ChemPy} oder mehrere Abhängigkeiten vereinen, z.B. ``sagemath'' \cite {Sagemath}.
 
@@ -775,7 +775,7 @@ Werden die Bedingungen und Vereinfachungen noch angewendet, so ergibt sich für 
         ]
     ]
 
-Eine ähnliche Struktur findet sich ebenfalls in ``SymbolicC++'' \cite[S. 284 ff.]{Tan2000}. SymPy verwendet ebenfalls diese Struktur \cite{SymPyTreeStruct}. Da sich dieser Aufbau anscheinend für ein CAS eignet, soll dieser auch in diesem System verwendet werden. Hierrauf bauen alle weiteren Operationen auf, wie z.B. das Zusammenfassen des Terms oder Substitution.
+Eine ähnliche Struktur findet sich ebenfalls in ``SymbolicC++'' \cite[S. 284 ff.]{Tan2000}. SymPy verwendet ebenfalls diese Struktur \cite[S. 18 ff.]{SympyPeerJ} \cite{SymPyTreeStruct}. Da sich dieser Aufbau anscheinend für ein CAS eignet, soll dieser auch in diesem System verwendet werden. Hierrauf bauen alle weiteren Operationen auf, wie z.B. das Zusammenfassen des Terms oder Substitution.
 
 \subsection{Grundtypen des CAS}
 In diesem Kapitel soll definiert werden, welche \codeword{structs}, \codeword{traits} oder \codeword{enums} benötigt werden, um das CAS zu erstellen. Darüber hinaus soll grob umrissen werden, welche Implementierungen im weiteren Verlauf sinnvoll sein können und welchen Zweck diese erfüllen.
@@ -1120,7 +1120,7 @@ Terme wie $1/x$ werden durch das CAS in die Form \codeword{Pow(Symbol("x"), Num(
 
 Ebenso können Wurzeln ebenfalls als Potenzen dargestellt werden, z.B. $\sqrt{2} = 2^{1/2}$ oder $\sqrt[3]{8} = 8^{1/3}$. So können alle bisherigen Regeln hierrauf übertragen werden. Weiterhin sollen die Funktionen \codeword{sqrt} und \codeword{nthroot} im Term verwendet werden können, die dann entsprechende \codeword{Ast}-Elemente erzeugen.
 
-Darüber hinaus wird derselbe Algorithmus wie in SymPy implementiert, um zu prüfen, ob eine Wurzel eine perfektes Ergebnis liefert \cite{SymPyNewton}. Hierbei wird das ``Newtonverfahren'' genutzt, das Näherungswerte für die Nullstullen von nichtlinearen Gleichungssystemen findet \cite{NewtonDetail}. Bei dieser Implementierung wird der Wert näherungsweise bestimmt und danach überprüft, ob die Potenz aus dem Wert und der n-ten Wurzel den gesuchten Wert abbildet. In diesem Fall kann das entsprechende Element vereinfacht werden.
+Darüber hinaus wird derselbe Algorithmus wie in SymPy implementiert, um zu prüfen, ob eine Wurzel eine perfektes Ergebnis liefert \cite{SymPyNewton}. Hierbei wird das ``Newtonverfahren'' genutzt, das Näherungswerte für die Nullstullen von nichtlinearen Gleichungssystemen findet \cite[S. 28 ff.]{NewtonDetail}. Bei dieser Implementierung wird der Wert näherungsweise bestimmt und danach überprüft, ob die Potenz aus dem Wert und der n-ten Wurzel den gesuchten Wert abbildet. In diesem Fall kann das entsprechende Element vereinfacht werden.
 
 \label{sec:kapErRustUndBei}
 \subsection{Erweiterbarkeit in Rust und Beispiele}
