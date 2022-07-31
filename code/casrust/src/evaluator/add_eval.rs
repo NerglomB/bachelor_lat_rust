@@ -1,6 +1,7 @@
 use crate::types::{ast::Ast, NumberType};
 use std::collections::{hash_map::Entry, HashMap};
 
+/// Indicates that an expression is added one more time in a mathematical expression.
 pub fn add_term<N>(node: Ast<N>, terms: &mut HashMap<Ast<N>, Ast<N>>)
 where
     N: NumberType,
@@ -15,6 +16,7 @@ where
     }
 }
 
+/// Indicates that a multiplication expression is added n more times in a addition expression where n is a number found in the multiplication or 1 if not.
 pub fn add_mul<N>(mul_vec: &Vec<Ast<N>>, terms: &mut HashMap<Ast<N>, Ast<N>>)
 where
     N: NumberType,
@@ -59,6 +61,7 @@ where
     }
 }
 
+/// Tries to add sin and cos function when possible and shorten it to 1.
 pub fn add_sin_cos<N>(terms: &mut HashMap<Ast<N>, Ast<N>>, _hard_eval: &bool)
 where
     N: NumberType,

@@ -1,5 +1,6 @@
 use crate::types::{ast::Ast, NumberType};
 
+/// Tries to find a perfect root for given base and exponent. Algorithm is based on the Newton procedure.
 pub fn perfect_nth_root<N>(base: &Ast<N>, exp: &Ast<N>, hard_eval: &bool) -> Option<Ast<N>>
 where
     N: NumberType,
@@ -56,6 +57,7 @@ where
     ret_val
 }
 
+/// Tries to simplify the numerical value of a power operation where the base is a multiplication.
 pub fn pow_mul<N>(base: &Ast<N>, exp: &Ast<N>, hard_eval: &bool) -> Option<Ast<N>>
 where
     N: NumberType,

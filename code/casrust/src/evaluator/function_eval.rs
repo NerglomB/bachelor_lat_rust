@@ -1,6 +1,7 @@
 use crate::evaluator::base_evaluator;
 use crate::types::{ast::Ast, prim_num::PrimNum, NumberType};
 
+/// Can simplify the sin funcion in a mathematical expression.
 pub fn func_sin<N>(args: &Vec<Ast<N>>, hard_eval: &bool) -> Option<Ast<N>>
 where
     N: NumberType + SinCos,
@@ -34,6 +35,7 @@ where
     }
 }
 
+/// Can simplify the cos funcion in a mathematical expression.
 pub fn func_cos<N>(args: &Vec<Ast<N>>, hard_eval: &bool) -> Option<Ast<N>>
 where
     N: NumberType + SinCos,
@@ -67,6 +69,7 @@ where
     }
 }
 
+/// Converts sqrt function in an expression to a expression like x^y.
 pub fn func_sqrt<N>(args: &Vec<Ast<N>>, _: &bool) -> Option<Ast<N>>
 where
     N: NumberType,
@@ -82,6 +85,7 @@ where
     ret_val
 }
 
+/// Converts nthroot function in an expression to a expression like x^(1/y).
 pub fn func_nthroot<N>(args: &Vec<Ast<N>>, _: &bool) -> Option<Ast<N>>
 where
     N: NumberType,
@@ -101,12 +105,14 @@ where
     ret_val
 }
 
+/// Addition needed for NumberTypes that can contain sin and cos function.
 pub trait SinCos {
     fn sin(&self) -> Self;
     fn cos(&self) -> Self;
 }
 
 impl SinCos for PrimNum {
+    /// sin function to a value for primitive types.
     fn sin(&self) -> Self {
         match self {
             PrimNum::Int(v) => PrimNum::Float((*v as f64).sin()),
@@ -115,6 +121,7 @@ impl SinCos for PrimNum {
         }
     }
 
+    /// cos function to a value for primitive types.
     fn cos(&self) -> Self {
         match self {
             PrimNum::Int(v) => PrimNum::Float((*v as f64).cos()),
@@ -124,6 +131,7 @@ impl SinCos for PrimNum {
     }
 }
 
+/// limit function to a value if possible. Only some simple heuristics are used to get a result.
 pub fn func_limit<N>(args: &Vec<Ast<N>>, hard_eval: &bool) -> Option<Ast<N>>
 where
     N: NumberType + SinCos,

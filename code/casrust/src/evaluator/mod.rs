@@ -9,6 +9,7 @@ use crate::extensions::{function_expand::*, function_simplify::*};
 use crate::types::{ast::Ast, constants::*, NumberType};
 use std::collections::HashMap;
 
+/// Wrapper for functions which are applied during evaluating a mathematical expression.
 pub struct EvalFn<N> {
     pub adders: Vec<fn(&mut HashMap<Ast<N>, Ast<N>>, &bool)>,
     pub muls: Vec<fn(&mut HashMap<Ast<N>, Ast<N>>, &bool)>,
@@ -19,6 +20,7 @@ pub struct EvalFn<N> {
     pub simplify_funcs: Vec<fn(&Ast<N>) -> Ast<N>>,
 }
 
+/// Returns a basic evaluator. Can be extended.
 pub fn base_evaluator<N>() -> EvalFn<N>
 where
     N: NumberType + SinCos,

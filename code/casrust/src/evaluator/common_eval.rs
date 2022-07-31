@@ -2,6 +2,7 @@ use crate::evaluator::{add_eval::*, mul_eval::*, EvalFn};
 use crate::types::{ast::Ast, NumberType, Operator};
 use std::collections::HashMap;
 
+/// Evaluates a Vector of Ast to an addition of Ast.
 pub fn add<N>(vec: Vec<Ast<N>>, evaler: &EvalFn<N>, hard_eval: &bool) -> Ast<N>
 where
     N: NumberType,
@@ -49,6 +50,7 @@ where
     result
 }
 
+/// Evaluates a Vector of Ast to a multiplication of Ast.
 pub fn mul<N>(vec: Vec<Ast<N>>, evaler: &EvalFn<N>, hard_eval: &bool) -> Ast<N>
 where
     N: NumberType,
@@ -103,6 +105,7 @@ where
     result
 }
 
+/// Evaluates a mathematical function if known to evaler.
 pub fn func<N>(name: &str, args: Vec<Ast<N>>, evaler: &EvalFn<N>, hard_eval: &bool) -> Ast<N>
 where
     N: NumberType,
@@ -120,6 +123,7 @@ where
     }
 }
 
+/// Evaluates a powser operation if possible, mostly depending on precision settings.
 pub fn pow<N>(base: Ast<N>, exp: Ast<N>, evaler: &EvalFn<N>, hard_eval: &bool) -> Ast<N>
 where
     N: NumberType,

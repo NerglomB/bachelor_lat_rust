@@ -7,6 +7,7 @@ impl<N> Ast<N>
 where
     N: NumberType,
 {
+    /// Allows to expand a mathematical expression like 2*(a + b) = 2*a + 2*b
     pub fn expand(&self, evaler: &EvalFn<N>) -> Ast<N> {
         match self {
             Ast::Add(vec) => {
@@ -105,10 +106,12 @@ where
         }
     }
 
+    /// Allows to simplify a mathematical expression like a^x * b^x = (a * b)^x. Returns a new Ast when the operation count is lower.
     pub fn simplify(&self, s_type: SimplifyType, evaler: &EvalFn<N>) -> Ast<N> {
         self.simplify_ratio(s_type, 1.0, evaler)
     }
 
+    /// Allows to simplify a mathematical expression like a^x * b^x = (a * b)^x. Define an ratio for operation counting.
     pub fn simplify_ratio(&self, s_type: SimplifyType, ratio: f64, evaler: &EvalFn<N>) -> Ast<N> {
         let simplified = self.simplify_wrapper(s_type, evaler);
 
@@ -260,6 +263,8 @@ where
         }
     }
 }
+
+/// Defines which part of an expression should be simplified.
 #[derive(Copy, Clone, PartialEq)]
 pub enum SimplifyType {
     Base,
