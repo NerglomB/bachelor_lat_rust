@@ -831,7 +831,7 @@ Eine erste Implementierung erfolgt folgendermaßen. Die beiden zusätzlichen Par
 Bei der Entscheidung, ob das Element direkt bearbeitet wird oder ein neuer \codeword{Ast} zurückgegeben wird, wurde der Definition von SymPy gefolgt, sodass der originale Term nicht verändert sondern ein neuer erstellt wird.
 
 \begin{quote}
-    ``SymPy expressions are immutable. No function will change them in-place.'' \cite{SymPySubs}
+    ``Another important property of SymPy expressions is that they are immutable.'' \cite[S. 19]{SympyPeerJ}
 \end{quote}
 
 Mit den bereits genannten Einschränkungen, ergibt sich, dass die \codeword{clone}-Methode aufgerufen werden muss, da einige Daten auf dem Heap abgelegt werden. Bei einer Zuweisung oder einem Rückgabewert würde ansonsten der originale \codeword{Ast} das Ownership abgeben. Der \codeword{Copy}-Trait kann für \codeword{Ast} nicht implementiert werden, da bereits Vektoren diesen Trait nicht implementieren.
@@ -1258,7 +1258,7 @@ Um das Problem zu umgehen, bieten sich zwei Lösungen an. Entweder kann das zur�
 Das zweite Beispiel bezieht sich auf das explizite Klonen des Exponenten bei Potenzen, wenn die Basis eine Multiplikation ist. In der entsprechenden for-Schleife wird für jedes Element des Vektors der Basis dem Ergebnis nach den oben genannten Regeln ein neues Element hinzugefügt. Der Exponent bleibt jedoch in jedem Durchlauf dersselbe. Da \codeword{Ast} weiterhin nicht den Copy-Trait implementiert und die Initialisierung von Box das Ownership des Wertes bekommt, muss hier \codeword{.clone()} ausgeführt werden.
 
 \subsection{Implementierung von simplify}
-Um andere Arten von Vereinfachungen vorzunehmen, wird die Methode ``simplify'' in Anlehnung von SymPy \cite{SymPySimplify} erstellt. Hier werden verschiedene Möglichkeiten geprüft einen Term effizient zu vereinfachen.
+Um andere Arten von Vereinfachungen vorzunehmen, wird die Methode ``simplify'' in Anlehnung von SymPy \cite[S. 7 ff.]{SympyPeerJ} erstellt. Hier werden verschiedene Möglichkeiten geprüft einen Term effizient zu vereinfachen.
 
 In dieser Arbeit sollen folgende Terme vereinfacht werden können:
 
