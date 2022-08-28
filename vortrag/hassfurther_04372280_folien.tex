@@ -1,0 +1,400 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[ngerman]{babel}
+\usepackage{hologo}
+\usepackage{amsmath}
+\usepackage{babelbib}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{qtree}
+\usepackage{makecell}
+
+\definecolor{GrayCodeBlock}{RGB}{245,245,245}
+\definecolor{BlackText}{RGB}{10,10,10}
+\definecolor{RedTypename}{RGB}{135,58,3}
+\definecolor{GreenString}{RGB}{72,125,44}
+\definecolor{PurpleKeyword}{RGB}{159,73,183}
+\definecolor{GrayComment}{RGB}{70,70,70}
+\definecolor{GoldDocumentation}{RGB}{200,185,65}
+\lstdefinelanguage{rust}
+{
+    escapeinside=``,
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false,
+    frame=single,
+    framesep=0pt,
+    framerule=0pt,
+    framexleftmargin=4pt,
+    framexrightmargin=4pt,
+    framextopmargin=5pt,
+    framexbottommargin=3pt,
+    xleftmargin=4pt,
+    xrightmargin=4pt,
+    backgroundcolor=\color{GrayCodeBlock},
+    basicstyle=\ttfamily\color{BlackText},
+    keywords={
+        true,false,
+        unsafe,async,await,move,
+        use,pub,crate,super,self,mod,
+        struct,enum,fn,const,static,let,mut,ref,type,impl,dyn,trait,where,as,
+        break,continue,if,else,while,for,loop,match,return,yield,in
+    },
+    keywordstyle=\color{PurpleKeyword},
+    ndkeywords={
+        bool,u8,u16,u32,u64,u128,i8,i16,i32,i64,i128,char,str,
+        Self,Option,Some,None,Result,Ok,Err,String,Box,Vec,Rc,Arc,Cell,RefCell,HashMap,BTreeMap,
+        macro_rules
+    },
+    ndkeywordstyle=\color{RedTypename},
+    comment=[l][\color{GrayComment}\slshape]{//},
+    morecomment=[s][\color{GrayComment}\slshape]{/*}{*/},
+    morecomment=[l][\color{GoldDocumentation}\slshape]{///},
+    morecomment=[s][\color{GoldDocumentation}\slshape]{/*!}{*/},
+    morecomment=[l][\color{GoldDocumentation}\slshape]{//!},
+    morecomment=[s][\color{RedTypename}]{\#![}{]},
+    morecomment=[s][\color{RedTypename}]{\#[}{]},
+    stringstyle=\color{GreenString},
+    string=[b]"
+}
+
+\lstset{literate=%
+    {Ö}{{\"O}}1
+    {Ä}{{\"A}}1
+    {Ü}{{\"U}}1
+    {ß}{{\ss}}1
+    {ü}{{\"u}}1
+    {ä}{{\"a}}1
+    {ö}{{\"o}}1
+    {~}{{\textasciitilde}}1
+}
+
+\usetheme{Montpellier}
+
+\setbeamertemplate{title page}
+{
+  \vbox{}
+  \begingroup
+    \centering
+    {
+    {\small Bachelorarbeit}\\
+    \begin{beamercolorbox}[sep=8pt,center]{title}
+      \usebeamerfont{title}\inserttitle\par%
+      \ifx\insertsubtitle\@empty%
+      \else%
+        \vskip0.25em%
+        {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}%
+      \fi%
+    \end{beamercolorbox}%
+    \usebeamercolor[fg]{titlegraphic}\inserttitlegraphic\par}\vskip1em
+    \vskip1em\par
+    \begin{beamercolorbox}[sep=8pt,center]{author}
+      \usebeamerfont{author}\insertauthor
+      \begin{tabular}{ll}
+          Verfasser & Bernd Haßfurther \href{mailto:nerglom@posteo.de}{<nerglom@posteo.de>}\\
+          Matrikel-Nr. & 4372280\\
+          Betreuerin & Prof. Dr. Lena Oden\\
+          Datum & \today\\
+      \end{tabular}
+    \end{beamercolorbox}
+    \begin{beamercolorbox}[sep=8pt,center]{institute}
+      \usebeamerfont{institute}\insertinstitute
+    \end{beamercolorbox}
+  \endgroup
+  \vfill
+}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+
+\setbeamertemplate{section in toc}[sections numbered]
+\setbeamertemplate{subsection in toc}[subsections numbered]
+
+\NewDocumentCommand{\codeword}{v}{%
+\texttt{\textcolor{blue}{#1}}%
+}
+
+\title{Ein Computeralgebrasystem in Rust}
+\titlegraphic{\includegraphics[width=2cm]{rust-logo-512x512-blk.png}}
+
+\begin{document}
+\maketitle
+\frame{
+  \frametitle{Inhaltsverzeichnis}
+  \tableofcontents
+}
+
+\section{Vorstellung Computeralgebrasystem}
+\begin{frame}[fragile]
+  \frametitle{Was ist ein CAS?}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Funktionsumfang der Implementierung}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\section{Vorstellung Rust}
+\begin{frame}[fragile]
+  \frametitle{Ziele von Rust}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Syntax anhand von Beispielen}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Weitere Konzepte in Rust}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Vertiefung des Ownership und Borrowing}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Stack, Heap, Copy und Clone}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\section{Einen Term lesen}
+\begin{frame}[fragile]
+  \frametitle{Tokenizer}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Parser}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\section{Implementierung des CAS}
+\begin{frame}[fragile]
+  \frametitle{Überlauf und Ungenauigkeit}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Überlegungen zur Datenstruktur}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Vergleich zu existierenden Lösungen}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Datenstruktur in Rust}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Grundfunktionalitäten}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Erweiterung des CAS mit EvalFn}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Konkrete Erweiterungen des CAS}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Implementierung von mathematischen Funktionen}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\section{Vergleich zu SymPy}
+\begin{frame}[fragile]
+  \frametitle{Parsen von Termen}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Performance}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\section{Zusammenfassung und Fazit}
+\begin{frame}[fragile]
+  \frametitle{Verbesserungsideen und deren Ansätze}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Vor- und Nachteile Rust}
+  \begin{itemize}
+    \item Performance
+    \pause
+    \item Verlässlichkeit
+    \pause
+    \item Produktivität
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
+
+\section{Quellen}
+\begin{frame}[fragile,allowframebreaks]
+  \bibliographystyle{babplain-fl}
+  \raggedright
+  \setbeamertemplate{bibliography item}{\insertbiblabel}
+  \bibliography{literature}
+\end{frame}
+\end{document}

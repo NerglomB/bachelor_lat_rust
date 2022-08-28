@@ -1,0 +1,22 @@
+\begin{thebibliography}{1}
+  \providebibliographyfont{name}{}%
+  \providebibliographyfont{lastname}{}%
+  \providebibliographyfont{title}{\emph}%
+  \providebibliographyfont{jtitle}{\btxtitlefont}%
+  \providebibliographyfont{etal}{\emph}%
+  \providebibliographyfont{journal}{}%
+  \providebibliographyfont{volume}{}%
+  \providebibliographyfont{ISBN}{\MakeUppercase}%
+  \providebibliographyfont{ISSN}{\MakeUppercase}%
+  \providebibliographyfont{url}{\url}%
+  \providebibliographyfont{numeral}{}%
+  \expandafter\btxselectlanguage\expandafter {\btxfallbacklanguage}
+
+\btxselectlanguage {ngerman}
+\bibitem {WhyRust}
+\btxnamefont {Rust \btxlastnamefont {Website}}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {{Why Rust?}}{{Why Rust?}}}
+\newblock \url{https://www.rust-lang.org/}.
+\newblock [abgerufen am 17.08.2021].
+
+\end{thebibliography}

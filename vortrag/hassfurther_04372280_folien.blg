@@ -1,0 +1,49 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: hassfurther_04372280_folien.aux
+Reallocating 'name_of_file' (item size: 1) to 12 items.
+The style file: babplain-fl.bst
+Reallocating 'name_of_file' (item size: 1) to 11 items.
+Database file #1: literature.bib
+Reallocating 'singl_function' (item size: 4) to 100 items.
+You've used 1 entry,
+            2793 wiz_defined-function locations,
+            639 strings with 6013 characters,
+and the built_in function-call counts, 323 in all, are:
+= -- 25
+> -- 7
+< -- 0
++ -- 3
+- -- 2
+* -- 22
+:= -- 52
+add.period$ -- 3
+call.type$ -- 1
+change.case$ -- 4
+chr.to.int$ -- 0
+cite$ -- 1
+duplicate$ -- 13
+empty$ -- 34
+format.name$ -- 4
+if$ -- 63
+int.to.chr$ -- 0
+int.to.str$ -- 1
+missing$ -- 0
+newline$ -- 21
+num.names$ -- 2
+pop$ -- 13
+preamble$ -- 1
+purify$ -- 3
+quote$ -- 0
+skip$ -- 6
+stack$ -- 0
+substring$ -- 5
+swap$ -- 4
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 4
+warning$ -- 0
+while$ -- 2
+width$ -- 2
+write$ -- 25
