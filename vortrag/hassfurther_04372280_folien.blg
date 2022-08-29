@@ -6,44 +6,44 @@ The style file: babplain-fl.bst
 Reallocating 'name_of_file' (item size: 1) to 11 items.
 Database file #1: literature.bib
 Reallocating 'singl_function' (item size: 4) to 100 items.
-You've used 1 entry,
+You've used 9 entries,
             2793 wiz_defined-function locations,
-            639 strings with 6013 characters,
-and the built_in function-call counts, 323 in all, are:
-= -- 25
-> -- 7
-< -- 0
-+ -- 3
-- -- 2
-* -- 22
-:= -- 52
-add.period$ -- 3
-call.type$ -- 1
-change.case$ -- 4
+            697 strings with 7741 characters,
+and the built_in function-call counts, 4167 in all, are:
+= -- 296
+> -- 234
+< -- 1
++ -- 93
+- -- 84
+* -- 553
+:= -- 583
+add.period$ -- 20
+call.type$ -- 9
+change.case$ -- 68
 chr.to.int$ -- 0
-cite$ -- 1
-duplicate$ -- 13
-empty$ -- 34
-format.name$ -- 4
-if$ -- 63
+cite$ -- 9
+duplicate$ -- 200
+empty$ -- 362
+format.name$ -- 174
+if$ -- 804
 int.to.chr$ -- 0
-int.to.str$ -- 1
-missing$ -- 0
-newline$ -- 21
-num.names$ -- 2
-pop$ -- 13
+int.to.str$ -- 9
+missing$ -- 8
+newline$ -- 54
+num.names$ -- 18
+pop$ -- 122
 preamble$ -- 1
-purify$ -- 3
+purify$ -- 60
 quote$ -- 0
-skip$ -- 6
+skip$ -- 76
 stack$ -- 0
-substring$ -- 5
-swap$ -- 4
-text.length$ -- 0
+substring$ -- 57
+swap$ -- 105
+text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 4
+type$ -- 30
 warning$ -- 0
-while$ -- 2
-width$ -- 2
-write$ -- 25
+while$ -- 19
+width$ -- 10
+write$ -- 107

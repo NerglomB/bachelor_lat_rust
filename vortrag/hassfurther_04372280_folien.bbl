@@ -13,10 +13,94 @@
   \expandafter\btxselectlanguage\expandafter {\btxfallbacklanguage}
 
 \btxselectlanguage {ngerman}
+\bibitem {BO18}
+\btxnamefont {Jim \btxlastnamefont {Blandy}} \btxandlong {}\ \btxnamefont
+  {Jason \btxlastnamefont {Orendorff}}\btxauthorcolon\ \btxtitlefont
+  {Programming Rust: Fast, Safe Systems Development}.
+\newblock \btxpublisherfont {O'Reilly Media, Inc}, \btxeditionnumlong {1.}{},
+  2018\ifbtxprintISBN {, \mbox{\btxISBN~\btxISBNfont {978-1-491-92728-1}}}.
+
+\bibitem {FachgruppeDef}
+\btxnamefont {Fachgruppe \btxlastnamefont {Computeralgebra}}\btxauthorcolon\
+  \btxtitlefont {\btxifchangecase {{Was ist Computeralgebra?}}{{Was ist
+  Computeralgebra?}}}
+\newblock \url{https://fachgruppe-computeralgebra.de/computeralgebra/}.
+\newblock [abgerufen am 18.07.2022].
+
+\bibitem {Geddes2007}
+\btxnamefont {Keith\btxfnamespacelong O. \btxlastnamefont {Geddes}},
+  \btxnamefont {Stephen\btxfnamespacelong R. \btxlastnamefont
+  {Czapor}}\btxandcomma {} \btxandlong {}\ \btxnamefont {George
+  \btxlastnamefont {Labahn}}\btxauthorcolon\ \btxtitlefont {\btxifchangecase
+  {Algorithms for computer algebra -}{Algorithms for Computer Algebra -}},
+  2007\ifbtxprintISBN {, \mbox{\btxISBN~\btxISBNfont {978-0-585-33247-5}}}.
+
+\bibitem {TraitBoundariesEx}
+\btxnamefont {Steve \btxlastnamefont {Klabnik}} \btxandlong {}\ \btxnamefont
+  {Carol \btxlastnamefont {Nichols}}\btxauthorcolon\ \btxtitlefont {Using Trait
+  Objects That Allow for Values of Different Types}, \btxchapterlong {}\ Using
+  Trait Objects That Allow for Values of Different Types.
+\newblock \btxpublisherfont {No Starch Press}, 2019\ifbtxprintISBN {,
+  \mbox{\btxISBN~\btxISBNfont {9781718500440}}}.
+
+\bibitem {SympyPeerJ}
+\btxnamefont {Aaron \btxlastnamefont {Meurer}}, \btxnamefont
+  {Christopher\btxfnamespacelong P. \btxlastnamefont {Smith}}, \btxnamefont
+  {Mateusz \btxlastnamefont {Paprocki}}, \btxnamefont {Ondřej \btxlastnamefont
+  {Čertík}}, \btxnamefont {Sergey\btxfnamespacelong B. \btxlastnamefont
+  {Kirpichev}}, \btxnamefont {Matthew \btxlastnamefont {Rocklin}}, \btxnamefont
+  {AMiT \btxlastnamefont {Kumar}}, \btxnamefont {Sergiu \btxlastnamefont
+  {Ivanov}}, \btxnamefont {Jason\btxfnamespacelong K. \btxlastnamefont
+  {Moore}}, \btxnamefont {Sartaj \btxlastnamefont {Singh}}, \btxnamefont
+  {Thilina \btxlastnamefont {Rathnayake}}, \btxnamefont {Sean \btxlastnamefont
+  {Vig}}, \btxnamefont {Brian\btxfnamespacelong E. \btxlastnamefont {Granger}},
+  \btxnamefont {Richard\btxfnamespacelong P. \btxlastnamefont {Muller}},
+  \btxnamefont {Francesco \btxlastnamefont {Bonazzi}}, \btxnamefont {Harsh
+  \btxlastnamefont {Gupta}}, \btxnamefont {Shivam \btxlastnamefont {Vats}},
+  \btxnamefont {Fredrik \btxlastnamefont {Johansson}}, \btxnamefont {Fabian
+  \btxlastnamefont {Pedregosa}}, \btxnamefont {Matthew\btxfnamespacelong J.
+  \btxlastnamefont {Curry}}, \btxnamefont {Andy\btxfnamespacelong R.
+  \btxlastnamefont {Terrel}}, \btxnamefont {Štěpán \btxlastnamefont
+  {Roučka}}, \btxnamefont {Ashutosh \btxlastnamefont {Saboo}}, \btxnamefont
+  {Isuru \btxlastnamefont {Fernando}}, \btxnamefont {Sumith \btxlastnamefont
+  {Kulal}}, \btxnamefont {Robert \btxlastnamefont {Cimrman}}\btxandcomma {}
+  \btxandlong {}\ \btxnamefont {Anthony \btxlastnamefont
+  {Scopatz}}\btxauthorcolon\ \btxjtitlefont {\btxifchangecase {Sympy: symbolic
+  computing in python}{SymPy: symbolic computing in Python}}.
+\newblock \btxjournalfont {PeerJ Computer Science}, 3:e103,
+  \btxprintmonthyear{.}{1}{2017}{long}\ifbtxprintISSN {,
+  \mbox{\btxISSN~\btxISSNfont {2376-5992}}}.
+\newblock {\latintext \btxurlfont{https://doi.org/10.7717/peerj-cs.103}}.
+
+\bibitem {JavaGenerics}
+\btxnamefont {\btxlastnamefont {Oracle}}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {{Type Erasure}}{{Type Erasure}}}.
+\newblock
+  \url{https://docs.oracle.com/javase/tutorial/java/generics/erasure.html}.
+\newblock [abgerufen am 18.07.2022].
+
+\bibitem {SK19}
+\btxnamefont {Rahul \btxlastnamefont {Sharma}} \btxandlong {}\ \btxnamefont
+  {Vesa \btxlastnamefont {Kaihlavirta}}\btxauthorcolon\ \btxtitlefont
+  {Mastering RUST}.
+\newblock \btxpublisherfont {Packt Publishing Ltd.}, \btxeditionnumlong {second
+  edition}{}, 2019\ifbtxprintISBN {, \mbox{\btxISBN~\btxISBNfont
+  {978-1-78934-657-2}}}.
+
+\bibitem {Tan2000}
+\btxnamefont {Kiat\btxfnamespacelong Shi \btxlastnamefont {Tan}}, \btxnamefont
+  {Willi\btxfnamespacelong Hans \btxlastnamefont {Steeb}}\btxandcomma {}
+  \btxandlong {}\ \btxnamefont {Yorick \btxlastnamefont
+  {Hardy}}\btxauthorcolon\ \btxtitlefont {\btxifchangecase {Symbolicc++: An
+  introduction to computer algebra using object-oriented
+  programming}{SymbolicC++: An Introduction to Computer Algebra using
+  Object-Oriented Programming}}, 2000\ifbtxprintISBN {,
+  \mbox{\btxISBN~\btxISBNfont {978-1-852-33260-0}}}.
+
 \bibitem {WhyRust}
 \btxnamefont {Rust \btxlastnamefont {Website}}\btxauthorcolon\ \btxtitlefont
   {\btxifchangecase {{Why Rust?}}{{Why Rust?}}}
 \newblock \url{https://www.rust-lang.org/}.
-\newblock [abgerufen am 17.08.2021].
+\newblock [abgerufen am 29.08.2022].
 
 \end{thebibliography}

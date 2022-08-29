@@ -136,25 +136,42 @@
 \begin{frame}[fragile]
   \frametitle{Was ist ein CAS?}
   \begin{itemize}
-    \item Performance
+    \item Mathematische Ausdrücke mit Variablen darstellen
     \pause
-    \item Verlässlichkeit
+    \item Resistent gegen Ungenauigkeiten
     \pause
-    \item Produktivität
+    \item Einsatz in verschiedenen Gebieten
+    \pause
+    \item SymPy als konkrete Implementierung
   \end{itemize}
-  {\small (vgl. \cite{WhyRust})}
+  {\small (vgl. \cite{FachgruppeDef} \cite[S. 1]{SympyPeerJ})}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Grundregeln und Annahmen}
+  \begin{itemize}
+    \item Zahlenräume $\mathbb{N}$, $\mathbb{Z}$, $\mathbb{Q}$, $\mathbb{R}$
+    \pause
+    \item Jede Subtraktion ist eine Addition
+    \pause
+    \item Jede Division ist entweder eine rationale Zahl oder eine Multiplikation
+    \pause
+    \item Wurzeln können als Potenzen dargestellt werden
+  \end{itemize}
+  {\small (vgl. \cite[S. 23 ff.]{Geddes2007} \cite[S. 2]{Tan2000})}
 \end{frame}
 
 \begin{frame}[fragile]
   \frametitle{Funktionsumfang der Implementierung}
   \begin{itemize}
-    \item Performance
+    \item Addition von Zahlen und Symbolen
     \pause
-    \item Verlässlichkeit
+    \item Multiplikation von Zahlen und Symbolen
     \pause
-    \item Produktivität
+    \item Potenzregeln in Hinblick auf Genauigkeit auswerten
+    \pause
+    \item Auswertung von mathematischen Funktionen und Konstanten
   \end{itemize}
-  {\small (vgl. \cite{WhyRust})}
 \end{frame}
 
 \section{Vorstellung Rust}
@@ -167,31 +184,41 @@
     \pause
     \item Produktivität
   \end{itemize}
-  {\small (vgl. \cite{WhyRust})}
+  {\small (vgl. \cite{WhyRust} \cite[S. 196 ff.]{SK19} \cite{JavaGenerics})}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Syntax anhand von Beispielen}
+  \frametitle{Hinweise zur Syntax}
   \begin{itemize}
-    \item Performance
+    \item Expression und Statements \begin{lstlisting}[language=rust]
+let t = if bedingung_1 { false } else { true };\end{lstlisting}
     \pause
-    \item Verlässlichkeit
+    \item \codeword{struct} und \codeword{trait} als Klassen und Interfaces \begin{lstlisting}[language=rust]
+struct MyStruct {  my_field: i32, }
+impl MyStruct { fn do_smth(&self) {} }\end{lstlisting}
     \pause
-    \item Produktivität
+    \item Enums \begin{lstlisting}[language=rust]
+enum MyEnum {
+  Entry1(i32, i32, i32), Entry2,
+}\end{lstlisting}
   \end{itemize}
-  {\small (vgl. \cite{WhyRust})}
+  {\small (vgl. \cite[S. 122 ff.]{BO18})}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Weitere Konzepte in Rust}
+  \frametitle{Hinweise zur Syntax}
   \begin{itemize}
-    \item Performance
+    \item Generics und \codeword{trait objects} \begin{lstlisting}[language=rust]
+enum MyEnum<T> { Entry1(T) }\end{lstlisting}
     \pause
-    \item Verlässlichkeit
+    \item Operatorenüberladung \begin{lstlisting}[language=rust]
+impl std::ops::Add<MyEnum> for MyEnum {
+  fn add(self, rhs: MyEnum) -> MyEnum { ... }
+}\end{lstlisting}
     \pause
-    \item Produktivität
+    \item Referenzen
   \end{itemize}
-  {\small (vgl. \cite{WhyRust})}
+  {\small (vgl. \cite[S. 196 ff.]{SK19} \cite{TraitBoundariesEx} \cite[S. 246 ff.]{BO18})}
 \end{frame}
 
 \begin{frame}[fragile]
