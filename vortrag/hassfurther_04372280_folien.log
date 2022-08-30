@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.12) (preloaded format=pdflatex 2020.12.30)  30 AUG 2022 12:01
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.12) (preloaded format=pdflatex 2020.12.30)  30 AUG 2022 13:04
 entering extended mode
 **c:/Users/Nutzer/Documents/Bernd/Uni/Bachelor/bachelor_lat_rust/vortrag/hassfurther_04372280_folien.tex
 (c:/Users/Nutzer/Documents/Bernd/Uni/Bachelor/bachelor_lat_rust/vortrag/hassfurther_04372280_folien.tex
@@ -1192,41 +1192,16 @@ File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 
 ] (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [54
 
+] (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [55
+
 ]
 \openout4 = `hassfurther_04372280_folien.vrb'.
 
- (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [55
-
-] (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [56
+ (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [56
 
 ] (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [57
 
-]
-\openout4 = `hassfurther_04372280_folien.vrb'.
-
- (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [58
-
-] (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [59
-
-] (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [60
-
-]
-\openout4 = `hassfurther_04372280_folien.vrb'.
-
- (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [61
-
-] (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [62
-
-] (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [63
-
-]
-\openout4 = `hassfurther_04372280_folien.vrb'.
-
- (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [64
-
-] (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [65
-
-] (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [66
+] (c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.vrb) [58
 
 ]
 \openout4 = `hassfurther_04372280_folien.vrb'.
@@ -1243,15 +1218,15 @@ babelbib: Using the BibTeX style's default font for `ISBN'.
 babelbib: Using the BibTeX style's default font for `ISSN'.
 babelbib: Using the BibTeX style's default font for `url'.
 babelbib: Using the BibTeX style's default font for `numeral'.
-)) [67
+)) [59
 
-] [68
-
-
-] [69
+] [60
 
 
-] [70
+] [61
+
+
+] [62
 
 
 ]
@@ -1269,17 +1244,17 @@ Package rerunfilecheck Info: File `hassfurther_04372280_folien.out' has not chan
 (rerunfilecheck)             Checksum: 0FF7198FC1B792E53DE6544C62A20363;332.
  ) 
 Here is how much of TeX's memory you used:
- 22387 strings out of 479696
- 424184 string characters out of 2866639
- 747089 words of memory out of 3000000
- 38651 multiletter control sequences out of 15000+200000
+ 22349 strings out of 479696
+ 422352 string characters out of 2866639
+ 746984 words of memory out of 3000000
+ 38645 multiletter control sequences out of 15000+200000
  442094 words of font info for 57 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
  125i,14n,126p,530b,1430s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Users/Nutzer/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-ec.enc}<C:/Users/Nutzer/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmss10.pfb><C:/Users/Nutzer/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmss12.pfb><C:/Users/Nutzer/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmss8.pfb><C:/Users/Nutzer/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmsso10.pfb><C:/Users/Nutzer/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmtt10.pfb><C:/Users/Nutzer/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmtto10.pfb><C:/Users/Nutzer/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb><C:/Users/Nutzer/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.pdf (70 pages, 625357 bytes).
+Output written on c:/Users\Nutzer\Documents\Bernd\Uni\Bachelor\bachelor_lat_rust\vortrag\hassfurther_04372280_folien.pdf (62 pages, 574548 bytes).
 PDF statistics:
- 2176 PDF objects out of 2487 (max. 8388607)
- 159 named destinations out of 1000 (max. 500000)
+ 1929 PDF objects out of 2073 (max. 8388607)
+ 143 named destinations out of 1000 (max. 500000)
  96 words of extra memory for PDF output out of 10000 (max. 10000000)
 
