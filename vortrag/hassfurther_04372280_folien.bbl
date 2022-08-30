@@ -1,4 +1,4 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
   \providebibliographyfont{name}{}%
   \providebibliographyfont{lastname}{}%
   \providebibliographyfont{title}{\emph}%
@@ -34,6 +34,26 @@
   \btxlastnamefont {Labahn}}\btxauthorcolon\ \btxtitlefont {\btxifchangecase
   {Algorithms for computer algebra -}{Algorithms for Computer Algebra -}},
   2007\ifbtxprintISBN {, \mbox{\btxISBN~\btxISBNfont {978-0-585-33247-5}}}.
+
+\bibitem {IEEE754}
+\btxjtitlefont {\btxifchangecase {Ieee standard for floating-point
+  arithmetic}{IEEE Standard for Floating-Point Arithmetic}}.
+\newblock \btxjournalfont {IEEE Std 754-2019 (Revision of IEEE 754-2008)},
+  \btxpageslong {}\ 1--84, 2019.
+
+\bibitem {Rules1}
+\btxnamefont {Steve \btxlastnamefont {Klabnik}} \btxandlong {}\ \btxnamefont
+  {Carol \btxlastnamefont {Nichols}}\btxauthorcolon\ \btxtitlefont {Ownership
+  Rules}, \btxchapterlong {}\ What Is Ownership?
+\newblock \btxpublisherfont {No Starch Press}, 2019\ifbtxprintISBN {,
+  \mbox{\btxISBN~\btxISBNfont {9781718500440}}}.
+
+\bibitem {Rules2}
+\btxnamefont {Steve \btxlastnamefont {Klabnik}} \btxandlong {}\ \btxnamefont
+  {Carol \btxlastnamefont {Nichols}}\btxauthorcolon\ \btxtitlefont {The Rules
+  of References}, \btxchapterlong {}\ References and Borrowing.
+\newblock \btxpublisherfont {No Starch Press}, 2019\ifbtxprintISBN {,
+  \mbox{\btxISBN~\btxISBNfont {9781718500440}}}.
 
 \bibitem {TraitBoundariesEx}
 \btxnamefont {Steve \btxlastnamefont {Klabnik}} \btxandlong {}\ \btxnamefont

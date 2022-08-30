@@ -224,123 +224,148 @@ impl std::ops::Add<MyEnum> for MyEnum {
 \begin{frame}[fragile]
   \frametitle{Vertiefung des Ownership und Borrowing}
   \begin{itemize}
-    \item Performance
+    \item Jeder Wert ist einer Variablen zugewiesen, dem \codeword{Owner} 
     \pause
-    \item Verlässlichkeit
+    \item Jeder Wert kann nur einen \codeword{Owner} besitzen
     \pause
-    \item Produktivität
+    \item Verlässt der \codeword{Owner} den Gültigkeitsbereich, wird die Variable ungültig
+    \pause
+    \item Beliebige Anzahl an nicht veränderbaren Referenzen oder exakt eine veränderbare Referenz
+    \pause
+    \item Referenzen müssen immer gültig sein
   \end{itemize}
-  {\small (vgl. \cite{WhyRust})}
+  {\small (vgl. \cite{Rules1} \cite{Rules2})}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Stack, Heap, Copy und Clone}
-  \begin{itemize}
-    \item Performance
-    \pause
-    \item Verlässlichkeit
-    \pause
-    \item Produktivität
-  \end{itemize}
-  {\small (vgl. \cite{WhyRust})}
-\end{frame}
-
-\section{Einen Term lesen}
-\begin{frame}[fragile]
-  \frametitle{Tokenizer}
-  \begin{itemize}
-    \item Performance
-    \pause
-    \item Verlässlichkeit
-    \pause
-    \item Produktivität
-  \end{itemize}
-  {\small (vgl. \cite{WhyRust})}
+  \frametitle{Beispiel Ownership}
+  \begin{lstlisting}[language=rust]
+let mut a = 2;
+let b = a;
+a = 4;
+println!("{}{}", a, b); // Ausgabe: 42
+`\pause`
+let s1 = String::from("hello");
+let s2 = s1;
+println!("{}", s2); // Ok
+println!("{}", s1); // Fehler\end{lstlisting}
+  {\small (vgl. \cite{Rules1} \cite{Rules2})}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Parser}
-  \begin{itemize}
-    \item Performance
-    \pause
-    \item Verlässlichkeit
-    \pause
-    \item Produktivität
-  \end{itemize}
-  {\small (vgl. \cite{WhyRust})}
+  \frametitle{Beispiel Referenzen}
+  \begin{lstlisting}[language=rust]
+let matrix = LargeMatrix { matrix: vec![] };
+
+fn take_ownership(matrix_fn: LargeMatrix) { ... }
+`\pause`
+fn give_back_ownership(matrix_fn: LargeMatrix) 
+-> LargeMatrix { matrix_fn }
+`\pause`
+fn take_reference(matrix_ref: &LargeMatrix) { ... }
+`\pause`
+fn take_mutable_reference(
+  matrix_ref: &mut LargeMatrix) { ... }\end{lstlisting}
 \end{frame}
+
+% \section{Einen Term lesen}
+% \begin{frame}[fragile]
+%   \frametitle{Tokenizer}
+%   \begin{itemize}
+%     \item Performance
+%     \pause
+%     \item Verlässlichkeit
+%     \pause
+%     \item Produktivität
+%   \end{itemize}
+%   {\small (vgl. \cite{WhyRust})}
+% \end{frame}
+
+% \begin{frame}[fragile]
+%   \frametitle{Parser}
+%   \begin{itemize}
+%     \item Performance
+%     \pause
+%     \item Verlässlichkeit
+%     \pause
+%     \item Produktivität
+%   \end{itemize}
+%   {\small (vgl. \cite{WhyRust})}
+% \end{frame}
 
 \section{Implementierung des CAS}
 \begin{frame}[fragile]
   \frametitle{Überlauf und Ungenauigkeit}
   \begin{itemize}
-    \item Performance
+    \item Überlauf \begin{lstlisting}[language=rust]
+let mut x = i32::MAX;
+x += 1;\end{lstlisting}
     \pause
-    \item Verlässlichkeit
+    \item Ungenauigkeiten \begin{lstlisting}[language=rust]
+let f1 = 0.1;
+let f2 = 0.2;
+println!("{}", f1 + f2);\end{lstlisting}
     \pause
-    \item Produktivität
+    \item Lösung mit externen Abhängigkeiten und Generics
   \end{itemize}
-  {\small (vgl. \cite{WhyRust})}
+  {\small (vgl. \cite{IEEE754})}
 \end{frame}
 
 \begin{frame}[fragile]
   \frametitle{Überlegungen zur Datenstruktur}
   \begin{itemize}
-    \item Performance
+    \item Terme bestehen aus Token
     \pause
-    \item Verlässlichkeit
+    \item Datenstruktur aus Tokens generieren
     \pause
-    \item Produktivität
+    \item Datenstruktur als Baum
   \end{itemize}
-  {\small (vgl. \cite{WhyRust})}
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{Vergleich zu existierenden Lösungen}
-  \begin{itemize}
-    \item Performance
-    \pause
-    \item Verlässlichkeit
-    \pause
-    \item Produktivität
-  \end{itemize}
-  {\small (vgl. \cite{WhyRust})}
+  \Tree[.+
+        [.a ]
+        [.-1 ]
+        [.*
+            [.-1 ]
+            [.b ]
+        ]
+    ]
 \end{frame}
 
 \begin{frame}[fragile]
   \frametitle{Datenstruktur in Rust}
-  \begin{itemize}
-    \item Performance
-    \pause
-    \item Verlässlichkeit
-    \pause
-    \item Produktivität
-  \end{itemize}
-  {\small (vgl. \cite{WhyRust})}
+  \begin{lstlisting}[language=rust]
+pub enum Ast<N> {
+  Add(Vec<Ast<N>>),
+  Mul(Vec<Ast<N>>),
+  Pow(Box<Ast<N>>, Box<Ast<N>>),
+  Symbol(String),
+  Const(String),
+  Func(String, Vec<Ast<N>>),
+  Num(N),
+}\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]
   \frametitle{Grundfunktionalitäten}
   \begin{itemize}
-    \item Performance
+    \item Implementierung von Operatorenüberladungen
     \pause
-    \item Verlässlichkeit
-    \pause
-    \item Produktivität
+    \item Auswertung von Termen
   \end{itemize}
-  {\small (vgl. \cite{WhyRust})}
 \end{frame}
 
 \begin{frame}[fragile]
   \frametitle{Erweiterung des CAS mit EvalFn}
   \begin{itemize}
-    \item Performance
+    \item Funktionen für Additionen und Multiplikationen
     \pause
-    \item Verlässlichkeit
+    \item Funktionen für Potenzen
     \pause
-    \item Produktivität
+    \item Möglichkeit für mathematische Funktionen
+    \pause
+    \item Konstantenauswertung
+    \pause
+    \item Funktionen um Terme zu vereinfachen
   \end{itemize}
-  {\small (vgl. \cite{WhyRust})}
 \end{frame}
 
 \begin{frame}[fragile]
