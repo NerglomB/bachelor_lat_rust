@@ -337,11 +337,49 @@ pub enum Ast<N> {
 \end{frame}
 
 \begin{frame}[fragile]
+  \frametitle{Der Nummerntyp}
+  \begin{lstlisting}[language=rust]
+pub trait NumberType:
+    ...
+    + PartialEq<i128>
+    + PartialOrd<i128>
+    + ops::Add<Self, Output = Self>
+    + ops::Mul<Self, Output = Self>
+    + From<i128>
+{
+  fn is_integer(&self) -> bool;
+  fn is_float(&self) -> bool;
+  fn is_rational(&self) -> bool;
+  ...
+}\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Eine konkrete Implementierung}
+  \begin{lstlisting}[language=rust]
+pub enum PrimNum {
+  Int(i128),
+  Float(f64),
+  Rational(i128, i128),
+}
+impl NumberType for PrimNum { ... }
+
+impl From<i128> for PrimNum {
+  fn from(from: i128) -> PrimNum {
+    PrimNum::Int(from)
+  }
+}
+N::from(1)\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
   \frametitle{Grundfunktionalitäten}
   \begin{itemize}
     \item Implementierung von Operatorenüberladungen
     \pause
     \item Auswertung von Termen
+    \pause
+    \item Substitution von Variablen
   \end{itemize}
 \end{frame}
 
@@ -358,6 +396,36 @@ pub enum Ast<N> {
     \pause
     \item Funktionen um Terme zu vereinfachen
   \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Evaluierung eines Terms}
+  \begin{lstlisting}[language=rust]
+pub fn eval_sub(
+  &self,
+  evaler: &EvalFn<N>,
+  hard_eval: &bool,
+  sub: &Option<&str>,
+  with: &Option<&Ast<N>>,
+) -> Ast<N> { ... }\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Evaluierung eines Terms}
+  \begin{lstlisting}[language=rust]
+match self {
+  Ast::Add(vec) => add(
+    vec.iter()
+      .map(|t| t.eval_sub(evaler, hard_eval,
+        sub, with))
+      .collect(),
+    evaler,
+    hard_eval,
+  ),
+  ...
+  Ast::Symbol(name) if sub.is_some() && 
+    name == sub.unwrap() => with.unwrap().clone(),
+}\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]

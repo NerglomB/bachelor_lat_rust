@@ -30,4 +30,13 @@ fn main() {
             println!("error in term");
         }
     };
+
+    match Ast::from_str("limit(1+2+x, x, 3, pos)") {
+        Ok(ast) => {
+            println!("{}", ast);
+        }
+        Err(_) => {
+            println!("error in term");
+        }
+    };
 }
