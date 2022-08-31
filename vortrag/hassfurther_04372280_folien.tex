@@ -138,7 +138,7 @@
   \begin{itemize}
     \item Mathematische Ausdrücke mit Variablen darstellen
     \pause
-    \item Resistent gegen Ungenauigkeiten
+    \item Exakte Darstellung von Ausdrücken
     \pause
     \item Einsatz in verschiedenen Gebieten
     \pause
@@ -184,7 +184,7 @@
     \pause
     \item Produktivität
   \end{itemize}
-  {\small (vgl. \cite{WhyRust} \cite[S. 196 ff.]{SK19} \cite{JavaGenerics})}
+  {\small (vgl.  \cite{JavaGenerics} \cite[S. 196 ff.]{SK19} \cite{WhyRust})}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -218,7 +218,7 @@ impl std::ops::Add<MyEnum> for MyEnum {
     \pause
     \item Referenzen
   \end{itemize}
-  {\small (vgl. \cite[S. 196 ff.]{SK19} \cite{TraitBoundariesEx} \cite[S. 246 ff.]{BO18})}
+  {\small (vgl. \cite[S. 246 ff.]{BO18} \cite{TraitBoundariesEx} \cite[S. 196 ff.]{SK19})}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -268,30 +268,22 @@ fn take_mutable_reference(
   matrix_ref: &mut LargeMatrix) { ... }\end{lstlisting}
 \end{frame}
 
-% \section{Einen Term lesen}
-% \begin{frame}[fragile]
-%   \frametitle{Tokenizer}
-%   \begin{itemize}
-%     \item Performance
-%     \pause
-%     \item Verlässlichkeit
-%     \pause
-%     \item Produktivität
-%   \end{itemize}
-%   {\small (vgl. \cite{WhyRust})}
-% \end{frame}
-
-% \begin{frame}[fragile]
-%   \frametitle{Parser}
-%   \begin{itemize}
-%     \item Performance
-%     \pause
-%     \item Verlässlichkeit
-%     \pause
-%     \item Produktivität
-%   \end{itemize}
-%   {\small (vgl. \cite{WhyRust})}
-% \end{frame}
+\begin{frame}[fragile]
+  \frametitle{Beispiel Lifetime}
+  \begin{lstlisting}[language=rust]
+let r;
+{
+  let x = 5;
+  r = &x;
+} 
+println!("r: {}", r);
+`\pause`
+let x = 5;
+let r = &x;
+println!("r: {}", r);
+\end{lstlisting}
+{\small (vgl. \cite{LifetimeEx})}
+\end{frame}
 
 \section{Implementierung des CAS}
 \begin{frame}[fragile]
@@ -368,29 +360,19 @@ pub enum Ast<N> {
   \end{itemize}
 \end{frame}
 
-% \begin{frame}[fragile]
-%   \frametitle{Konkrete Erweiterungen des CAS}
-%   \begin{itemize}
-%     \item Performance
-%     \pause
-%     \item Verlässlichkeit
-%     \pause
-%     \item Produktivität
-%   \end{itemize}
-%   {\small (vgl. \cite{WhyRust})}
-% \end{frame}
-
-% \begin{frame}[fragile]
-%   \frametitle{Implementierung von mathematischen Funktionen}
-%   \begin{itemize}
-%     \item Performance
-%     \pause
-%     \item Verlässlichkeit
-%     \pause
-%     \item Produktivität
-%   \end{itemize}
-%   {\small (vgl. \cite{WhyRust})}
-% \end{frame}
+\begin{frame}[fragile]
+  \frametitle{Konkrete Erweiterungen des CAS}
+  \begin{itemize}
+    \item Additionsterme $cos(x)^2+sin(x)^2 = 1$
+    \pause
+    \item Potenzen mit Multiplikation als Basis $(4*x)^\frac{1}{2} = 2 * x^\frac{1}{2}$
+    \pause
+    \item Auswertung der Funktionen $sin$, $cos$ und $limit$ mit Heuristiken
+    \pause
+    \item Logarithmus-Funktion aufteilen und zusammenfügen $log(x^2*y) = 2*log(x)+log(y)$ und $2*log(x)+log(y) = log(x^2*y)$
+  \end{itemize}
+  {\small (vgl. \cite{WhyRust})}
+\end{frame}
 
 \section{Vergleich zu SymPy}
 \begin{frame}[fragile]

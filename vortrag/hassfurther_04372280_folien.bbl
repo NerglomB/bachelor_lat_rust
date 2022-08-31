@@ -41,6 +41,13 @@
 \newblock \btxjournalfont {IEEE Std 754-2019 (Revision of IEEE 754-2008)},
   \btxpageslong {}\ 1--84, 2019.
 
+\bibitem {LifetimeEx}
+\btxnamefont {Steve \btxlastnamefont {Klabnik}} \btxandlong {}\ \btxnamefont
+  {Carol \btxlastnamefont {Nichols}}\btxauthorcolon\ \btxtitlefont {The Borrow
+  Checker}, \btxchapterlong {}\ Validating References with Lifetimes.
+\newblock \btxpublisherfont {No Starch Press}, 2019\ifbtxprintISBN {,
+  \mbox{\btxISBN~\btxISBNfont {9781718500440}}}.
+
 \bibitem {Rules1}
 \btxnamefont {Steve \btxlastnamefont {Klabnik}} \btxandlong {}\ \btxnamefont
   {Carol \btxlastnamefont {Nichols}}\btxauthorcolon\ \btxtitlefont {Ownership

@@ -2,10 +2,10 @@
 \babel@toc {ngerman}{}
 \beamer@sectionintoc {1}{Vorstellung Computeralgebrasystem}{3}{0}{1}
 \beamer@sectionintoc {2}{Vorstellung Rust}{15}{0}{2}
-\beamer@sectionintoc {3}{Implementierung des CAS}{35}{0}{3}
-\beamer@sectionintoc {4}{Vergleich zu SymPy}{49}{0}{4}
-\beamer@sectionintoc {5}{Zusammenfassung und Fazit}{52}{0}{5}
-\beamer@sectionintoc {6}{Quellen}{59}{0}{6}
+\beamer@sectionintoc {3}{Implementierung des CAS}{37}{0}{3}
+\beamer@sectionintoc {4}{Vergleich zu SymPy}{55}{0}{4}
+\beamer@sectionintoc {5}{Zusammenfassung und Fazit}{58}{0}{5}
+\beamer@sectionintoc {6}{Quellen}{65}{0}{6}
 \babel@toc {ngerman}{}
 \babel@toc {ngerman}{}
 \babel@toc {ngerman}{}
