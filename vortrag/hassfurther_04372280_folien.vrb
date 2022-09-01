@@ -1,0 +1,4 @@
+\bibliographystyle{babplain-fl}
+  \raggedright
+  \setbeamertemplate{bibliography item}{\insertbiblabel}
+  \bibliography{literature}

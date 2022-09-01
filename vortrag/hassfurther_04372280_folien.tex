@@ -190,7 +190,7 @@
 \begin{frame}[fragile]
   \frametitle{Hinweise zur Syntax}
   \begin{itemize}
-    \item Expression und Statements \begin{lstlisting}[language=rust]
+    \item Expressions und Statements \begin{lstlisting}[language=rust]
 let t = if bedingung_1 { false } else { true };\end{lstlisting}
     \pause
     \item \codeword{struct} und \codeword{trait} als Klassen und Interfaces \begin{lstlisting}[language=rust]
@@ -296,7 +296,7 @@ x += 1;\end{lstlisting}
     \item Ungenauigkeiten \begin{lstlisting}[language=rust]
 let f1 = 0.1;
 let f2 = 0.2;
-println!("{}", f1 + f2);\end{lstlisting}
+println!("{}", f1 + f2); // 0.30000000000000004\end{lstlisting}
     \pause
     \item Lösung mit externen Abhängigkeiten und Generics
   \end{itemize}
